@@ -79,6 +79,13 @@ export function SettingsForm() {
     });
   }
 
+  const handleRequestDeletion = () => {
+    toast({
+        title: "Deletion Request Sent",
+        description: "Your request to delete your account has been received. You will be contacted by support within 48 hours."
+    })
+  }
+
   return (
     <Tabs defaultValue="profile" className="w-full">
       <TabsList className="grid w-full grid-cols-4">
@@ -251,20 +258,20 @@ export function SettingsForm() {
                     <div className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <h3 className="font-semibold">Delete Account</h3>
-                            <p className="text-sm text-muted-foreground">Permanently delete your account and all of your data. This action cannot be undone.</p>
+                            <p className="text-sm text-muted-foreground">Permanently delete your account and all of your data. This action is irreversible.</p>
                         </div>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive">Delete Account</Button>
+                                <Button variant="destructive">Request Account Deletion</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>This action cannot be undone. This will permanently delete your account and remove your data from our servers.</AlertDialogDescription>
+                                    <AlertDialogDescription>This will send a request to our support team to permanently delete your account and all associated data. This process is irreversible and may take up to 48 hours to complete.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                    <AlertDialogAction onClick={handleRequestDeletion} className="bg-destructive hover:bg-destructive/90">Yes, Request Deletion</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
