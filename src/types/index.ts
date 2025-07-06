@@ -1,5 +1,5 @@
 
-export type ProjectStatus = 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Approved';
+export type ProjectStatus = 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Approved' | 'Cancellation Requested';
 export type ProjectType = 'Branding' | 'Web Design' | 'UI/UX' | 'Marketing' | 'Other';
 
 export interface Feedback {
@@ -25,7 +25,7 @@ export interface Asset {
 }
 
 export interface Project {
-  id: string;
+  id:string;
   name: string;
   client: string;
   status: ProjectStatus;

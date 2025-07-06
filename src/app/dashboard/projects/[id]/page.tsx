@@ -13,12 +13,13 @@ import { Button } from "@/components/ui/button"
 import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { CheckCircle, UploadCloud, Loader2 } from "lucide-react"
+import { CheckCircle, UploadCloud, Loader2, AlertTriangle } from "lucide-react"
 import Loading from "../../loading"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { v4 as uuidv4 } from 'uuid';
 import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>()
@@ -197,6 +198,27 @@ export default function ProjectDetailPage() {
     });
   };
 
+  const handleConfirmCancellation = async () => {
+    if (!project) return;
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, { status: 'Canceled' });
+    toast({
+      title: "Project Canceled",
+      description: `The project "${project.name}" has been canceled.`,
+    });
+  };
+
+  const handleDenyCancellationRequest = async () => {
+    if (!project) return;
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, { status: 'In Progress' });
+    toast({
+      title: "Cancellation Request Denied",
+      description: `The project "${project.name}" has been moved back to "In Progress". The client has been notified.`,
+    });
+  };
+
+
   if (loading || !project) {
     return <Loading />;
   }
@@ -249,6 +271,19 @@ export default function ProjectDetailPage() {
           </div>
         }
       />
+      {project.status === 'Cancellation Requested' && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Cancellation Requested</AlertTitle>
+          <AlertDescription className="flex flex-col sm:flex-row justify-between sm:items-center">
+            The client has requested to cancel this project.
+            <div className="flex gap-2 mt-2 sm:mt-0">
+              <Button onClick={handleConfirmCancellation} variant="destructive" size="sm">Confirm Cancellation</Button>
+              <Button onClick={handleDenyCancellationRequest} variant="outline" size="sm">Deny Request</Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
       <ProjectTabs 
         project={project} 
         onTaskToggle={handleTaskToggle} 

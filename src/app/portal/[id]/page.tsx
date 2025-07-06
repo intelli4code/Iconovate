@@ -7,9 +7,9 @@ import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from "firebase/firesto
 import { db } from "@/lib/firebase"
 import { v4 as uuidv4 } from 'uuid';
 
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, ListChecks } from "lucide-react"
+import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -22,6 +22,7 @@ import Loading from "@/app/dashboard/loading"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
 function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNewMessage: (msg: string) => void }) {
   const [newMessage, setNewMessage] = useState("")
@@ -176,11 +177,22 @@ export default function ClientPortalPage() {
       description: `Your designer has been notified. You have ${project.revisionLimit - project.revisionsUsed - 1} revisions remaining.`,
     });
   };
+
+  const handleRequestCancellation = async () => {
+    if (!project) return;
+    if (project.status === 'Completed' || project.status === 'Canceled' || project.status === 'Approved') return;
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, { status: 'Cancellation Requested' });
+    toast({
+        title: "Cancellation Requested",
+        description: "Your cancellation request has been sent to the designer for review.",
+    });
+  };
   
-  const isApproved = project.status === 'Approved' || project.status === 'Completed';
+  const isFinalState = ['Approved', 'Completed', 'Canceled'].includes(project.status);
   const daysRemaining = differenceInDays(parseISO(project.dueDate), new Date());
   const revisionsRemaining = project.revisionLimit - project.revisionsUsed;
-  const canRequestRevision = revisionsRemaining > 0 && !isApproved;
+  const canRequestRevision = revisionsRemaining > 0 && !isFinalState;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -192,6 +204,15 @@ export default function ClientPortalPage() {
       </header>
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        {project.status === 'Cancellation Requested' && (
+             <Alert className="mb-8">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Cancellation Pending</AlertTitle>
+              <AlertDescription>
+                Your request to cancel this project is currently being reviewed by the designer.
+              </AlertDescription>
+            </Alert>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <Card>
@@ -295,12 +316,17 @@ export default function ClientPortalPage() {
                   <CardDescription>Manage project milestones from here.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                  {isApproved ? (
-                      <Alert className="border-green-500 text-green-500">
-                          <CheckCircle className="h-4 w-4 !text-green-500" />
-                          <AlertTitle>Project Approved</AlertTitle>
+                  {isFinalState ? (
+                      <Alert className={cn(
+                          project.status === 'Approved' && 'border-green-500 text-green-500 [&>svg]:!text-green-500',
+                          project.status === 'Completed' && 'border-blue-500 text-blue-500 [&>svg]:!text-blue-500',
+                      )}>
+                          <CheckCircle className="h-4 w-4" />
+                          <AlertTitle>Project {project.status}</AlertTitle>
                           <AlertDescription>
-                            Thank you! Your final assets are being prepared.
+                            {project.status === 'Approved' && 'Thank you! Your final assets are being prepared.'}
+                            {project.status === 'Completed' && 'This project is complete. Thank you for your business!'}
+                            {project.status === 'Canceled' && 'This project has been canceled.'}
                           </AlertDescription>
                       </Alert>
                   ) : (
@@ -312,7 +338,7 @@ export default function ClientPortalPage() {
                      <Button onClick={handleRequestRevision} variant="outline" className="w-full">
                         <RefreshCw className="mr-2 h-4 w-4" /> Request Revision
                     </Button>
-                  ) : !isApproved && (
+                  ) : !isFinalState && (
                     <Alert variant="destructive">
                       <AlertTriangle className="h-4 w-4" />
                       <AlertTitle>No Revisions Remaining</AlertTitle>
@@ -321,6 +347,32 @@ export default function ClientPortalPage() {
                       </AlertDescription>
                     </Alert>
                   )}
+                  <div className="pt-4 border-t">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                         <Button variant="destructive" className="w-full" disabled={isFinalState || project.status === 'Cancellation Requested'}>
+                          <XCircle className="mr-2 h-4 w-4" /> Request Cancellation
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will send a cancellation request to your designer. They will have to approve it before the project is officially canceled.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Go Back</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={handleRequestCancellation} 
+                            className={buttonVariants({ variant: "destructive" })}
+                          >
+                            Yes, Request Cancellation
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
               </CardContent>
             </Card>
             <ClientChat feedback={project.feedback} onNewMessage={handleFeedbackSubmit} />
