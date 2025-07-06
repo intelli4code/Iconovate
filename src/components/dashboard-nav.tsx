@@ -66,6 +66,14 @@ export function DashboardNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/team")}>
+              <Link href="/dashboard/team">
+                <Users />
+                <span>Team</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/emails")}>
                 <Link href="/dashboard/emails">
                     <Mail />
