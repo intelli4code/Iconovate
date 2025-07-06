@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -11,11 +11,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CheckCircle, AlertTriangle } from "lucide-react"
+import { CheckCircle, Loader2 } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
-import { cn } from "@/lib/utils"
 import { Switch } from "./ui/switch"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog"
+import { db } from "@/lib/firebase"
+import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore"
+import type { TeamMember } from "@/types"
+
+// Mock current user - replace with actual auth context
+const MOCK_CURRENT_USER_EMAIL = "alex@brandboost.ai";
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
@@ -32,17 +37,15 @@ type NotificationsFormValues = z.infer<typeof notificationsFormSchema>;
 
 export function SettingsForm() {
   const { toast } = useToast()
+  const [currentUser, setCurrentUser] = useState<TeamMember | null>(null);
 
   const {
     register: registerProfile,
     handleSubmit: handleProfileSubmit,
     formState: { errors: profileErrors, isSubmitting: isProfileSubmitting },
+    reset: resetProfileForm
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: {
-      fullName: "Alex Drake",
-      email: "alex@brandboost.ai",
-    },
   });
 
   const {
@@ -58,15 +61,39 @@ export function SettingsForm() {
       }
   });
 
+  useEffect(() => {
+    const fetchUser = async () => {
+        const teamRef = collection(db, "teamMembers");
+        const q = query(teamRef, where("email", "==", MOCK_CURRENT_USER_EMAIL));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            const userDoc = querySnapshot.docs[0];
+            const userData = { id: userDoc.id, ...userDoc.data() } as TeamMember;
+            setCurrentUser(userData);
+            resetProfileForm({ fullName: userData.name, email: userData.email });
+        }
+    };
+    fetchUser();
+  }, [resetProfileForm]);
+
 
   const onProfileSubmit = async (data: ProfileFormValues) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Profile updated:", data);
-    toast({
-      title: "Profile Updated!",
-      description: "Your changes have been saved successfully.",
-      action: <CheckCircle className="text-green-500" />,
-    });
+    if (!currentUser) return;
+    try {
+        const userDocRef = doc(db, "teamMembers", currentUser.id);
+        await updateDoc(userDocRef, { name: data.fullName, email: data.email });
+        toast({
+            title: "Profile Updated!",
+            description: "Your changes have been saved successfully.",
+            action: <CheckCircle className="text-green-500" />,
+        });
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Update Failed",
+            description: "Could not save your profile changes. " + error.message,
+        });
+    }
   }
 
   const onNotificationsSubmit = async (data: NotificationsFormValues) => {
@@ -116,7 +143,7 @@ export function SettingsForm() {
                  {profileErrors.email && <p className="text-sm text-destructive mt-1">{profileErrors.email.message}</p>}
               </div>
               <Button type="submit" disabled={isProfileSubmitting}>
-                {isProfileSubmitting ? "Saving..." : "Save Changes"}
+                {isProfileSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Save Changes"}
               </Button>
             </form>
           </CardContent>
@@ -134,7 +161,7 @@ export function SettingsForm() {
             <CardContent className="space-y-6">
                 <div className="space-y-2">
                     <Label>Theme</Label>
-                    <RadioGroup defaultValue="dark" className="grid max-w-md grid-cols-3 gap-8 pt-2">
+                    <RadioGroup defaultValue="dark" className="grid max-w-md grid-cols-2 gap-8 pt-2">
                         <Label className="[&:has([data-state=checked])>div]:border-primary">
                             <RadioGroupItem value="light" className="sr-only" />
                             <div className="items-center rounded-md border-2 border-muted p-1 hover:border-accent">
@@ -157,7 +184,7 @@ export function SettingsForm() {
                         </Label>
                          <Label className="[&:has([data-state=checked])>div]:border-primary">
                             <RadioGroupItem value="dark" className="sr-only" />
-                            <div className="items-center rounded-md border-2 border-muted bg-popover p-1 hover:border-accent">
+                            <div className="items-center rounded-md border-2 border-primary bg-popover p-1 hover:border-accent">
                                 <div className="space-y-2 rounded-sm bg-slate-950 p-2">
                                     <div className="space-y-2 rounded-md bg-slate-800 p-2 shadow-sm">
                                     <div className="h-2 w-4/5 rounded-lg bg-slate-400" />
@@ -228,7 +255,7 @@ export function SettingsForm() {
                         </div>
                     </div>
                     <Button type="submit" disabled={isNotificationsSubmitting}>
-                        {isNotificationsSubmitting ? "Saving..." : "Save Preferences"}
+                        {isNotificationsSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Save Preferences"}
                     </Button>
                 </form>
             </CardContent>
@@ -262,7 +289,9 @@ export function SettingsForm() {
                         </div>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive">Request Account Deletion</Button>
+                                <Button variant="destructive" disabled={currentUser?.email === 'alex@brandboost.ai'}>
+                                    Request Account Deletion
+                                </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>

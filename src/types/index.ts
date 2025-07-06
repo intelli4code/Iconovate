@@ -1,8 +1,20 @@
 
 
+
 export type ProjectStatus = 'Awaiting Brief' | 'Pending Approval' | 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Cancellation Requested' | 'Revision Requested';
 export type ProjectType = 'Branding' | 'Web Design' | 'UI/UX' | 'Marketing' | 'Other';
 export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
+export type TeamMemberRole = "Admin" | "Designer" | "Viewer";
+
+export interface TeamMember {
+  id: string; // The doc ID from firestore
+  name: string;
+  email: string;
+  role: TeamMemberRole;
+  avatarUrl?: string;
+  avatarPath?: string;
+  createdAt?: any;
+}
 
 export interface Notification {
   id: string;

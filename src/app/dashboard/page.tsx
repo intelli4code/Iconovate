@@ -27,7 +27,7 @@ import {
 } from "recharts"
 import { PageHeader } from "@/components/page-header"
 import Link from "next/link"
-import { FolderKanban, DollarSign, FolderClock, CheckCircle, Info } from "lucide-react"
+import { FolderKanban, DollarSign, FolderClock, Star, Info } from "lucide-react"
 import { format, getMonth, startOfMonth } from "date-fns"
 import Loading from "./loading"
 
@@ -62,13 +62,17 @@ export default function Dashboard() {
     };
   }, []);
 
-  const { totalSales, totalProjects, activeProjects, completedProjects, recentActivity, salesByMonth, projectStatusData } = useMemo(() => {
-    if (loading) return { totalSales: 0, totalProjects: 0, activeProjects: 0, completedProjects: 0, recentActivity: [], salesByMonth: [], projectStatusData: [] };
+  const { totalSales, totalProjects, activeProjects, averageRating, ratedProjectsCount, recentActivity, salesByMonth, projectStatusData } = useMemo(() => {
+    if (loading) return { totalSales: 0, totalProjects: 0, activeProjects: 0, averageRating: 0, ratedProjectsCount: 0, recentActivity: [], salesByMonth: [], projectStatusData: [] };
 
     const totalSales = invoices.filter(inv => inv.status === 'Paid').reduce((acc, inv) => acc + inv.total, 0);
     const totalProjects = projects.length;
     const activeProjects = projects.filter(p => ['In Progress', 'Pending Feedback', 'Revision Requested'].includes(p.status)).length;
-    const completedProjects = projects.filter(p => p.status === 'Completed').length;
+    
+    const ratedProjects = projects.filter(p => p.rating && p.rating > 0);
+    const averageRating = ratedProjects.length > 0
+        ? ratedProjects.reduce((acc, p) => acc + p.rating!, 0) / ratedProjects.length
+        : 0;
 
     const recentActivity = projects
       .flatMap(p => 
@@ -112,7 +116,7 @@ export default function Dashboard() {
         }
     });
 
-    return { totalSales, totalProjects, activeProjects, completedProjects, recentActivity, salesByMonth: monthlySalesData, projectStatusData };
+    return { totalSales, totalProjects, activeProjects, averageRating, ratedProjectsCount: ratedProjects.length, recentActivity, salesByMonth: monthlySalesData, projectStatusData };
   }, [projects, invoices, loading]);
 
 
@@ -156,12 +160,12 @@ export default function Dashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed Projects</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
+            <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{completedProjects}</div>
-            <p className="text-xs text-muted-foreground">Successfully delivered</p>
+            <div className="text-2xl font-bold">{averageRating.toFixed(1)} / 5.0</div>
+            <p className="text-xs text-muted-foreground">From {ratedProjectsCount} client reviews</p>
           </CardContent>
         </Card>
       </div>
