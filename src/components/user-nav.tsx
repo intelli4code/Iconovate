@@ -1,3 +1,4 @@
+
 import {
   Avatar,
   AvatarFallback,
@@ -14,6 +15,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import Link from "next/link"
 
 export function UserNav() {
   return (
@@ -38,7 +40,9 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
-            Profile
+            <Link href="/dashboard/settings" className="w-full">
+              Profile
+            </Link>
             <DropdownMenuShortcut>⇧P</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>
@@ -46,14 +50,18 @@ export function UserNav() {
             <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            Settings
+             <Link href="/dashboard/settings" className="w-full">
+                Settings
+            </Link>
             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>New Team</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-          Log out
+          <Link href="/login" className="w-full">
+            Log out
+          </Link>
           <DropdownMenuShortcut>⇧Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>

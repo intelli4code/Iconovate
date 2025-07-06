@@ -1,6 +1,9 @@
+
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
+import { Input } from "@/components/ui/input"
+import { Search } from "lucide-react"
 
 export default function DashboardLayout({
   children,
@@ -11,9 +14,16 @@ export default function DashboardLayout({
     <SidebarProvider>
       <DashboardNav />
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 sm:px-6">
+        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur-sm px-4 sm:px-6">
           <SidebarTrigger className="sm:hidden" />
-          <div className="flex-1" />
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search..."
+              className="w-full rounded-lg bg-secondary pl-8 md:w-[200px] lg:w-[320px]"
+            />
+          </div>
           <UserNav />
         </header>
         <main className="p-4 sm:p-6">{children}</main>

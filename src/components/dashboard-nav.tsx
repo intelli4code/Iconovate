@@ -1,3 +1,4 @@
+
 // This component is based on the v0 `dashboard-05` reference
 "use client"
 
@@ -27,8 +28,8 @@ export function DashboardNav() {
     <Sidebar>
       <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Rocket className="w-6 h-6 text-accent" />
-            <span className="text-lg font-semibold font-headline text-primary">BrandBoost AI</span>
+            <Rocket className="w-6 h-6 text-primary" />
+            <span className="text-lg font-semibold font-headline">BrandBoost AI</span>
           </div>
       </SidebarHeader>
       <SidebarContent>
@@ -58,6 +59,9 @@ export function DashboardNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <Separator className="my-2" />
+          <SidebarMenuItem className="px-2 text-xs text-muted-foreground">
+              AI Tools
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/brand-research")}>
               <Link href="/dashboard/brand-research">

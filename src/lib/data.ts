@@ -1,4 +1,6 @@
+
 import type { Project } from '@/types';
+import { subDays, format } from 'date-fns';
 
 export const mockProjects: Project[] = [
   {
@@ -6,12 +8,14 @@ export const mockProjects: Project[] = [
     name: 'Aether-Core Rebrand',
     client: 'Aether-Core Dynamics',
     status: 'In Progress',
-    dueDate: '2024-09-15',
+    dueDate: format(new Date(new Date().setDate(new Date().getDate() + 30)), "yyyy-MM-dd"),
     team: ['Alex', 'Maria'],
     description: 'Complete rebrand for a leading aerospace technology firm. Focus on modernity, precision, and innovation. Deliverables include new logo, brand guidelines, and presentation templates.',
     feedback: [
-      { user: 'Client', comment: 'The initial concepts look promising. Can we explore a darker blue for the primary color?', timestamp: '2024-08-05T14:30:00Z' },
-      { user: 'Maria', comment: 'Agreed. I will prepare a revised palette for review.', timestamp: '2024-08-05T16:00:00Z' },
+      { user: 'Client', comment: 'The initial concepts look promising. Can we explore a darker blue for the primary color?', timestamp: subDays(new Date(), 5).toISOString() },
+      { user: 'Maria', comment: 'Agreed. I will prepare a revised palette for review.', timestamp: subDays(new Date(), 4).toISOString() },
+      { user: 'Client', comment: 'Perfect, that revised palette is exactly what we were looking for. Let\'s proceed with that one.', timestamp: subDays(new Date(), 2).toISOString() },
+      { user: 'Alex', comment: 'Great! I\'ve updated the logo concepts with the new palette and they are now ready for presentation.', timestamp: subDays(new Date(), 1).toISOString() }
     ],
     tasks: [
         { id: 'task-1-1', text: 'Initial client meeting and brief', completed: true },
@@ -30,7 +34,7 @@ export const mockProjects: Project[] = [
     name: 'TerraBloom Website UI',
     client: 'TerraBloom Organics',
     status: 'Pending Feedback',
-    dueDate: '2024-08-30',
+    dueDate: format(new Date(new Date().setDate(new Date().getDate() + 15)), "yyyy-MM-dd"),
     team: ['Sam', 'Chloe'],
     description: 'UI/UX design for a new e-commerce platform for an organic skincare line. The design should feel natural, clean, and trustworthy.',
      feedback: [
@@ -72,7 +76,7 @@ export const mockProjects: Project[] = [
     name: 'Nova Fitness App Logo',
     client: 'Nova Fitness',
     status: 'In Progress',
-    dueDate: '2024-09-25',
+    dueDate: format(new Date(new Date().setDate(new Date().getDate() + 45)), "yyyy-MM-dd"),
     team: ['Maria'],
     description: 'Logo design for a new mobile fitness application. The brand needs to feel energetic, motivating, and accessible to a wide audience.',
      feedback: [],
@@ -88,7 +92,7 @@ export const mockProjects: Project[] = [
     name: 'Zenith Hotels Brand Guide',
     client: 'Zenith Hotel Group',
     status: 'Blocked',
-    dueDate: '2024-10-10',
+    dueDate: format(new Date(new Date().setDate(new Date().getDate() + 60)), "yyyy-MM-dd"),
     team: ['Sam'],
     description: 'Create a comprehensive brand identity guide for a luxury hotel chain. Project is currently blocked pending client asset delivery.',
      feedback: [
