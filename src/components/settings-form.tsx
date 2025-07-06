@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -38,6 +37,7 @@ type NotificationsFormValues = z.infer<typeof notificationsFormSchema>;
 export function SettingsForm() {
   const { toast } = useToast()
   const [currentUser, setCurrentUser] = useState<TeamMember | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
   const {
     register: registerProfile,
@@ -63,22 +63,46 @@ export function SettingsForm() {
 
   useEffect(() => {
     const fetchUser = async () => {
-        const teamRef = collection(db, "teamMembers");
-        const q = query(teamRef, where("email", "==", MOCK_CURRENT_USER_EMAIL));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-            const userDoc = querySnapshot.docs[0];
-            const userData = { id: userDoc.id, ...userDoc.data() } as TeamMember;
-            setCurrentUser(userData);
-            resetProfileForm({ fullName: userData.name, email: userData.email });
+        setLoadingUser(true);
+        try {
+            const teamRef = collection(db, "teamMembers");
+            const q = query(teamRef, where("email", "==", MOCK_CURRENT_USER_EMAIL));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                const userDoc = querySnapshot.docs[0];
+                const userData = { id: userDoc.id, ...userDoc.data() } as TeamMember;
+                setCurrentUser(userData);
+                resetProfileForm({ fullName: userData.name, email: userData.email });
+            } else {
+                 toast({
+                    variant: "destructive",
+                    title: "Profile Not Found",
+                    description: `Could not load profile for ${MOCK_CURRENT_USER_EMAIL}.`,
+                });
+            }
+        } catch (error) {
+             toast({
+                variant: "destructive",
+                title: "Error Loading Profile",
+                description: "There was a problem fetching your data.",
+            });
+        } finally {
+            setLoadingUser(false);
         }
     };
     fetchUser();
-  }, [resetProfileForm]);
+  }, [resetProfileForm, toast]);
 
 
   const onProfileSubmit = async (data: ProfileFormValues) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+        toast({
+            variant: "destructive",
+            title: "Update Failed",
+            description: "User profile not loaded. Cannot save changes.",
+        });
+        return;
+    };
     try {
         const userDocRef = doc(db, "teamMembers", currentUser.id);
         await updateDoc(userDocRef, { name: data.fullName, email: data.email });
@@ -131,20 +155,22 @@ export function SettingsForm() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleProfileSubmit(onProfileSubmit)} className="space-y-4">
-              <div>
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input id="fullName" {...registerProfile("fullName")} />
-                {profileErrors.fullName && <p className="text-sm text-destructive mt-1">{profileErrors.fullName.message}</p>}
-              </div>
-              <div>
-                <Label htmlFor="email">Email Address</Label>
-                <Input id="email" type="email" {...registerProfile("email")} />
-                 {profileErrors.email && <p className="text-sm text-destructive mt-1">{profileErrors.email.message}</p>}
-              </div>
-              <Button type="submit" disabled={isProfileSubmitting}>
-                {isProfileSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Save Changes"}
-              </Button>
+            <form onSubmit={handleProfileSubmit(onProfileSubmit)}>
+                <fieldset disabled={loadingUser || isProfileSubmitting} className="space-y-4">
+                    <div>
+                        <Label htmlFor="fullName">Full Name</Label>
+                        <Input id="fullName" {...registerProfile("fullName")} />
+                        {profileErrors.fullName && <p className="text-sm text-destructive mt-1">{profileErrors.fullName.message}</p>}
+                    </div>
+                    <div>
+                        <Label htmlFor="email">Email Address</Label>
+                        <Input id="email" type="email" {...registerProfile("email")} />
+                        {profileErrors.email && <p className="text-sm text-destructive mt-1">{profileErrors.email.message}</p>}
+                    </div>
+                    <Button type="submit">
+                        {isProfileSubmitting || loadingUser ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Save Changes"}
+                    </Button>
+                </fieldset>
             </form>
           </CardContent>
         </Card>
