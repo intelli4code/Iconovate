@@ -11,8 +11,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import type { Project, Asset, TeamMember, InternalNote } from "@/types"
-import { Users, ListTodo, RefreshCw, Download, Trash2, Pencil, Star, Fingerprint, Info, Link2, Timer, NotebookPen } from "lucide-react"
+import type { Project, Asset, TeamMember, InternalNote, Expense } from "@/types"
+import { Users, ListTodo, RefreshCw, Download, Trash2, Pencil, Star, Fingerprint, Info, Link2, Timer, NotebookPen, Receipt } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
@@ -32,17 +32,38 @@ interface ProjectTabsProps {
   onRevisionLimitChange: (newLimit: number) => void;
   onTaskDelete: (taskId: string) => void;
   onNewInternalNote: (note: string) => void;
+  onNewExpense: (description: string, amount: number) => void;
+  onDeleteExpense: (expenseId: string) => void;
 }
 
-export function ProjectTabs({ project, adminUser, onTaskToggle, onNewMessage, onFileDelete, onRevisionLimitChange, onTaskDelete, onNewInternalNote }: ProjectTabsProps) {
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+}
+
+export function ProjectTabs({ 
+    project, 
+    adminUser, 
+    onTaskToggle, 
+    onNewMessage, 
+    onFileDelete, 
+    onRevisionLimitChange, 
+    onTaskDelete, 
+    onNewInternalNote,
+    onNewExpense,
+    onDeleteExpense
+}: ProjectTabsProps) {
   const [newComment, setNewComment] = useState("");
   const [newInternalNote, setNewInternalNote] = useState("");
   const [isEditRevisionsOpen, setIsEditRevisionsOpen] = React.useState(false);
   const [newRevisionLimit, setNewRevisionLimit] = React.useState(project.revisionLimit);
+
+  const [expenseDescription, setExpenseDescription] = useState("");
+  const [expenseAmount, setExpenseAmount] = useState<number | string>("");
   
   const completedTasks = project.tasks?.filter(task => task.completed).length || 0;
   const totalTasks = project.tasks?.length || 0;
   const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+  const totalExpenses = project.expenses?.reduce((acc, exp) => acc + exp.amount, 0) || 0;
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +81,15 @@ export function ProjectTabs({ project, adminUser, onTaskToggle, onNewMessage, on
     }
   };
 
+  const handleExpenseSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (expenseDescription && typeof expenseAmount === 'number' && expenseAmount > 0) {
+        onNewExpense(expenseDescription, expenseAmount);
+        setExpenseDescription("");
+        setExpenseAmount("");
+    }
+  };
+
 
   const handleSaveRevisions = () => {
     onRevisionLimitChange(newRevisionLimit);
@@ -68,10 +98,11 @@ export function ProjectTabs({ project, adminUser, onTaskToggle, onNewMessage, on
 
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5">
+      <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6">
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="tasks">Tasks</TabsTrigger>
         <TabsTrigger value="assets">Assets</TabsTrigger>
+        <TabsTrigger value="expenses">Expenses</TabsTrigger>
         <TabsTrigger value="feedback">Feedback</TabsTrigger>
         <TabsTrigger value="internal_notes">Internal Notes</TabsTrigger>
       </TabsList>
@@ -320,6 +351,74 @@ export function ProjectTabs({ project, adminUser, onTaskToggle, onNewMessage, on
                     </TableBody>
                 </Table>
             </CardContent>
+        </Card>
+      </TabsContent>
+
+       <TabsContent value="expenses" className="mt-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Project Expenses</CardTitle>
+            <CardDescription>Track project-specific costs. These are not visible to the client.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleExpenseSubmit} className="flex flex-col sm:flex-row gap-4 items-start sm:items-end mb-6 p-4 border rounded-lg bg-secondary/30">
+                <div className="flex-1 w-full space-y-2">
+                    <Label htmlFor="expense-desc">Description</Label>
+                    <Input id="expense-desc" value={expenseDescription} onChange={(e) => setExpenseDescription(e.target.value)} placeholder="e.g., Stock photo subscription" />
+                </div>
+                <div className="w-full sm:w-auto space-y-2">
+                    <Label htmlFor="expense-amount">Amount ($)</Label>
+                    <Input id="expense-amount" type="number" value={expenseAmount} onChange={(e) => setExpenseAmount(Number(e.target.value))} placeholder="50.00" />
+                </div>
+                <Button type="submit" className="w-full sm:w-auto">Add Expense</Button>
+            </form>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {project.expenses?.map((expense) => (
+                        <TableRow key={expense.id}>
+                            <TableCell>{expense.description}</TableCell>
+                            <TableCell>{format(new Date(expense.date), 'PP')}</TableCell>
+                            <TableCell className="text-right font-medium">{formatCurrency(expense.amount)}</TableCell>
+                            <TableCell>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
+                                            <AlertDialogDescription>This will permanently delete the expense: "{expense.description}".</AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => onDeleteExpense(expense.id)} className={buttonVariants({ variant: "destructive" })}>Delete</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                    {(!project.expenses || project.expenses.length === 0) && (
+                        <TableRow>
+                            <TableCell colSpan={4} className="h-24 text-center">No expenses logged for this project.</TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+            <div className="flex justify-end font-bold text-lg mt-4 pr-4">
+                Total Expenses: {formatCurrency(totalExpenses)}
+            </div>
+          </CardContent>
         </Card>
       </TabsContent>
 

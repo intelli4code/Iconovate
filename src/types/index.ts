@@ -1,8 +1,10 @@
 
-
-
-
-
+export interface Expense {
+  id: string;
+  description: string;
+  amount: number;
+  date: string;
+}
 
 export type ProjectStatus = 'Awaiting Brief' | 'Pending Approval' | 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Cancellation Requested' | 'Revision Requested';
 export type ProjectType = 'Branding' | 'Web Design' | 'UI/UX' | 'Marketing' | 'Other';
@@ -109,6 +111,7 @@ export interface Project {
   feedback: Feedback[];
   tasks: Task[];
   assets: Asset[];
+  expenses?: Expense[];
   notifications: Notification[];
   internalNotes?: InternalNote[];
   createdAt?: any;

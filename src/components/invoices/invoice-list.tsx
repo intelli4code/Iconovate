@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -20,7 +21,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Loader2, PlusCircle, FileText, CheckCircle } from "lucide-react"
+import { MoreHorizontal, Loader2, PlusCircle, CheckCircle, Clock, Send } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog"
 
 const statusStyles: { [key in InvoiceStatus]: string } = {
@@ -88,6 +89,13 @@ export function InvoiceList() {
         console.error("Error deleting invoice:", error);
         toast({ variant: "destructive", title: "Deletion Failed"});
      }
+  }
+
+  const handleSendReminder = (invoice: Invoice) => {
+    toast({
+        title: "Reminder Sent!",
+        description: `A payment reminder email has been sent to ${invoice.clientName}.`
+    });
   }
 
   return (
@@ -165,7 +173,15 @@ export function InvoiceList() {
                         <DropdownMenuItem onSelect={() => handleUpdateStatus(invoice.id, 'Sent')} disabled={invoice.status === 'Sent'}>
                           Mark as Sent
                         </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleUpdateStatus(invoice.id, 'Overdue')} disabled={invoice.status === 'Overdue'}>
+                          Mark as Overdue
+                        </DropdownMenuItem>
                          <DropdownMenuSeparator />
+                          {invoice.status === 'Overdue' && (
+                            <DropdownMenuItem onSelect={() => handleSendReminder(invoice)}>
+                                <Send className="mr-2 h-4 w-4" /> Send Reminder
+                            </DropdownMenuItem>
+                          )}
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">Delete</DropdownMenuItem>

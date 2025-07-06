@@ -7,7 +7,7 @@ import { doc, getDoc, updateDoc, arrayUnion, onSnapshot, collection, query, wher
 import { db, auth } from "@/lib/firebase"
 import { onAuthStateChanged } from "firebase/auth"
 import { supabase } from "@/lib/supabase"
-import type { Project, Feedback, Asset, Task, Notification, InternalNote, TeamMember } from "@/types"
+import type { Project, Feedback, Asset, Task, Notification, InternalNote, TeamMember, Expense } from "@/types"
 import { format, addDays } from 'date-fns';
 import { generateTasksFromBrief } from "@/ai/flows/task-generator"
 
@@ -245,6 +245,40 @@ export default function ProjectDetailPage() {
     await updateDoc(projectRef, {
       internalNotes: arrayUnion(newNote)
     });
+  };
+
+  const handleNewExpense = async (description: string, amount: number) => {
+    if (!description.trim() || amount <= 0 || !project) return;
+    
+    const newExpense: Expense = {
+      id: uuidv4(),
+      description: description.trim(),
+      amount,
+      date: new Date().toISOString(),
+    };
+
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, {
+      expenses: arrayUnion(newExpense)
+    });
+
+    toast({ title: "Expense Added", description: "The new expense has been logged for this project."});
+  };
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    if (!project) return;
+    try {
+      const updatedExpenses = project.expenses?.filter(exp => exp.id !== expenseId) || [];
+      const projectRef = doc(db, "projects", project.id);
+      await updateDoc(projectRef, {
+        expenses: updatedExpenses,
+      });
+
+      toast({ title: "Expense Deleted" });
+    } catch (error: any) {
+      console.error("Error deleting expense:", error);
+      toast({ variant: "destructive", title: "Deletion Failed"});
+    }
   };
 
 
@@ -529,6 +563,8 @@ export default function ProjectDetailPage() {
         onRevisionLimitChange={handleRevisionLimitChange}
         onTaskDelete={handleTaskDelete}
         onNewInternalNote={handleNewInternalNote}
+        onNewExpense={handleNewExpense}
+        onDeleteExpense={handleDeleteExpense}
       />
       <Card className="mt-4">
         <CardHeader>

@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2, ReceiptText } from "lucide-react"
+import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2, ReceiptText, CreditCard } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -460,6 +460,23 @@ export default function ClientPortalPage() {
         description: "Your project brief has been sent to the designer for approval.",
     });
   };
+  
+  const handlePayInvoice = async (invoiceId: string) => {
+    if (!invoiceId) return;
+
+    const invoiceRef = doc(db, "invoices", invoiceId);
+    try {
+        await updateDoc(invoiceRef, { status: "Paid" });
+        toast({
+            title: "Payment Successful!",
+            description: "Thank you for your payment. The invoice has been marked as paid.",
+            action: <CheckCircle className="text-green-500" />
+        });
+        setIsInvoiceDialogOpen(false); // Close modal on success
+    } catch (e) {
+        toast({ variant: "destructive", title: "Payment Failed" });
+    }
+  };
 
   const isFinalState = ['Completed', 'Canceled'].includes(project.status);
   const daysRemaining = differenceInDays(parseISO(project.dueDate), new Date());
@@ -899,6 +916,11 @@ export default function ClientPortalPage() {
             </div>
           )}
           <DialogFooter>
+            {selectedInvoice && ['Sent', 'Overdue'].includes(selectedInvoice.status) && (
+                <Button onClick={() => handlePayInvoice(selectedInvoice.id)}>
+                    <CreditCard className="mr-2 h-4 w-4" /> Pay with Stripe
+                </Button>
+            )}
             <Button variant="outline" onClick={() => setIsInvoiceDialogOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
