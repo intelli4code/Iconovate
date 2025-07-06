@@ -478,6 +478,7 @@ export default function ClientPortalPage() {
     }
   };
 
+  const visibleInvoices = invoices.filter(inv => inv.status !== 'Draft');
   const isFinalState = ['Completed', 'Canceled'].includes(project.status);
   const daysRemaining = differenceInDays(parseISO(project.dueDate), new Date());
   const revisionsRemaining = project.revisionLimit - project.revisionsUsed;
@@ -654,12 +655,12 @@ export default function ClientPortalPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Invoices</CardTitle>
-                        <CardDescription>View and manage invoices for this project.</CardDescription>
+                        <CardDescription>View and pay invoices for this project.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                       {invoices.length > 0 ? (
+                       {visibleInvoices.length > 0 ? (
                             <ul className="space-y-3">
-                                {invoices.map(invoice => (
+                                {visibleInvoices.map(invoice => (
                                     <li key={invoice.id} className="flex items-center justify-between p-3 rounded-md border bg-muted/50">
                                         <div className="flex items-center gap-3">
                                             <ReceiptText className="h-5 w-5 text-primary"/>
