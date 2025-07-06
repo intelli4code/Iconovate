@@ -62,7 +62,7 @@ export function LogoMockupForm() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setValue('logo', e.target.files);
+      setValue('logo', e.target.files, { shouldValidate: true });
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
@@ -115,7 +115,7 @@ export function LogoMockupForm() {
             </div>
             <div>
               <Label htmlFor="mockupType">Mockup Type</Label>
-               <Select onValueChange={(value) => setValue('mockupType', value)}>
+               <Select onValueChange={(value) => setValue('mockupType', value, { shouldValidate: true })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a mockup type" />
                   </SelectTrigger>
