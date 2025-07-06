@@ -2,10 +2,23 @@
 export type ProjectStatus = 'Awaiting Brief' | 'Pending Approval' | 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Cancellation Requested' | 'Revision Requested';
 export type ProjectType = 'Branding' | 'Web Design' | 'UI/UX' | 'Marketing' | 'Other';
 
+export interface Notification {
+  id: string;
+  text: string;
+  timestamp: string;
+}
+
 export interface Feedback {
   user: string;
   comment: string;
   timestamp: string;
+  file?: {
+    name: string;
+    url: string;
+    path: string;
+    size: string;
+    fileType: string;
+  }
 }
 
 export interface Task {
@@ -36,6 +49,7 @@ export interface Project {
   feedback: Feedback[];
   tasks: Task[];
   assets: Asset[];
+  notifications: Notification[];
   createdAt?: any;
   projectType: ProjectType;
   revisionLimit: number;

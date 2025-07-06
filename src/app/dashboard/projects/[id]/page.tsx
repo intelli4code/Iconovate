@@ -5,8 +5,9 @@ import { useState, useEffect } from "react"
 import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { supabase } from "@/lib/supabase"
-import type { Project, Feedback, Asset, Task } from "@/types"
+import type { Project, Feedback, Asset, Task, Notification } from "@/types"
 import { format, addDays } from 'date-fns';
+import { generateTasksFromBrief } from "@/ai/flows/task-generator"
 
 import { PageHeader } from "@/components/page-header"
 import { ProjectTabs } from "@/components/projects/project-tabs"
@@ -14,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { CheckCircle, UploadCloud, Loader2, AlertTriangle, ShieldCheck, RefreshCw, XCircle } from "lucide-react"
+import { CheckCircle, UploadCloud, Loader2, AlertTriangle, ShieldCheck, RefreshCw, XCircle, BrainCircuit } from "lucide-react"
 import Loading from "../../loading"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -169,13 +170,14 @@ export default function ProjectDetailPage() {
     await updateDoc(projectRef, { tasks: newTasks });
   }
 
-  const handleFeedbackSubmit = async (comment: string) => {
+  const handleFeedbackSubmit = async (comment: string, file?: any) => {
     if (!comment.trim() || !project) return;
 
     const newFeedback: Feedback = {
-      user: 'Alex (Designer)', // Or get current user name
+      user: 'Alex (Designer)',
       comment,
       timestamp: new Date().toISOString(),
+      ...(file && { file }),
     };
 
     const projectRef = doc(db, "projects", project.id);
@@ -223,12 +225,66 @@ export default function ProjectDetailPage() {
   };
 
   const handleApproveAndStartProject = async () => {
+    if (!project || !project.briefDescription) return;
+    setIsSubmitting(true);
+    
+    try {
+        const aiTasks = await generateTasksFromBrief({ briefDescription: project.briefDescription });
+        const newTasks: Task[] = aiTasks.tasks.map(task => ({
+            id: uuidv4(),
+            text: task.text,
+            completed: false,
+        }));
+        
+        const approvalNotification: Notification = {
+            id: uuidv4(),
+            text: `Project approved and started. AI has generated an initial task list.`,
+            timestamp: new Date().toISOString(),
+        };
+
+        const projectRef = doc(db, "projects", project.id);
+        await updateDoc(projectRef, { 
+            status: 'In Progress',
+            tasks: arrayUnion(...newTasks),
+            notifications: arrayUnion(approvalNotification)
+        });
+
+        toast({
+            title: "Project Approved & Tasks Generated!",
+            description: `The project has been moved to "In Progress" and an initial task list has been created by AI.`,
+            action: <BrainCircuit className="text-green-500" />
+        });
+
+    } catch (error) {
+        console.error("Error approving project or generating tasks:", error);
+        toast({
+            variant: "destructive",
+            title: "Approval Failed",
+            description: "Could not start the project or generate AI tasks. Please try again.",
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
+  }
+
+  const handleReaskForBrief = async () => {
     if (!project) return;
+    
+    const reaskNotification: Notification = {
+      id: uuidv4(),
+      text: 'The designer has requested more details for the project brief. Please update it in the "Project Brief" tab.',
+      timestamp: new Date().toISOString(),
+    };
+
     const projectRef = doc(db, "projects", project.id);
-    await updateDoc(projectRef, { status: 'In Progress' });
+    await updateDoc(projectRef, {
+      status: 'Awaiting Brief',
+      notifications: arrayUnion(reaskNotification),
+    });
+
     toast({
-      title: "Project Approved!",
-      description: `The project has been moved to "In Progress".`,
+      title: "Brief Re-submission Requested",
+      description: "The client has been notified to provide more details.",
     });
   }
 
@@ -243,6 +299,12 @@ export default function ProjectDetailPage() {
       completed: false,
     };
 
+    const approvalNotification: Notification = {
+        id: uuidv4(),
+        text: `Revision Approved. Deadline extended by ${extraDays} days. New task added: "${revisionTask.text}"`,
+        timestamp: new Date().toISOString(),
+    };
+
     const projectRef = doc(db, "projects", project.id);
     await updateDoc(projectRef, {
       status: 'In Progress',
@@ -250,7 +312,8 @@ export default function ProjectDetailPage() {
       dueDate: format(newDueDate, 'yyyy-MM-dd'),
       revisionRequestDetails: '',
       revisionRequestTimestamp: '',
-      tasks: arrayUnion(revisionTask)
+      tasks: arrayUnion(revisionTask),
+      notifications: arrayUnion(approvalNotification)
     });
 
     toast({
@@ -393,9 +456,13 @@ export default function ProjectDetailPage() {
               <Label className="font-semibold">Links Provided</Label>
               <p className="text-sm text-muted-foreground p-3 bg-secondary rounded-md whitespace-pre-wrap">{project.briefLinks || 'No links provided.'}</p>
             </div>
-            <Button onClick={handleApproveAndStartProject}>
-              Approve & Start Project
-            </Button>
+            <div className="flex gap-2">
+                <Button onClick={handleApproveAndStartProject} disabled={isSubmitting}>
+                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <BrainCircuit className="mr-2 h-4 w-4" />}
+                    Approve & Generate Tasks
+                </Button>
+                <Button onClick={handleReaskForBrief} variant="outline">Re-ask for Brief</Button>
+            </div>
           </CardContent>
         </Card>
       )}

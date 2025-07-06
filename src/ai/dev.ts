@@ -14,3 +14,4 @@ import '@/ai/flows/mood-board-generator.ts';
 import '@/ai/flows/icon-set-generator.ts';
 import '@/ai/flows/logo-variation-generator.ts';
 import '@/ai/flows/social-media-kit-generator.ts';
+import '@/ai/flows/task-generator.ts';

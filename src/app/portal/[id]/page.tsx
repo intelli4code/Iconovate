@@ -1,37 +1,77 @@
 
 "use client"
 
-import { useState, type FormEvent, useEffect } from "react"
+import { useState, type FormEvent, useEffect, useRef } from "react"
 import { notFound, useParams } from "next/navigation"
 import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
 import { v4 as uuidv4 } from 'uuid';
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText } from "lucide-react"
+import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import type { Project, Feedback as FeedbackType, Task } from "@/types"
+import type { Project, Feedback as FeedbackType, Task, Notification } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
-import { differenceInDays, parseISO } from 'date-fns';
+import { differenceInDays, parseISO, format } from 'date-fns';
 import Loading from "@/app/dashboard/loading"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
-function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNewMessage: (msg: string) => void }) {
+function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNewMessage: (msg: string, file?: any) => void }) {
   const [newMessage, setNewMessage] = useState("")
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (newMessage.trim()) {
-      onNewMessage(newMessage.trim())
-      setNewMessage("")
+    if (!newMessage.trim() && !selectedFile) return;
+
+    if (selectedFile) {
+        setIsUploading(true);
+        try {
+            if (selectedFile.size > 200 * 1024 * 1024) { // 200MB limit
+                toast({ variant: "destructive", title: "File Too Large", description: "The maximum file size is 200MB."});
+                throw new Error("File too large");
+            }
+            const filePath = `chat-uploads/${uuidv4()}-${selectedFile.name}`;
+            const { data, error: uploadError } = await supabase.storage.from('data-storage').upload(filePath, selectedFile);
+
+            if (uploadError) throw uploadError;
+
+            const { data: publicUrlData } = supabase.storage.from('data-storage').getPublicUrl(data.path);
+
+            const fileData = {
+                name: selectedFile.name,
+                url: publicUrlData.publicUrl,
+                path: data.path,
+                size: `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`,
+                fileType: selectedFile.type,
+            };
+
+            onNewMessage(newMessage.trim(), fileData);
+
+        } catch (error: any) {
+            console.error("Chat upload error:", error);
+            toast({ variant: "destructive", title: "Upload Failed", description: error.message || "Could not upload your file."});
+        } finally {
+            setIsUploading(false);
+            setSelectedFile(null);
+            setNewMessage("");
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    } else {
+        onNewMessage(newMessage.trim());
+        setNewMessage("");
     }
   }
 
@@ -56,9 +96,14 @@ function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNe
                   <p className="font-semibold text-sm">{fb.user}</p>
                   <p className="text-xs text-muted-foreground">{new Date(fb.timestamp).toLocaleDateString()}</p>
                 </div>
-                <p className={`text-sm mt-1 p-3 rounded-lg max-w-xs ${fb.user === 'Client' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                  {fb.comment}
-                </p>
+                <div className={`text-sm mt-1 p-3 rounded-lg max-w-xs ${fb.user === 'Client' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                  {fb.comment && <p>{fb.comment}</p>}
+                  {fb.file && (
+                    <a href={fb.file.url} download={fb.file.name} target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ variant: 'secondary', size: 'sm'}), 'mt-2')}>
+                      <Link2 className="mr-2 h-4 w-4" /> {fb.file.name}
+                    </a>
+                  )}
+                </div>
               </div>
               {fb.user === 'Client' && (
                 <Avatar className="h-8 w-8">
@@ -73,9 +118,20 @@ function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNe
         <form onSubmit={handleSubmit} className="space-y-2">
           <Label htmlFor="client-comment" className="font-semibold">Your Message</Label>
           <Textarea id="client-comment" placeholder="Type your message here..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
-          <Button className="w-full" type="submit">
-            <MessageSquare className="mr-2 h-4 w-4" /> Send
-          </Button>
+          {selectedFile && <p className="text-sm text-muted-foreground">Attached: {selectedFile.name}</p>}
+          <div className="flex justify-between items-center">
+            <div>
+                 <Button type="button" variant="outline" size="icon" onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="h-4 w-4"/>
+                    <span className="sr-only">Upload File</span>
+                </Button>
+                <Input type="file" ref={fileInputRef} className="hidden" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
+            </div>
+            <Button className="w-auto" type="submit" disabled={isUploading}>
+              {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <MessageSquare className="mr-2 h-4 w-4" />}
+              Send
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
@@ -257,12 +313,14 @@ export default function ClientPortalPage() {
     return <Loading />;
   }
 
-  const handleFeedbackSubmit = async (comment: string) => {
-    if (!comment.trim() || !project) return;
+  const handleFeedbackSubmit = async (comment: string, file?: any) => {
+    if (!comment.trim() && !file) return;
+
     const newFeedback: FeedbackType = {
       user: 'Client',
       comment,
       timestamp: new Date().toISOString(),
+      ...(file && { file }),
     };
     
     const projectRef = doc(db, "projects", project.id);
@@ -466,10 +524,11 @@ export default function ClientPortalPage() {
             </Card>
 
             <Tabs defaultValue={defaultTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="brief" disabled={project.status !== 'Awaiting Brief'}>Project Brief</TabsTrigger>
                 <TabsTrigger value="deliverables">Deliverables</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                <TabsTrigger value="notifications">Notifications</TabsTrigger>
               </TabsList>
                <TabsContent value="brief" className="mt-4">
                  <Card>
@@ -564,6 +623,33 @@ export default function ClientPortalPage() {
                                 <Button type="submit" disabled={!newTask.trim()}>Add Task</Button>
                             </div>
                         </form>
+                    </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="notifications" className="mt-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Notifications</CardTitle>
+                        <CardDescription>A log of important project events and updates.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            {project.notifications?.length > 0 ? (
+                                [...project.notifications].reverse().map(notification => (
+                                    <div key={notification.id} className="flex items-start gap-3">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                            <Info className="h-4 w-4" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm">{notification.text}</p>
+                                            <p className="text-xs text-muted-foreground">{format(new Date(notification.timestamp), 'PPpp')}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-center text-muted-foreground py-6">No notifications yet.</p>
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
               </TabsContent>
