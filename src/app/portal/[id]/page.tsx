@@ -3,19 +3,19 @@
 
 import { useState, type FormEvent, useEffect, useRef } from "react"
 import { notFound, useParams } from "next/navigation"
-import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore"
+import { doc, getDoc, updateDoc, arrayUnion, onSnapshot, collection, query, where, orderBy } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { supabase } from "@/lib/supabase"
 import { v4 as uuidv4 } from 'uuid';
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2 } from "lucide-react"
+import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2, ReceiptText } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import type { Project, Feedback as FeedbackType, Task, Notification } from "@/types"
+import type { Project, Feedback as FeedbackType, Task, Notification, Invoice, InvoiceStatus } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { differenceInDays, parseISO, format } from 'date-fns';
@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNewMessage: (msg: string, file?: any) => void }) {
   const [newMessage, setNewMessage] = useState("")
@@ -231,9 +232,22 @@ function ClientReview({
   );
 }
 
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+}
+
+const statusStyles: { [key in InvoiceStatus]: string } = {
+  'Draft': 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300 border-gray-300',
+  'Sent': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border-blue-300',
+  'Paid': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-300',
+  'Overdue': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 border-red-300',
+};
+
+
 export default function ClientPortalPage() {
   const params = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState("");
   const [briefDescription, setBriefDescription] = useState("");
@@ -243,13 +257,15 @@ export default function ClientPortalPage() {
   
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
   const [email, setEmail] = useState("");
+  const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => {
     if (!params.id) return;
     setLoading(true);
     const docRef = doc(db, "projects", params.id);
 
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+    const unsubscribeProject = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         const projectData = { id: docSnap.id, ...docSnap.data() } as Project
         setProject(projectData);
@@ -261,7 +277,18 @@ export default function ClientPortalPage() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    const invoicesRef = collection(db, "invoices");
+    const q = query(invoicesRef, where("projectId", "==", params.id), orderBy("createdAt", "desc"));
+    const unsubscribeInvoices = onSnapshot(q, (querySnapshot) => {
+        const invoicesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Invoice[];
+        setInvoices(invoicesData);
+    });
+
+
+    return () => {
+        unsubscribeProject();
+        unsubscribeInvoices();
+    };
   }, [params.id]);
 
   useEffect(() => {
@@ -504,10 +531,11 @@ export default function ClientPortalPage() {
             </Card>
 
             <Tabs defaultValue={defaultTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="brief" disabled={project.status !== 'Awaiting Brief'}>Project Brief</TabsTrigger>
                 <TabsTrigger value="deliverables">Deliverables</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                <TabsTrigger value="invoices">Invoices</TabsTrigger>
               </TabsList>
                <TabsContent value="brief" className="mt-4">
                  <Card>
@@ -602,6 +630,37 @@ export default function ClientPortalPage() {
                                 <Button type="submit" disabled={!newTask.trim()}>Add Task</Button>
                             </div>
                         </form>
+                    </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="invoices" className="mt-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Invoices</CardTitle>
+                        <CardDescription>View and manage invoices for this project.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                       {invoices.length > 0 ? (
+                            <ul className="space-y-3">
+                                {invoices.map(invoice => (
+                                    <li key={invoice.id} className="flex items-center justify-between p-3 rounded-md border bg-muted/50">
+                                        <div className="flex items-center gap-3">
+                                            <ReceiptText className="h-5 w-5 text-primary"/>
+                                            <div>
+                                                <p className="font-semibold">{invoice.invoiceNumber} - {formatCurrency(invoice.total)}</p>
+                                                <p className="text-sm text-muted-foreground">Due: {format(new Date(invoice.dueDate), 'PP')}</p>
+                                            </div>
+                                        </div>
+                                         <div className="flex items-center gap-2">
+                                            <Badge variant="outline" className={statusStyles[invoice.status]}>{invoice.status}</Badge>
+                                            <Button variant="outline" size="sm" onClick={() => { setSelectedInvoice(invoice); setIsInvoiceDialogOpen(true); }}>View</Button>
+                                         </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-center text-muted-foreground py-6">No invoices have been issued for this project.</p>
+                        )}
                     </CardContent>
                 </Card>
               </TabsContent>
@@ -766,6 +825,84 @@ export default function ClientPortalPage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={isInvoiceDialogOpen} onOpenChange={setIsInvoiceDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Invoice Details</DialogTitle>
+            <DialogDescription>
+              Viewing invoice {selectedInvoice?.invoiceNumber}.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedInvoice && (
+             <div className="border rounded-lg p-6 space-y-6 bg-white text-black mt-4">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h2 className="text-2xl font-bold font-headline text-primary">INVOICE</h2>
+                        <p className="text-gray-500">Invoice #: {selectedInvoice.invoiceNumber}</p>
+                    </div>
+                    <div className="text-right">
+                        <h3 className="font-bold text-lg">{selectedInvoice.fromName}</h3>
+                        <p className="text-sm text-gray-500 whitespace-pre-line">{selectedInvoice.fromAddress}</p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <p className="font-bold">Bill To</p>
+                        <p>{selectedInvoice.toName}</p>
+                        <p className="text-gray-500 text-sm whitespace-pre-line">{selectedInvoice.toAddress}</p>
+                    </div>
+                    <div className="text-right">
+                        <p><span className="font-bold">Issue Date:</span> {selectedInvoice.issueDate}</p>
+                        <p><span className="font-bold">Due Date:</span> {selectedInvoice.dueDate}</p>
+                    </div>
+                </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-center">Quantity</TableHead>
+                    <TableHead className="text-right">Unit Price</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {selectedInvoice.lineItems.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{item.description}</TableCell>
+                      <TableCell className="text-center">{item.quantity}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(item.total)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter>
+                    <TableRow>
+                        <TableCell colSpan={3} className="text-right font-bold">Subtotal</TableCell>
+                        <TableCell className="text-right">{formatCurrency(selectedInvoice.subtotal)}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell colSpan={3} className="text-right font-bold">Tax</TableCell>
+                        <TableCell className="text-right">{formatCurrency(selectedInvoice.taxAmount)}</TableCell>
+                    </TableRow>
+                    <TableRow className="text-lg font-bold">
+                        <TableCell colSpan={3} className="text-right">Total</TableCell>
+                        <TableCell className="text-right">{formatCurrency(selectedInvoice.total)}</TableCell>
+                    </TableRow>
+                </TableFooter>
+              </Table>
+              {selectedInvoice.notes && (
+                <div>
+                    <p className="font-bold">Notes</p>
+                    <p className="text-sm text-gray-500">{selectedInvoice.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsInvoiceDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
