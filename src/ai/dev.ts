@@ -8,3 +8,5 @@ import '@/ai/flows/logo-mockup-generator.ts';
 import '@/ai/flows/brand-guidelines-generator.ts';
 import '@/ai/flows/logo-generator.ts';
 import '@/ai/flows/color-palette-generator.ts';
+import '@/ai/flows/slogan-generator.ts';
+import '@/ai/flows/typography-pairing.ts';
