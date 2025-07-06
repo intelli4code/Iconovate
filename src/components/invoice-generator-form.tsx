@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { generateInvoiceData, type InvoiceGeneratorInput, type InvoiceGeneratorOutput } from '@/ai/flows/invoice-generator';
+import { generateInvoiceData, type InvoiceGeneratorOutput } from '@/ai/flows/invoice-generator';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,10 @@ import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, Table
 import { Loader2, FileText, Plus, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from './ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { Project } from '@/types';
 
 const LineItemSchema = z.object({
   description: z.string().min(1, "Description is required."),
@@ -37,12 +41,19 @@ export function InvoiceGeneratorForm() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<InvoiceGeneratorOutput | null>(null);
   const { toast } = useToast();
+  
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [clients, setClients] = useState<string[]>([]);
+  const [selectedClient, setSelectedClient] = useState("");
+  const [loadingProjects, setLoadingProjects] = useState(true);
 
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
+    setValue,
+    reset,
   } = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -55,11 +66,70 @@ export function InvoiceGeneratorForm() {
     name: "lineItems"
   });
 
+  useEffect(() => {
+    setLoadingProjects(true);
+    const projectsRef = collection(db, "projects");
+    const q = query(projectsRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const projectsData = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        })) as Project[];
+        setProjects(projectsData);
+        
+        const uniqueClients = [...new Set(projectsData.map(p => p.client))];
+        setClients(uniqueClients);
+
+        setLoadingProjects(false);
+    }, (error) => {
+        console.error("Error fetching projects: ", error);
+        setLoadingProjects(false);
+        toast({ variant: "destructive", title: "Failed to load projects" });
+    });
+
+    return () => unsubscribe();
+  }, [toast]);
+
+
+  const handleClientChange = (clientName: string) => {
+    setSelectedClient(clientName);
+    // Reset form fields when client changes, but keep the new client name
+    reset({
+        clientName: clientName,
+        clientAddress: "",
+        projectName: "",
+        lineItems: [{ description: "", quantity: 1, price: 0 }],
+        taxRate: 0,
+        notes: ""
+    });
+  }
+
+  const handleProjectChange = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+        setValue('clientName', project.client, { shouldValidate: true });
+        setValue('projectName', project.name, { shouldValidate: true });
+        
+        const taskLineItems = project.tasks.map(task => ({
+            description: task.text,
+            quantity: 1,
+            price: 0
+        }));
+        
+        if(taskLineItems.length > 0) {
+          setValue('lineItems', taskLineItems, { shouldValidate: true });
+        } else {
+          setValue('lineItems', [{ description: `Work for project: ${project.name}`, quantity: 1, price: 0 }], { shouldValidate: true });
+        }
+    }
+  }
+
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setLoading(true);
     setResult(null);
     try {
-      const response = await generateInvoiceData(data as InvoiceGeneratorInput);
+      const response = await generateInvoiceData(data);
       setResult(response);
     } catch (error) {
       console.error("Error generating invoice:", error);
@@ -76,6 +146,8 @@ export function InvoiceGeneratorForm() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
   }
+  
+  const clientProjects = projects.filter(p => p.client === selectedClient);
 
   return (
     <div className="grid lg:grid-cols-5 gap-8">
@@ -86,9 +158,36 @@ export function InvoiceGeneratorForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            
+            <div className='space-y-2'>
+              <Label>Select Client</Label>
+              <Select onValueChange={handleClientChange} value={selectedClient} disabled={loadingProjects}>
+                  <SelectTrigger>
+                      <SelectValue placeholder={loadingProjects ? "Loading clients..." : "Choose a client"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {clients.map(client => <SelectItem key={client} value={client}>{client}</SelectItem>)}
+                  </SelectContent>
+              </Select>
+            </div>
+
+            <div className='space-y-2'>
+              <Label>Select Project</Label>
+              <Select onValueChange={handleProjectChange} disabled={!selectedClient}>
+                  <SelectTrigger>
+                      <SelectValue placeholder="Choose a project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {clientProjects.map(project => <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>)}
+                  </SelectContent>
+              </Select>
+            </div>
+
+            <Separator />
+            
             <div>
               <Label htmlFor="clientName">Client Name</Label>
-              <Input id="clientName" {...register('clientName')} placeholder="e.g., Aether-Core Dynamics" />
+              <Input id="clientName" {...register('clientName')} readOnly placeholder="Selected from dropdown" />
               {errors.clientName && <p className="text-sm text-destructive mt-1">{errors.clientName.message}</p>}
             </div>
              <div>
@@ -98,7 +197,7 @@ export function InvoiceGeneratorForm() {
             </div>
             <div>
               <Label htmlFor="projectName">Project Name</Label>
-              <Input id="projectName" {...register('projectName')} placeholder="e.g., Q3 Rebranding" />
+              <Input id="projectName" {...register('projectName')} readOnly placeholder="Selected from dropdown" />
               {errors.projectName && <p className="text-sm text-destructive mt-1">{errors.projectName.message}</p>}
             </div>
             
@@ -126,7 +225,7 @@ export function InvoiceGeneratorForm() {
                 <Button type="button" variant="outline" size="sm" onClick={() => append({ description: "", quantity: 1, price: 0 })}>
                     <Plus className="mr-2 h-4 w-4" /> Add Item
                 </Button>
-                {errors.lineItems && <p className="text-sm text-destructive mt-1">{errors.lineItems.message}</p>}
+                {errors.lineItems && !errors.lineItems?.[fields.length -1] && <p className="text-sm text-destructive mt-1">{errors.lineItems.message}</p>}
             </div>
 
             <Separator />
@@ -240,3 +339,5 @@ export function InvoiceGeneratorForm() {
     </div>
   );
 }
+
+    
