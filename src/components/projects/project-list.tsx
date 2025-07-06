@@ -34,7 +34,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { Project, ProjectStatus, ProjectType } from "@/types"
+import type { Project, ProjectStatus, ProjectType, TeamMember } from "@/types"
 import { ListFilter, PlusCircle, MoreHorizontal, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { Label } from "@/components/ui/label"
@@ -43,8 +43,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { format, differenceInDays, parseISO } from "date-fns"
 import { db } from "@/lib/firebase"
-import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore"
+import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
+import { FormField, FormItem, FormControl, FormLabel } from "./ui/form"
+import { Checkbox } from "./ui/checkbox"
 
 
 const statusStyles: { [key in ProjectStatus]: string } = {
@@ -69,12 +71,16 @@ const formSchema = z.object({
   projectType: z.enum(projectTypes, { required_error: "Please select a project type." }),
   revisionLimit: z.coerce.number().min(0, "Revision limit must be 0 or more.").default(3),
   durationDays: z.coerce.number().min(1, "Duration must be at least 1 day.").default(30),
+  team: z.array(z.string()).refine((value) => value.length > 0, {
+    message: "You must assign at least one designer.",
+  }),
 });
 type FormValues = z.infer<typeof formSchema>;
 
 
 export function ProjectList() {
   const [projects, setProjects] = React.useState<Project[]>([]);
+  const [designers, setDesigners] = React.useState<TeamMember[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const { toast } = useToast();
@@ -87,6 +93,7 @@ export function ProjectList() {
     defaultValues: {
       revisionLimit: 3,
       durationDays: 30,
+      team: [],
     },
   });
   
@@ -112,7 +119,16 @@ export function ProjectList() {
       });
     });
 
-    return () => unsubscribe();
+    const designersQuery = query(collection(db, "teamMembers"), where("role", "==", "Designer"));
+    const unsubscribeDesigners = onSnapshot(designersQuery, (snapshot) => {
+        const designersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as TeamMember[];
+        setDesigners(designersData);
+    });
+
+    return () => {
+        unsubscribe();
+        unsubscribeDesigners();
+    };
   }, [toast]);
 
 
@@ -126,7 +142,7 @@ export function ProjectList() {
       description: data.description || "No description provided.",
       status: "Awaiting Brief" as ProjectStatus,
       dueDate: format(futureDate, "yyyy-MM-dd"),
-      team: ["Hamza", "Casey"],
+      team: [...data.team, "Hamza"],
       feedback: [],
       tasks: [],
       assets: [],
@@ -352,6 +368,54 @@ export function ProjectList() {
                       <Input id="durationDays" type="number" {...register("durationDays")} />
                       {errors.durationDays && <p className="text-sm text-destructive mt-1">{errors.durationDays.message}</p>}
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Assign Designers</Label>
+                    <div className="space-y-2 rounded-md border p-3 max-h-48 overflow-y-auto">
+                      <FormField
+                        control={control}
+                        name="team"
+                        render={() => (
+                          <>
+                            {designers.map((designer) => (
+                              <FormField
+                                key={designer.id}
+                                control={control}
+                                name="team"
+                                render={({ field }) => {
+                                  return (
+                                    <FormItem
+                                      key={designer.id}
+                                      className="flex flex-row items-center space-x-3 space-y-0"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(designer.name)}
+                                          onCheckedChange={(checked) => {
+                                            return checked
+                                              ? field.onChange([...(field.value || []), designer.name])
+                                              : field.onChange(
+                                                  field.value?.filter(
+                                                    (value) => value !== designer.name
+                                                  )
+                                                );
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        {designer.name}
+                                      </FormLabel>
+                                    </FormItem>
+                                  );
+                                }}
+                              />
+                            ))}
+                            {designers.length === 0 && <p className="text-xs text-muted-foreground p-2 text-center">No designers available. Add one in the Team page.</p>}
+                          </>
+                        )}
+                      />
+                    </div>
+                    {errors.team && <p className="text-sm text-destructive mt-1">{errors.team.message}</p>}
                   </div>
                 </div>
               </form>

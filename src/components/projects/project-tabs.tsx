@@ -84,6 +84,17 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
                     <span className="font-semibold mr-2">Project Type:</span>
                     <Badge variant="secondary">{project.projectType}</Badge>
                 </div>
+                 <div className="flex items-start">
+                    <Users className="h-5 w-5 mr-2 mt-0.5 text-muted-foreground" />
+                    <div className="flex-1">
+                        <span className="font-semibold mr-2">Assigned Team:</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                            {project.team.map((memberName) => (
+                                <Badge key={memberName} variant="secondary">{memberName}</Badge>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
             <div className="space-y-4">
                 <div className="flex items-center">
