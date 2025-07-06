@@ -14,7 +14,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes } from "lucide-react"
+import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2 } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -91,6 +91,14 @@ export function DashboardNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
            <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/logo-variations")}>
+              <Link href="/dashboard/logo-variations">
+                <Blend />
+                <span>Logo Variations</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/color-palette")}>
               <Link href="/dashboard/color-palette">
                 <Palette />
@@ -135,6 +143,14 @@ export function DashboardNav() {
               <Link href="/dashboard/brand-guidelines">
                 <BookText />
                 <span>Brand Guidelines</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/social-media-kit")}>
+              <Link href="/dashboard/social-media-kit">
+                <Share2 />
+                <span>Social Media Kit</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
