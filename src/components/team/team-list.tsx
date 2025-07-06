@@ -7,12 +7,13 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useToast } from "@/hooks/use-toast"
 import { v4 as uuidv4 } from 'uuid';
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { MoreHorizontal, PlusCircle, Trash2, Loader2, UploadCloud } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Copy, LogIn, Loader2, UploadCloud, KeyRound } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -24,7 +25,6 @@ import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, deleteD
 import { createUserWithEmailAndPassword } from "firebase/auth"
 import { supabase } from "@/lib/supabase"
 import type { TeamMember, TeamMemberRole } from "@/types"
-import Image from "next/image"
 
 const memberFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -35,6 +35,7 @@ type MemberFormValues = z.infer<typeof memberFormSchema>;
 
 export function TeamList() {
     const { toast } = useToast()
+    const router = useRouter();
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
     const [loading, setLoading] = useState(true);
     
@@ -47,6 +48,7 @@ export function TeamList() {
         control,
         register,
         handleSubmit,
+        watch,
         formState: { errors, isSubmitting },
         reset,
         setError,
@@ -158,8 +160,8 @@ export function TeamList() {
                     });
                     toast({ 
                         title: "Designer Added!", 
-                        description: `${data.name}'s key: ${designerKey}`,
-                        duration: 10000,
+                        description: `Share their key securely: ${designerKey}`,
+                        duration: 15000,
                     });
                 }
             }
@@ -174,7 +176,7 @@ export function TeamList() {
                  toast({ 
                     variant: "destructive", 
                     title: "Save Failed", 
-                    description: error.message || "An unexpected error occurred. Please check Supabase RLS policies." 
+                    description: error.message || "An unexpected error occurred. Please check Supabase RLS policies for `data-storage` bucket." 
                 });
             }
         }
@@ -195,6 +197,19 @@ export function TeamList() {
                  description: error.message || "Failed to delete avatar. Please check Supabase RLS policies." 
             });
         }
+    };
+    
+    const handleLoginAsDesigner = (designerId: string) => {
+        sessionStorage.setItem('designerId', designerId);
+        router.push('/designer');
+    };
+
+    const copyToClipboard = (text: string, label: string) => {
+        navigator.clipboard.writeText(text);
+        toast({
+            title: `${label} Copied!`,
+            description: text,
+        });
     };
 
     return (
@@ -217,13 +232,14 @@ export function TeamList() {
                             <TableRow>
                                 <TableHead>Member</TableHead>
                                 <TableHead className="hidden sm:table-cell">Role</TableHead>
+                                <TableHead className="hidden lg:table-cell">Designer Key</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={3} className="text-center p-6">
+                                    <TableCell colSpan={4} className="text-center p-6">
                                         <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                                     </TableCell>
                                 </TableRow>
@@ -245,6 +261,16 @@ export function TeamList() {
                                         <TableCell className="hidden sm:table-cell">
                                             <Badge variant={member.role === 'Admin' ? 'default' : 'secondary'}>{member.role}</Badge>
                                         </TableCell>
+                                        <TableCell className="hidden lg:table-cell">
+                                            {member.role === 'Designer' && member.designerKey ? (
+                                                <div className="flex items-center gap-1 font-mono text-xs">
+                                                    <span>{member.designerKey.substring(0, 8)}...</span>
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(member.designerKey!, 'Designer Key')}><Copy className="h-3 w-3" /></Button>
+                                                </div>
+                                            ) : (
+                                                <span className="text-muted-foreground">-</span>
+                                            )}
+                                        </TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
@@ -253,6 +279,12 @@ export function TeamList() {
                                                 <DropdownMenuContent>
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                     <DropdownMenuItem onSelect={() => handleOpenDialog(member)}>Edit</DropdownMenuItem>
+                                                    {member.role === 'Designer' && (
+                                                        <DropdownMenuItem onSelect={() => handleLoginAsDesigner(member.id)}>
+                                                            <LogIn className="mr-2 h-4 w-4" />
+                                                            Login as Designer
+                                                        </DropdownMenuItem>
+                                                    )}
                                                     <DropdownMenuSeparator />
                                                     <AlertDialog>
                                                         <AlertDialogTrigger asChild>
@@ -311,18 +343,24 @@ export function TeamList() {
                                 <Input id="name" placeholder="John Doe" {...register("name")} />
                                 {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
                             </div>
-                            <div className="space-y-2">
+                             <div className="space-y-2">
                                 <Label htmlFor="email">Email Address</Label>
                                 <Input id="email" type="email" placeholder="member@example.com" {...register("email")} disabled={!!editingMember} />
                                 {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
                             </div>
-                            {!editingMember && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="password">Password (for Admins only)</Label>
-                                    <Input id="password" type="password" placeholder="••••••••" {...register("password")} />
+                            {!editingMember && watch('email') && (
+                                watch('email') === 'infoathamza@gmail.com' ? (
+                                    <div className="space-y-2">
+                                    <Label htmlFor="password">Admin Password</Label>
+                                    <Input id="password" type="password" placeholder="At least 6 characters" {...register("password")} />
                                     {errors.password && <p className="text-sm text-destructive mt-1">{errors.password.message}</p>}
-                                    <p className="text-xs text-muted-foreground">Designers are assigned a unique key instead of a password.</p>
-                                </div>
+                                    </div>
+                                ) : (
+                                    <div className="p-3 bg-secondary rounded-md text-center text-sm text-muted-foreground">
+                                    <KeyRound className="mx-auto h-5 w-5 mb-1" />
+                                    A unique Designer Key will be generated for this user.
+                                    </div>
+                                )
                             )}
                         </div>
                     </form>

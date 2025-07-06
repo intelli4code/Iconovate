@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore"
 import { db } from "@/lib/firebase"
-import type { Project, Invoice, ProjectStatus } from "@/types"
+import type { Project, Invoice, ProjectStatus, ProjectType } from "@/types"
 import {
   Card,
   CardContent,
@@ -34,6 +34,9 @@ import Loading from "./loading"
 const allStatuses: ProjectStatus[] = ['Awaiting Brief', 'Pending Approval', 'In Progress', 'Pending Feedback', 'Completed', 'Blocked', 'Canceled', 'Cancellation Requested', 'Revision Requested'];
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#34a853'];
 
+const allProjectTypes: ProjectType[] = ['Branding', 'Web Design', 'UI/UX', 'Marketing', 'Other'];
+const TYPE_COLORS = ['#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e74c3c'];
+
 
 export default function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -62,8 +65,8 @@ export default function Dashboard() {
     };
   }, []);
 
-  const { totalSales, totalProjects, activeProjects, averageRating, ratedProjectsCount, recentActivity, salesByMonth, projectStatusData } = useMemo(() => {
-    if (loading) return { totalSales: 0, totalProjects: 0, activeProjects: 0, averageRating: 0, ratedProjectsCount: 0, recentActivity: [], salesByMonth: [], projectStatusData: [] };
+  const { totalSales, totalProjects, activeProjects, averageRating, ratedProjectsCount, recentActivity, salesByMonth, projectStatusData, projectTypeData } = useMemo(() => {
+    if (loading) return { totalSales: 0, totalProjects: 0, activeProjects: 0, averageRating: 0, ratedProjectsCount: 0, recentActivity: [], salesByMonth: [], projectStatusData: [], projectTypeData: [] };
 
     const totalSales = invoices.filter(inv => inv.status === 'Paid').reduce((acc, inv) => acc + inv.total, 0);
     const totalProjects = projects.length;
@@ -85,6 +88,13 @@ export default function Dashboard() {
         .map(status => ({
             name: status,
             value: projects.filter(p => p.status === status).length
+        }))
+        .filter(d => d.value > 0);
+        
+    const projectTypeData = allProjectTypes
+        .map(type => ({
+            name: type,
+            value: projects.filter(p => p.projectType === type).length
         }))
         .filter(d => d.value > 0);
 
@@ -116,7 +126,7 @@ export default function Dashboard() {
         }
     });
 
-    return { totalSales, totalProjects, activeProjects, averageRating, ratedProjectsCount: ratedProjects.length, recentActivity, salesByMonth: monthlySalesData, projectStatusData };
+    return { totalSales, totalProjects, activeProjects, averageRating, ratedProjectsCount: ratedProjects.length, recentActivity, salesByMonth: monthlySalesData, projectStatusData, projectTypeData };
   }, [projects, invoices, loading]);
 
 
@@ -221,7 +231,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="lg:col-span-7">
+        <Card className="lg:col-span-4">
           <CardHeader>
             <CardTitle>Project Status Distribution</CardTitle>
             <CardDescription>A breakdown of all your projects by their current status.</CardDescription>
@@ -242,6 +252,28 @@ export default function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
+        </Card>
+        <Card className="lg:col-span-3">
+            <CardHeader>
+                <CardTitle>Project Type Distribution</CardTitle>
+                <CardDescription>A breakdown of all your projects by type.</CardDescription>
+            </CardHeader>
+            <CardContent className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                    <Pie data={projectTypeData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}>
+                    {projectTypeData.map((entry, index) => <Cell key={`cell-${index}`} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip
+                    contentStyle={{
+                        backgroundColor: "hsl(var(--background))",
+                        borderColor: "hsl(var(--border))",
+                    }}
+                    />
+                    <Legend />
+                </PieChart>
+                </ResponsiveContainer>
+            </CardContent>
         </Card>
       </div>
     </>
