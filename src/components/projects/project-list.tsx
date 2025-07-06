@@ -46,7 +46,7 @@ import { format, differenceInDays, parseISO } from "date-fns"
 import { db } from "@/lib/firebase"
 import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { FormField, FormItem, FormControl, FormLabel } from "@/components/ui/form"
+import { Form, FormField, FormItem, FormControl, FormLabel } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
 
 
@@ -89,7 +89,7 @@ export function ProjectList() {
   const [activeTab, setActiveTab] = React.useState("all");
   const [statusFilters, setStatusFilters] = React.useState<ProjectStatus[]>([]);
 
-  const { control, register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       revisionLimit: 3,
@@ -159,7 +159,7 @@ export function ProjectList() {
     try {
       await addDoc(collection(db, 'projects'), newProjectData);
       
-      reset();
+      form.reset();
       setIsDialogOpen(false);
       toast({
         title: "Project Created",
@@ -321,105 +321,113 @@ export function ProjectList() {
                   Fill in the details below to start a new project.
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit(onSubmit)} id="new-project-form">
-                <div className="grid gap-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Project Name</Label>
-                    <Input id="name" {...register("name")} placeholder="e.g. Aether-Core Rebrand" />
-                    {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="client">Client Name</Label>
-                    <Input id="client" {...register("client")} placeholder="e.g. Aether-Core Dynamics" />
-                    {errors.client && <p className="text-sm text-destructive mt-1">{errors.client.message}</p>}
-                  </div>
-                   <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea id="description" {...register("description")} placeholder="Briefly describe the project goals..." />
-                    {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Project Type</Label>
-                      <Controller
-                        name="projectType"
-                        control={control}
-                        render={({ field }) => (
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {projectTypes.map(type => (
-                                  <SelectItem key={type} value={type}>{type}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                        )}
-                      />
-                    {errors.projectType && <p className="text-sm text-destructive mt-1">{errors.projectType.message}</p>}
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                     <div className="space-y-2">
-                      <Label htmlFor="revisionLimit">Revision Limit</Label>
-                      <Input id="revisionLimit" type="number" {...register("revisionLimit")} />
-                      {errors.revisionLimit && <p className="text-sm text-destructive mt-1">{errors.revisionLimit.message}</p>}
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} id="new-project-form">
+                  <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Project Name</Label>
+                      <Input id="name" {...form.register("name")} placeholder="e.g. Aether-Core Rebrand" />
+                      {form.formState.errors.name && <p className="text-sm text-destructive mt-1">{form.formState.errors.name.message}</p>}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="durationDays">Duration (days)</Label>
-                      <Input id="durationDays" type="number" {...register("durationDays")} />
-                      {errors.durationDays && <p className="text-sm text-destructive mt-1">{errors.durationDays.message}</p>}
+                      <Label htmlFor="client">Client Name</Label>
+                      <Input id="client" {...form.register("client")} placeholder="e.g. Aether-Core Dynamics" />
+                      {form.formState.errors.client && <p className="text-sm text-destructive mt-1">{form.formState.errors.client.message}</p>}
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Assign Designers</Label>
-                    <div className="space-y-2 rounded-md border p-3 max-h-48 overflow-y-auto">
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea id="description" {...form.register("description")} placeholder="Briefly describe the project goals..." />
+                      {form.formState.errors.description && <p className="text-sm text-destructive mt-1">{form.formState.errors.description.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Controller
+                          name="projectType"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Project Type</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a type" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {projectTypes.map(type => (
+                                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormItem>
+                          )}
+                        />
+                      {form.formState.errors.projectType && <p className="text-sm text-destructive mt-1">{form.formState.errors.projectType.message}</p>}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="revisionLimit">Revision Limit</Label>
+                        <Input id="revisionLimit" type="number" {...form.register("revisionLimit")} />
+                        {form.formState.errors.revisionLimit && <p className="text-sm text-destructive mt-1">{form.formState.errors.revisionLimit.message}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="durationDays">Duration (days)</Label>
+                        <Input id="durationDays" type="number" {...form.register("durationDays")} />
+                        {form.formState.errors.durationDays && <p className="text-sm text-destructive mt-1">{form.formState.errors.durationDays.message}</p>}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
                       <FormField
-                        control={control}
+                        control={form.control}
                         name="team"
                         render={() => (
-                          <>
-                            {designers.map((designer) => (
-                              <FormField
-                                key={designer.id}
-                                control={control}
-                                name="team"
-                                render={({ field }) => {
-                                  return (
-                                    <FormItem
+                          <FormItem>
+                            <FormLabel>Assign Designers</FormLabel>
+                              <div className="space-y-2 rounded-md border p-3 max-h-48 overflow-y-auto">
+                                <>
+                                  {designers.map((designer) => (
+                                    <FormField
                                       key={designer.id}
-                                      className="flex flex-row items-center space-x-3 space-y-0"
-                                    >
-                                      <FormControl>
-                                        <Checkbox
-                                          checked={field.value?.includes(designer.name)}
-                                          onCheckedChange={(checked) => {
-                                            return checked
-                                              ? field.onChange([...(field.value || []), designer.name])
-                                              : field.onChange(
-                                                  field.value?.filter(
-                                                    (value) => value !== designer.name
-                                                  )
-                                                );
-                                          }}
-                                        />
-                                      </FormControl>
-                                      <FormLabel className="font-normal">
-                                        {designer.name}
-                                      </FormLabel>
-                                    </FormItem>
-                                  );
-                                }}
-                              />
-                            ))}
-                            {designers.length === 0 && <p className="text-xs text-muted-foreground p-2 text-center">No designers available. Add one in the Team page.</p>}
-                          </>
+                                      control={form.control}
+                                      name="team"
+                                      render={({ field }) => {
+                                        return (
+                                          <FormItem
+                                            key={designer.id}
+                                            className="flex flex-row items-center space-x-3 space-y-0"
+                                          >
+                                            <FormControl>
+                                              <Checkbox
+                                                checked={field.value?.includes(designer.name)}
+                                                onCheckedChange={(checked) => {
+                                                  return checked
+                                                    ? field.onChange([...(field.value || []), designer.name])
+                                                    : field.onChange(
+                                                        field.value?.filter(
+                                                          (value) => value !== designer.name
+                                                        )
+                                                      );
+                                                }}
+                                              />
+                                            </FormControl>
+                                            <FormLabel className="font-normal">
+                                              {designer.name}
+                                            </FormLabel>
+                                          </FormItem>
+                                        );
+                                      }}
+                                    />
+                                  ))}
+                                  {designers.length === 0 && <p className="text-xs text-muted-foreground p-2 text-center">No designers available. Add one in the Team page.</p>}
+                                </>
+                              </div>
+                          </FormItem>
                         )}
                       />
+                      {form.formState.errors.team && <p className="text-sm text-destructive mt-1">{form.formState.errors.team.message}</p>}
                     </div>
-                    {errors.team && <p className="text-sm text-destructive mt-1">{errors.team.message}</p>}
                   </div>
-                </div>
-              </form>
+                </form>
+              </Form>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
                 <Button type="submit" form="new-project-form">Create Project</Button>
