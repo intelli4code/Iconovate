@@ -5,7 +5,7 @@ import * as React from "react"
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -21,7 +21,6 @@ import { format } from "date-fns"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { buttonVariants } from "../ui/button"
 
 interface ProjectTabsProps {
   project: Project,
@@ -29,9 +28,10 @@ interface ProjectTabsProps {
   onNewMessage: (message: string, file?: any) => void;
   onFileDelete: (asset: Asset) => void;
   onRevisionLimitChange: (newLimit: number) => void;
+  onTaskDelete: (taskId: string) => void;
 }
 
-export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete, onRevisionLimitChange }: ProjectTabsProps) {
+export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete, onRevisionLimitChange, onTaskDelete }: ProjectTabsProps) {
   const [newComment, setNewComment] = useState("");
   const [isEditRevisionsOpen, setIsEditRevisionsOpen] = React.useState(false);
   const [newRevisionLimit, setNewRevisionLimit] = React.useState(project.revisionLimit);
@@ -147,7 +147,7 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
             </div>
             <div className="space-y-3 pt-2">
                 {project.tasks?.map((task) => (
-                    <div key={task.id} className="flex items-center space-x-3 rounded-md border p-3">
+                    <div key={task.id} className="flex items-center space-x-3 rounded-md border p-3 group">
                         <Checkbox 
                           id={`task-${task.id}`} 
                           checked={task.completed} 
@@ -156,12 +156,33 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
                         <label 
                           htmlFor={`task-${task.id}`} 
                           className={cn(
-                            "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70", 
+                            "text-sm font-medium leading-none flex-1 peer-disabled:cursor-not-allowed peer-disabled:opacity-70", 
                             task.completed && "line-through text-muted-foreground"
                           )}
                         >
                             {task.text}
                         </label>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete the task: "{task.text}". This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => onTaskDelete(task.id)} className={buttonVariants({ variant: "destructive" })}>
+                                Delete Task
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 ))}
                  {(!project.tasks || project.tasks.length === 0) && (

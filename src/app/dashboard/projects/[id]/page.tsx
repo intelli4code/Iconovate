@@ -170,6 +170,29 @@ export default function ProjectDetailPage() {
     await updateDoc(projectRef, { tasks: newTasks });
   }
 
+  const handleTaskDelete = async (taskId: string) => {
+    if (!project) return;
+    try {
+      const updatedTasks = project.tasks.filter(task => task.id !== taskId);
+      const projectRef = doc(db, "projects", project.id);
+      await updateDoc(projectRef, {
+        tasks: updatedTasks,
+      });
+
+      toast({
+        title: "Task Deleted",
+        description: "The task has been removed from the project.",
+      });
+    } catch (error: any) {
+      console.error("Error deleting task:", error);
+      toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: error.message || "Could not delete the task. Please try again.",
+      });
+    }
+  };
+
   const handleFeedbackSubmit = async (comment: string, file?: any) => {
     if (!comment.trim() || !project) return;
 
@@ -472,6 +495,7 @@ export default function ProjectDetailPage() {
         onNewMessage={handleFeedbackSubmit}
         onFileDelete={handleFileDelete}
         onRevisionLimitChange={handleRevisionLimitChange}
+        onTaskDelete={handleTaskDelete}
       />
     </div>
   )
