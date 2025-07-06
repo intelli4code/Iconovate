@@ -14,7 +14,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3 } from "lucide-react"
+import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -71,6 +71,14 @@ export function DashboardNav() {
               <Link href="/dashboard/mood-board">
                 <Grid3x3 />
                 <span>AI Mood Board</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/icon-generator")}>
+              <Link href="/dashboard/icon-generator">
+                <Shapes />
+                <span>AI Icon Generator</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
