@@ -5,6 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { brandResearch, type BrandResearchOutput } from '@/ai/flows/brand-research';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -102,35 +103,45 @@ export function BrandResearchForm() {
         </CardHeader>
         <CardContent>
           {loading && (
-            <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">
+            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 text-muted-foreground">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
               <p>Analyzing markets and competitors...</p>
+              <p className="text-xs">Generating images can take a moment.</p>
             </div>
           )}
           {result && (
-            <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
+            <Accordion type="single" collapsible defaultValue="item-3" className="w-full">
               <AccordionItem value="item-1">
                 <AccordionTrigger>Market Insights</AccordionTrigger>
-                <AccordionContent className="prose prose-sm dark:prose-invert max-w-none">
+                <AccordionContent className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line">
                   {result.marketInsights}
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2">
                 <AccordionTrigger>Competitor Branding Analysis</AccordionTrigger>
-                <AccordionContent className="prose prose-sm dark:prose-invert max-w-none">
+                <AccordionContent className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line">
                    {result.competitorBrandingAnalysis}
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
                 <AccordionTrigger>Data-Driven Mood Board</AccordionTrigger>
-                <AccordionContent className="prose prose-sm dark:prose-invert max-w-none">
-                  {result.moodBoardDescription}
+                <AccordionContent>
+                  <div className="prose prose-sm dark:prose-invert max-w-none mb-4 whitespace-pre-line">
+                    {result.moodBoardDescription}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    {result.moodBoardImages.map((src, index) => (
+                      <div key={index} className="relative aspect-square w-full overflow-hidden rounded-lg border">
+                        <Image src={src} alt={`Mood board image ${index + 1}`} layout="fill" objectFit="cover" />
+                      </div>
+                    ))}
+                  </div>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
           )}
           {!loading && !result && (
-            <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-center text-muted-foreground">
               <Sparkles className="h-10 w-10 mb-4" />
               <p>Ready to uncover brand secrets?</p>
               <p className="text-xs">Fill out the form to begin.</p>

@@ -1,6 +1,9 @@
 "use client"
 
 import * as React from "react"
+import { useForm, SubmitHandler } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
 import {
   Table,
   TableBody,
@@ -25,7 +28,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -38,6 +40,7 @@ import Link from "next/link"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { format } from "date-fns"
 
 const statusStyles: { [key in ProjectStatus]: string } = {
   'In Progress': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border-blue-300',
@@ -47,9 +50,38 @@ const statusStyles: { [key in ProjectStatus]: string } = {
   'Canceled': 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300 border-gray-300',
 };
 
+const formSchema = z.object({
+  name: z.string().min(3, "Project name must be at least 3 characters."),
+  client: z.string().min(3, "Client name must be at least 3 characters."),
+  description: z.string().optional(),
+});
+type FormValues = z.infer<typeof formSchema>;
+
 
 export function ProjectList() {
-  const [projects, setProjects] = React.useState<Project[]>(mockProjects)
+  const [projects, setProjects] = React.useState<Project[]>(mockProjects);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
+    const newProject: Project = {
+      id: `proj-${Date.now()}`,
+      name: data.name,
+      client: data.client,
+      description: data.description || "No description provided.",
+      status: "In Progress",
+      dueDate: format(new Date(new Date().setMonth(new Date().getMonth() + 1)), "yyyy-MM-dd"),
+      team: ["Alex"], // Default team member
+      feedback: [],
+    };
+
+    setProjects(prev => [newProject, ...prev]);
+    reset();
+    setIsDialogOpen(false);
+  };
 
   return (
     <Tabs defaultValue="all">
@@ -82,15 +114,13 @@ export function ProjectList() {
               <DropdownMenuCheckboxItem>Blocked</DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="sm" className="h-8 gap-1">
-                <PlusCircle className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Create Project
-                </span>
-              </Button>
-            </DialogTrigger>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Button size="sm" className="h-8 gap-1" onClick={() => setIsDialogOpen(true)}>
+              <PlusCircle className="h-3.5 w-3.5" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Create Project
+              </span>
+            </Button>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Create New Project</DialogTitle>
@@ -98,28 +128,40 @@ export function ProjectList() {
                   Fill in the details below to start a new project.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
-                    Project Name
-                  </Label>
-                  <Input id="name" placeholder="e.g. Aether-Core Rebrand" className="col-span-3" />
+              <form onSubmit={handleSubmit(onSubmit)} id="new-project-form">
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right">
+                      Project Name
+                    </Label>
+                    <div className="col-span-3">
+                      <Input id="name" {...register("name")} placeholder="e.g. Aether-Core Rebrand" />
+                      {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="client" className="text-right">
+                      Client Name
+                    </Label>
+                    <div className="col-span-3">
+                      <Input id="client" {...register("client")} placeholder="e.g. Aether-Core Dynamics" />
+                      {errors.client && <p className="text-sm text-destructive mt-1">{errors.client.message}</p>}
+                    </div>
+                  </div>
+                   <div className="grid grid-cols-4 items-start gap-4">
+                    <Label htmlFor="description" className="text-right pt-2">
+                      Description
+                    </Label>
+                     <div className="col-span-3">
+                      <Textarea id="description" {...register("description")} placeholder="Briefly describe the project goals..." />
+                      {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
+                    </div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="client" className="text-right">
-                    Client Name
-                  </Label>
-                  <Input id="client" placeholder="e.g. Aether-Core Dynamics" className="col-span-3" />
-                </div>
-                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="description" className="text-right">
-                    Description
-                  </Label>
-                  <Textarea id="description" placeholder="Briefly describe the project goals..." className="col-span-3" />
-                </div>
-              </div>
+              </form>
               <DialogFooter>
-                <Button type="submit">Create Project</Button>
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                <Button type="submit" form="new-project-form">Create Project</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -171,7 +213,11 @@ export function ProjectList() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>View Details</DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Link href={`/dashboard/projects/${project.id}`} className="w-full">
+                              View Details
+                            </Link>
+                          </DropdownMenuItem>
                           <DropdownMenuItem>Edit</DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive">Archive</DropdownMenuItem>
                         </DropdownMenuContent>

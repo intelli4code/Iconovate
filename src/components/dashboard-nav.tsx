@@ -14,7 +14,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool } from "lucide-react"
+import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -63,6 +63,14 @@ export function DashboardNav() {
               <Link href="/dashboard/logo-generator">
                 <PenTool />
                 <span>AI Logo Generator</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+           <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/color-palette")}>
+              <Link href="/dashboard/color-palette">
+                <Palette />
+                <span>AI Color Palette</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
