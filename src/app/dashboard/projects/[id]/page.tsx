@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react"
 import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
 import type { Project, Feedback, Asset } from "@/types"
 
 import { PageHeader } from "@/components/page-header"
@@ -12,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { CheckCircle, UploadCloud, Loader2, LinkIcon } from "lucide-react"
+import { CheckCircle, UploadCloud, Loader2 } from "lucide-react"
 import Loading from "../../loading"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -29,10 +30,7 @@ export default function ProjectDetailPage() {
   const [isDeliverDialogOpen, setIsDeliverDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [assetUrl, setAssetUrl] = useState('');
-  const [assetName, setAssetName] = useState('');
-  const [assetType, setAssetType] = useState('');
-  const [assetSize, setAssetSize] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
 
   useEffect(() => {
@@ -53,12 +51,12 @@ export default function ProjectDetailPage() {
   }, [params.id]);
 
 
-  const handleDeliverAsset = async () => {
-    if (!assetUrl || !assetName || !project) {
+  const handleFileUpload = async () => {
+    if (!selectedFile || !project) {
         toast({
             variant: "destructive",
-            title: "Missing Information",
-            description: "Please provide a valid URL and a name for the asset.",
+            title: "No File Selected",
+            description: "Please select a file to upload.",
         });
         return;
     }
@@ -66,12 +64,26 @@ export default function ProjectDetailPage() {
     setIsSubmitting(true);
 
     try {
+        const filePath = `${project.id}/${uuidv4()}-${selectedFile.name}`;
+        
+        const { data, error } = await supabase.storage
+            .from('data-storage')
+            .upload(filePath, selectedFile);
+
+        if (error) {
+            throw error;
+        }
+
+        const { data: publicUrlData } = supabase.storage
+            .from('data-storage')
+            .getPublicUrl(data.path);
+
         const newAsset: Asset = {
           id: uuidv4(),
-          name: assetName,
-          url: assetUrl,
-          size: assetSize || 'N/A',
-          fileType: assetType || 'link',
+          name: selectedFile.name,
+          url: publicUrlData.publicUrl,
+          size: `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`,
+          fileType: selectedFile.type || 'file',
           createdAt: new Date().toISOString(),
         };
 
@@ -82,19 +94,16 @@ export default function ProjectDetailPage() {
         
         toast({
             title: "Asset Delivered!",
-            description: "The client can now access the new file link in their portal.",
+            description: "The client can now download the new file in their portal.",
             action: <CheckCircle className="text-green-500" />,
         });
 
     } catch (error) {
-        console.error("File delivery failed", error);
-        toast({ variant: "destructive", title: "Delivery Failed", description: "There was an error saving the asset link." });
+        console.error("File upload failed", error);
+        toast({ variant: "destructive", title: "Upload Failed", description: "There was an error uploading the file. Check console for details." });
     } finally {
         setIsSubmitting(false);
-        setAssetUrl('');
-        setAssetName('');
-        setAssetType('');
-        setAssetSize('');
+        setSelectedFile(null);
         setIsDeliverDialogOpen(false);
     }
   };
@@ -157,36 +166,28 @@ export default function ProjectDetailPage() {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Deliver New Asset via Link</DialogTitle>
+                  <DialogTitle>Deliver New Asset</DialogTitle>
                   <DialogDescription>
-                    Paste a link to a file hosted on a service like Google Drive or Dropbox.
+                    Upload a file directly. It will be stored securely and made available to your client.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-2">
                     <div>
-                        <Label htmlFor="asset-url">File URL</Label>
-                        <Input id="asset-url" type="url" placeholder="https://..." value={assetUrl} onChange={(e) => setAssetUrl(e.target.value)} />
+                        <Label htmlFor="asset-file">File</Label>
+                        <Input id="asset-file" type="file" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
                     </div>
-                     <div>
-                        <Label htmlFor="asset-name">File Name</Label>
-                        <Input id="asset-name" type="text" placeholder="e.g., Final_Logo.zip" value={assetName} onChange={(e) => setAssetName(e.target.value)} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor="asset-type">File Type (Optional)</Label>
-                            <Input id="asset-type" type="text" placeholder="e.g., ZIP" value={assetType} onChange={(e) => setAssetType(e.target.value)} />
+                    {selectedFile && (
+                        <div className="text-sm text-muted-foreground">
+                            <p>File: {selectedFile.name}</p>
+                            <p>Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                         </div>
-                        <div>
-                            <Label htmlFor="asset-size">File Size (Optional)</Label>
-                            <Input id="asset-size" type="text" placeholder="e.g., 25 MB" value={assetSize} onChange={(e) => setAssetSize(e.target.value)} />
-                        </div>
-                    </div>
+                    )}
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsDeliverDialogOpen(false)} disabled={isSubmitting}>Cancel</Button>
-                  <Button onClick={handleDeliverAsset} disabled={isSubmitting}>
-                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
-                    Link & Deliver
+                  <Button onClick={handleFileUpload} disabled={isSubmitting || !selectedFile}>
+                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+                    Upload & Deliver
                   </Button>
                 </DialogFooter>
               </DialogContent>
