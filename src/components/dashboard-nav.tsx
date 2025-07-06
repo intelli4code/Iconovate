@@ -14,7 +14,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText } from "lucide-react"
+import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -55,6 +55,14 @@ export function DashboardNav() {
               <Link href="/dashboard/brand-research">
                 <BrainCircuit />
                 <span>AI Brand Research</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/logo-generator")}>
+              <Link href="/dashboard/logo-generator">
+                <PenTool />
+                <span>AI Logo Generator</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
