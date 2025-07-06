@@ -5,7 +5,8 @@ import { useState, useEffect } from "react"
 import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { supabase } from "@/lib/supabase"
-import type { Project, Feedback, Asset } from "@/types"
+import type { Project, Feedback, Asset, Task } from "@/types"
+import { format, addDays } from 'date-fns';
 
 import { PageHeader } from "@/components/page-header"
 import { ProjectTabs } from "@/components/projects/project-tabs"
@@ -13,14 +14,14 @@ import { Button } from "@/components/ui/button"
 import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { CheckCircle, UploadCloud, Loader2, AlertTriangle, ShieldCheck } from "lucide-react"
+import { CheckCircle, UploadCloud, Loader2, AlertTriangle, ShieldCheck, RefreshCw, XCircle } from "lucide-react"
 import Loading from "../../loading"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { v4 as uuidv4 } from 'uuid';
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>()
@@ -30,9 +31,11 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
 
   const [isDeliverDialogOpen, setIsDeliverDialogOpen] = useState(false);
+  const [isRevisionDialogOpen, setIsRevisionDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [extraDays, setExtraDays] = useState(7);
 
 
   useEffect(() => {
@@ -229,6 +232,48 @@ export default function ProjectDetailPage() {
     });
   }
 
+  const handleApproveRevision = async () => {
+    if (!project || !project.revisionRequestDetails) return;
+
+    const newDueDate = addDays(new Date(project.dueDate), extraDays);
+    
+    const revisionTask: Task = {
+      id: uuidv4(),
+      text: `Client Revision: ${project.revisionRequestDetails}`,
+      completed: false,
+    };
+
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, {
+      status: 'In Progress',
+      revisionsUsed: project.revisionsUsed + 1,
+      dueDate: format(newDueDate, 'yyyy-MM-dd'),
+      revisionRequestDetails: '',
+      revisionRequestTimestamp: '',
+      tasks: arrayUnion(revisionTask)
+    });
+
+    toast({
+      title: "Revision Approved",
+      description: `The project deadline has been extended by ${extraDays} days and a new task has been added.`,
+    });
+    setIsRevisionDialogOpen(false);
+  };
+  
+  const handleDenyRevision = async () => {
+    if (!project) return;
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, { 
+      status: 'In Progress',
+      revisionRequestDetails: '',
+      revisionRequestTimestamp: '',
+    });
+    toast({
+      title: "Revision Request Denied",
+      description: `The project has been moved back to "In Progress". The client has been notified.`,
+    });
+  };
+
 
   if (loading || !project) {
     return <Loading />;
@@ -291,6 +336,39 @@ export default function ProjectDetailPage() {
             <div className="flex gap-2 mt-2 sm:mt-0">
               <Button onClick={handleConfirmCancellation} variant="destructive" size="sm">Confirm Cancellation</Button>
               <Button onClick={handleDenyCancellationRequest} variant="outline" size="sm">Deny Request</Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+      {project.status === 'Revision Requested' && (
+        <Alert className="mb-4 border-yellow-500">
+          <RefreshCw className="h-4 w-4" />
+          <AlertTitle>Revision Requested</AlertTitle>
+          <AlertDescription>
+            <p className="mb-2"><strong>Client's Request:</strong> "{project.revisionRequestDetails}"</p>
+            <div className="flex gap-2 mt-2">
+              <Dialog open={isRevisionDialogOpen} onOpenChange={setIsRevisionDialogOpen}>
+                <DialogTrigger asChild>
+                    <Button size="sm">Approve Revision</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Approve Revision</DialogTitle>
+                        <DialogDescription>
+                            Add extra days to the deadline for this revision. The client's request will be added as a new task.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <Label htmlFor="extra-days">Extra Days for Deadline</Label>
+                        <Input id="extra-days" type="number" value={extraDays} onChange={(e) => setExtraDays(Number(e.target.value))} />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsRevisionDialogOpen(false)}>Cancel</Button>
+                        <Button onClick={handleApproveRevision}>Approve & Add Time</Button>
+                    </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <Button onClick={handleDenyRevision} variant="outline" size="sm">Deny Request</Button>
             </div>
           </AlertDescription>
         </Alert>

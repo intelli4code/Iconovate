@@ -56,10 +56,11 @@ const statusStyles: { [key in ProjectStatus]: string } = {
   'Blocked': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 border-red-300',
   'Canceled': 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300 border-gray-300',
   'Cancellation Requested': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 border-purple-300',
+  'Revision Requested': 'bg-pink-100 text-pink-800 dark:bg-pink-900/50 dark:text-pink-300 border-pink-300',
 };
 
 const projectTypes: ProjectType[] = ['Branding', 'Web Design', 'UI/UX', 'Marketing', 'Other'];
-const allStatuses: ProjectStatus[] = ['Awaiting Brief', 'Pending Approval', 'In Progress', 'Pending Feedback', 'Completed', 'Blocked', 'Canceled', 'Cancellation Requested'];
+const allStatuses: ProjectStatus[] = ['Awaiting Brief', 'Pending Approval', 'In Progress', 'Pending Feedback', 'Completed', 'Blocked', 'Canceled', 'Cancellation Requested', 'Revision Requested'];
 
 const formSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters."),
@@ -172,7 +173,7 @@ export function ProjectList() {
   const filteredProjects = React.useMemo(() => {
     return projects.filter(project => {
         const tabMatch = activeTab === 'all' ||
-            (activeTab === 'active' && ['In Progress', 'Pending Feedback', 'Blocked', 'Awaiting Brief', 'Pending Approval', 'Cancellation Requested'].includes(project.status)) ||
+            (activeTab === 'active' && ['In Progress', 'Pending Feedback', 'Blocked', 'Awaiting Brief', 'Pending Approval', 'Cancellation Requested', 'Revision Requested'].includes(project.status)) ||
             (activeTab === 'completed' && project.status === 'Completed') ||
             (activeTab === 'archived' && project.status === 'Canceled');
         

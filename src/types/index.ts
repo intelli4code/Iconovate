@@ -1,5 +1,5 @@
 
-export type ProjectStatus = 'Awaiting Brief' | 'Pending Approval' | 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Cancellation Requested';
+export type ProjectStatus = 'Awaiting Brief' | 'Pending Approval' | 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Cancellation Requested' | 'Revision Requested';
 export type ProjectType = 'Branding' | 'Web Design' | 'UI/UX' | 'Marketing' | 'Other';
 
 export interface Feedback {
@@ -15,7 +15,7 @@ export interface Task {
 }
 
 export interface Asset {
-  id: string;
+  id:string;
   name: string;
   fileType: string;
   size: string;
@@ -44,4 +44,6 @@ export interface Project {
   review?: string;
   briefDescription?: string;
   briefLinks?: string;
+  revisionRequestDetails?: string;
+  revisionRequestTimestamp?: string;
 }

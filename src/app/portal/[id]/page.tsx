@@ -230,6 +230,7 @@ export default function ClientPortalPage() {
   const [newTask, setNewTask] = useState("");
   const [briefDescription, setBriefDescription] = useState("");
   const [briefLinks, setBriefLinks] = useState("");
+  const [revisionDetails, setRevisionDetails] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -311,16 +312,25 @@ export default function ClientPortalPage() {
     });
   };
 
-  const handleRequestRevision = async () => {
-    if (!project || project.revisionsUsed >= project.revisionLimit) return;
+  const handleConfirmRevisionRequest = async () => {
+    if (!project || !revisionDetails.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Details Required",
+        description: "Please describe the revisions you need.",
+      });
+      return;
+    }
     const projectRef = doc(db, "projects", project.id);
     await updateDoc(projectRef, {
-        revisionsUsed: project.revisionsUsed + 1,
-        status: 'Pending Feedback'
+        status: 'Revision Requested',
+        revisionRequestDetails: revisionDetails,
+        revisionRequestTimestamp: new Date().toISOString(),
     });
+    setRevisionDetails("");
     toast({
       title: "Revision Requested",
-      description: `Your designer has been notified. Please add your revision requests to the task list. You have ${project.revisionLimit - project.revisionsUsed - 1} revisions remaining.`,
+      description: "Your revision request has been sent to the designer for approval.",
     });
   };
 
@@ -389,7 +399,7 @@ export default function ClientPortalPage() {
   const isFinalState = ['Completed', 'Canceled'].includes(project.status);
   const daysRemaining = differenceInDays(parseISO(project.dueDate), new Date());
   const revisionsRemaining = project.revisionLimit - project.revisionsUsed;
-  const canRequestRevision = revisionsRemaining > 0 && !isFinalState;
+  const canRequestRevision = revisionsRemaining > 0 && !isFinalState && project.status !== 'Revision Requested';
   const canCompleteProject = project.assets && project.assets.length > 0 && !isFinalState;
   const defaultTab = project.status === 'Awaiting Brief' ? 'brief' : 'deliverables';
 
@@ -409,6 +419,15 @@ export default function ClientPortalPage() {
               <AlertTitle>Cancellation Pending</AlertTitle>
               <AlertDescription>
                 Your request to cancel this project is currently being reviewed by the designer.
+              </AlertDescription>
+            </Alert>
+        )}
+        {project.status === 'Revision Requested' && (
+             <Alert className="mb-8 border-yellow-500">
+              <RefreshCw className="h-4 w-4" />
+              <AlertTitle>Revision Request Pending</AlertTitle>
+              <AlertDescription>
+                Your request for a revision is currently being reviewed by the designer.
               </AlertDescription>
             </Alert>
         )}
@@ -586,19 +605,53 @@ export default function ClientPortalPage() {
                         <AlertDescription>The completion button will appear here once your designer has uploaded the final assets.</AlertDescription>
                     </Alert>
                   )}
+                  
                   {canRequestRevision ? (
-                     <Button onClick={handleRequestRevision} variant="outline" className="w-full">
-                        <RefreshCw className="mr-2 h-4 w-4" /> Request Revision
-                    </Button>
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" className="w-full">
+                            <RefreshCw className="mr-2 h-4 w-4" /> Request Revision
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Request a Revision</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Please describe the changes you would like to request. This will use one of your remaining revisions and will be sent to the designer for approval.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <div className="py-2">
+                            <Label htmlFor="revision-details" className="sr-only">Revision Details</Label>
+                            <Textarea 
+                                id="revision-details"
+                                placeholder="e.g., 'Please change the primary color to a darker shade of blue and make the logo slightly larger.'"
+                                value={revisionDetails}
+                                onChange={(e) => setRevisionDetails(e.target.value)}
+                            />
+                          </div>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleConfirmRevisionRequest} disabled={!revisionDetails.trim()}>
+                              Submit Request
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                   ) : !isFinalState && (
-                    <Alert variant="destructive">
+                    <Alert variant={project.status === 'Revision Requested' ? 'default' : 'destructive'}>
                       <AlertTriangle className="h-4 w-4" />
-                      <AlertTitle>No Revisions Remaining</AlertTitle>
+                      <AlertTitle>
+                        {project.status === 'Revision Requested' ? 'Revision Pending Approval' : 'No Revisions Remaining'}
+                      </AlertTitle>
                       <AlertDescription>
-                        You have used all your revisions. Please contact your designer for further changes.
+                        {project.status === 'Revision Requested' 
+                            ? 'Your request is being reviewed.' 
+                            : 'Please contact your designer for further changes.'
+                        }
                       </AlertDescription>
                     </Alert>
                   )}
+
                   <div className="pt-4 border-t">
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
