@@ -1,4 +1,3 @@
-
 // This component is based on the v0 `dashboard-05` reference
 "use client"
 
@@ -15,7 +14,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail } from "lucide-react"
+import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail, FileText, Megaphone, SearchCode } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -83,6 +82,14 @@ export function DashboardNav() {
               <Link href="/dashboard/brand-research">
                 <BrainCircuit />
                 <span>AI Brand Research</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+           <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/competitor-analysis")}>
+              <Link href="/dashboard/competitor-analysis">
+                <SearchCode />
+                <span>Competitor Analysis</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -171,6 +178,22 @@ export function DashboardNav() {
               <Link href="/dashboard/social-media-kit">
                 <Share2 />
                 <span>Social Media Kit</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/social-media-posts")}>
+              <Link href="/dashboard/social-media-posts">
+                <Megaphone />
+                <span>Social Media Posts</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/invoice-generator")}>
+              <Link href="/dashboard/invoice-generator">
+                <FileText />
+                <span>Invoice Generator</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
