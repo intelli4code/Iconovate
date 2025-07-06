@@ -103,7 +103,7 @@ export default function ProjectDetailPage() {
         toast({ 
             variant: "destructive", 
             title: "Upload Failed", 
-            description: error.message || "An unknown error occurred during file upload. Check the console."
+            description: error.message || "An unknown error occurred. Please check your Supabase bucket policies and ensure 'data-storage' exists and allows public uploads."
         });
     } finally {
         setIsSubmitting(false);
