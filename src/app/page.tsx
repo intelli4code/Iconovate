@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Rocket, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import type { Project } from '@/types';
 
 export default function ClientLoginPage() {
@@ -31,24 +31,20 @@ export default function ClientLoginPage() {
     }
 
     try {
-      const projectsRef = collection(db, 'projects');
-      // In Firestore, you often use the document ID directly. 
-      // If 'id' is a field in the document, this query is correct.
-      const q = query(projectsRef, where("id", "==", orderId.trim()));
-      const querySnapshot = await getDocs(q);
+      const projectRef = doc(db, 'projects', orderId.trim());
+      const projectDoc = await getDoc(projectRef);
 
-      if (querySnapshot.empty) {
+      if (!projectDoc.exists()) {
         setError('Invalid Order ID. Please check and try again.');
         setLoading(false);
         return;
       }
       
-      const projectDoc = querySnapshot.docs[0];
       const project = projectDoc.data() as Project;
 
       // Case-insensitive check for the client's name
       if (project.client.toLowerCase() === name.trim().toLowerCase()) {
-        router.push(`/portal/${project.id}`);
+        router.push(`/portal/${projectDoc.id}`);
       } else {
         setError('The name provided does not match the client for this Order ID.');
         setLoading(false);
@@ -90,7 +86,7 @@ export default function ClientLoginPage() {
               <Input
                 id="order-id"
                 type="text"
-                placeholder="e.g., proj-001"
+                placeholder="Enter the ID provided by your designer"
                 required
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
