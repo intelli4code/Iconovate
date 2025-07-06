@@ -19,3 +19,6 @@ import '@/ai/flows/invoice-generator.ts';
 import '@/ai/flows/social-media-post-generator.ts';
 import '@/ai/flows/text-to-speech-generator.ts';
 import '@/ai/flows/competitor-analyzer.ts';
+import '@/ai/flows/brief-analyzer.ts';
+import '@/ai/flows/persona-generator.ts';
+import '@/ai/flows/weekly-summary-generator.ts';

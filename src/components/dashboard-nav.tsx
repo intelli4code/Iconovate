@@ -14,7 +14,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail, FileText, Megaphone, SearchCode, ReceiptText, Brush } from "lucide-react"
+import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail, FileText, Megaphone, SearchCode, ReceiptText, Brush, ClipboardCheck, UsersRound, CalendarClock } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -50,7 +50,7 @@ export function DashboardNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive("/dashboard/clients")}>
+            <SidebarMenuButton asChild isActive={pathname.startsWith("/dashboard/clients")}>
               <Link href="/dashboard/clients">
                 <Users />
                 <span>Clients</span>
@@ -100,6 +100,22 @@ export function DashboardNav() {
           <Separator className="my-2" />
           <SidebarMenuItem className="px-2 text-xs text-muted-foreground">
               AI Tools
+          </SidebarMenuItem>
+           <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/brief-analysis")}>
+              <Link href="/dashboard/brief-analysis">
+                <ClipboardCheck />
+                <span>Brief Analysis</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/persona-generator")}>
+              <Link href="/dashboard/persona-generator">
+                <UsersRound />
+                <span>Persona Generator</span>
+              </Link>
+            </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/brand-research")}>
@@ -210,6 +226,14 @@ export function DashboardNav() {
               <Link href="/dashboard/social-media-posts">
                 <Megaphone />
                 <span>Social Media Posts</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+           <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/weekly-summary")}>
+              <Link href="/dashboard/weekly-summary">
+                <CalendarClock />
+                <span>Weekly Summary</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

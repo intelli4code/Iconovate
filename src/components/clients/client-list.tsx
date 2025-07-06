@@ -22,6 +22,7 @@ import { collection, onSnapshot, query } from "firebase/firestore"
 import type { Project } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
+import Link from "next/link"
 
 interface Client {
   name: string;
@@ -114,12 +115,12 @@ export function ClientList() {
               clients.map((client) => (
                 <TableRow key={client.name}>
                   <TableCell>
-                    <div className="flex items-center gap-3">
+                    <Link href={`/dashboard/clients/${encodeURIComponent(client.name)}`} className="flex items-center gap-3 group">
                       <Avatar className="h-9 w-9 hidden sm:flex">
                           <AvatarFallback>{client.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                       </Avatar>
-                      <div className="font-medium">{client.name}</div>
-                    </div>
+                      <div className="font-medium group-hover:underline">{client.name}</div>
+                    </Link>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     {client.projectCount}
