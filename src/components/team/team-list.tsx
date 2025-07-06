@@ -111,13 +111,13 @@ export function TeamList() {
             if (selectedFile) {
                 const filePath = `team-pfps/${uuidv4()}-${selectedFile.name}`;
                 const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('team-pfps')
+                    .from('data-storage')
                     .upload(filePath, selectedFile, { upsert: true });
 
                 if (uploadError) throw uploadError;
 
                 avatarPath = uploadData.path;
-                const { data: publicUrlData } = supabase.storage.from('team-pfps').getPublicUrl(avatarPath);
+                const { data: publicUrlData } = supabase.storage.from('data-storage').getPublicUrl(avatarPath);
                 avatarUrl = publicUrlData.publicUrl;
             }
 
@@ -137,7 +137,7 @@ export function TeamList() {
             toast({ 
                 variant: "destructive", 
                 title: "Save Failed", 
-                description: error.message || "Failed to upload avatar. Please check that the 'team-pfps' bucket exists in your Supabase project and that its policies allow public uploads." 
+                description: error.message || "Failed to upload avatar. Please check that the 'data-storage' bucket exists and its RLS policies allow public uploads to the 'team-pfps/' folder." 
             });
         }
     };
@@ -146,7 +146,7 @@ export function TeamList() {
         try {
             // Delete avatar from Supabase if it exists
             if (member.avatarPath) {
-                await supabase.storage.from('team-pfps').remove([member.avatarPath]);
+                await supabase.storage.from('data-storage').remove([member.avatarPath]);
             }
             // Delete member from Firestore
             await deleteDoc(doc(db, "teamMembers", member.id));
@@ -156,7 +156,7 @@ export function TeamList() {
              toast({ 
                  variant: "destructive", 
                  title: "Deletion Failed", 
-                 description: error.message || "Failed to delete member. Please check your Supabase storage policies." 
+                 description: error.message || "Failed to delete avatar. Please check your Supabase RLS policies for the 'data-storage' bucket." 
             });
         }
     };
