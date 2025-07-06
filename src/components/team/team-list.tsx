@@ -134,7 +134,11 @@ export function TeamList() {
             handleCloseDialog();
         } catch (error: any) {
             console.error("Error saving member: ", error);
-            toast({ variant: "destructive", title: "Save Failed", description: error.message });
+            toast({ 
+                variant: "destructive", 
+                title: "Save Failed", 
+                description: error.message || "Failed to upload avatar. Please check that the 'team-pfps' bucket exists in your Supabase project and that its policies allow public uploads." 
+            });
         }
     };
 
@@ -149,7 +153,11 @@ export function TeamList() {
             toast({ title: "Member Removed", description: `${member.name} has been removed from the team.` });
         } catch (error: any) {
              console.error("Error deleting member: ", error);
-             toast({ variant: "destructive", title: "Deletion Failed", description: error.message });
+             toast({ 
+                 variant: "destructive", 
+                 title: "Deletion Failed", 
+                 description: error.message || "Failed to delete member. Please check your Supabase storage policies." 
+            });
         }
     };
 
