@@ -24,6 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNewMessage: (msg: string, file?: any) => void }) {
   const [newMessage, setNewMessage] = useState("")
@@ -230,55 +231,6 @@ function ClientReview({
   );
 }
 
-function EmailCollection({ project, onEmailSubmit }: { project: Project, onEmailSubmit: (email: string) => void }) {
-    const [email, setEmail] = useState("");
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (email.trim() && /\S+@\S+\.\S+/.test(email)) {
-            onEmailSubmit(email.trim());
-        }
-    }
-
-    if (project.clientEmail) {
-        return (
-             <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Mail className="h-5 w-5 text-primary" />
-                        Email on File
-                    </CardTitle>
-                    <CardDescription>We'll use this email for important project notifications.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <p className="font-semibold text-foreground">{project.clientEmail}</p>
-                    <p className="text-sm text-muted-foreground mt-1">Thank you for providing your contact information.</p>
-                </CardContent>
-            </Card>
-        )
-    }
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                     <Mail className="h-5 w-5 text-primary" />
-                     Stay Updated
-                </CardTitle>
-                <CardDescription>Please provide your email address to receive important project notifications.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-3">
-                    <Label htmlFor="client-email">Your Email Address</Label>
-                    <Input id="client-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    <Button type="submit" className="w-full">Save Email</Button>
-                </form>
-            </CardContent>
-        </Card>
-    )
-}
-
-
 export default function ClientPortalPage() {
   const params = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
@@ -288,6 +240,9 @@ export default function ClientPortalPage() {
   const [briefLinks, setBriefLinks] = useState("");
   const [revisionDetails, setRevisionDetails] = useState("");
   const { toast } = useToast();
+  
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     if (!params.id) return;
@@ -308,6 +263,18 @@ export default function ClientPortalPage() {
 
     return () => unsubscribe();
   }, [params.id]);
+
+  useEffect(() => {
+    if (loading || !project) return;
+    
+    const shouldShowPrompt = !project.clientEmail && localStorage.getItem(`hideEmailPrompt-${project.id}`) !== 'true';
+    if (shouldShowPrompt) {
+        // Use a small delay to prevent layout shift from interrupting the user
+        const timer = setTimeout(() => setIsEmailDialogOpen(true), 1500);
+        return () => clearTimeout(timer);
+    }
+  }, [project, loading]);
+
 
   if (loading || !project) {
     return <Loading />;
@@ -417,16 +384,29 @@ export default function ClientPortalPage() {
     });
   };
   
-  const handleEmailSubmit = async (email: string) => {
-    if (!project) return;
+  const handleEmailDialogSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!project || !email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+        toast({ variant: "destructive", title: "Invalid Email", description: "Please enter a valid email address."});
+        return;
+    }
     const projectRef = doc(db, "projects", project.id);
-    await updateDoc(projectRef, {
-      clientEmail: email,
-    });
+    await updateDoc(projectRef, { clientEmail: email.trim() });
     toast({
       title: "Email Saved!",
       description: "Thank you! We will use this email for important updates.",
       action: <CheckCircle className="text-green-500" />,
+    });
+    setIsEmailDialogOpen(false);
+  };
+
+  const handleDontShowAgain = () => {
+    if (!project) return;
+    localStorage.setItem(`hideEmailPrompt-${project.id}`, 'true');
+    setIsEmailDialogOpen(false);
+    toast({
+        title: "Preference Saved",
+        description: "We won't ask for your email again on this device.",
     });
   };
 
@@ -524,11 +504,10 @@ export default function ClientPortalPage() {
             </Card>
 
             <Tabs defaultValue={defaultTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="brief" disabled={project.status !== 'Awaiting Brief'}>Project Brief</TabsTrigger>
                 <TabsTrigger value="deliverables">Deliverables</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
-                <TabsTrigger value="notifications">Notifications</TabsTrigger>
               </TabsList>
                <TabsContent value="brief" className="mt-4">
                  <Card>
@@ -626,34 +605,33 @@ export default function ClientPortalPage() {
                     </CardContent>
                 </Card>
               </TabsContent>
-              <TabsContent value="notifications" className="mt-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Notifications</CardTitle>
-                        <CardDescription>A log of important project events and updates.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {project.notifications?.length > 0 ? (
-                                [...project.notifications].reverse().map(notification => (
-                                    <div key={notification.id} className="flex items-start gap-3">
-                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                            <Info className="h-4 w-4" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm">{notification.text}</p>
-                                            <p className="text-xs text-muted-foreground">{format(new Date(notification.timestamp), 'PPpp')}</p>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <p className="text-center text-muted-foreground py-6">No notifications yet.</p>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-              </TabsContent>
             </Tabs>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>Notifications</CardTitle>
+                    <CardDescription>A log of important project events and updates.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        {project.notifications?.length > 0 ? (
+                            [...project.notifications].reverse().map(notification => (
+                                <div key={notification.id} className="flex items-start gap-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                        <Info className="h-4 w-4" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm">{notification.text}</p>
+                                        <p className="text-xs text-muted-foreground">{format(new Date(notification.timestamp), 'PPpp')}</p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-center text-muted-foreground py-6">No notifications yet.</p>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
 
             {project.status === 'Completed' && (
               <ClientReview project={project} onReviewSubmit={handleReviewSubmit} />
@@ -767,10 +745,27 @@ export default function ClientPortalPage() {
               </CardContent>
             </Card>
             <ClientChat feedback={project.feedback} onNewMessage={handleFeedbackSubmit} />
-            <EmailCollection project={project} onEmailSubmit={handleEmailSubmit} />
           </div>
         </div>
       </main>
+
+      <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>Stay Updated</DialogTitle>
+                <DialogDescription>Please provide your email to receive important project notifications.</DialogDescription>
+            </DialogHeader>
+            <form id="email-form" onSubmit={handleEmailDialogSubmit} className="space-y-3 pt-2">
+                <Label htmlFor="client-email" className="sr-only">Your Email Address</Label>
+                <Input id="client-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </form>
+            <DialogFooter className="flex-row justify-between w-full sm:justify-between">
+                <Button variant="ghost" onClick={handleDontShowAgain}>Don't show again</Button>
+                <Button type="submit" form="email-form">Save Email</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }

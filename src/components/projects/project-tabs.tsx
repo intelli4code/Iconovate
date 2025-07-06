@@ -55,12 +55,11 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
 
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="tasks">Tasks</TabsTrigger>
         <TabsTrigger value="assets">Assets</TabsTrigger>
         <TabsTrigger value="feedback">Feedback</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
       </TabsList>
       
       <TabsContent value="overview" className="mt-4">
@@ -318,33 +317,6 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
               <Button className="mt-3" type="submit">Submit Comment</Button>
             </form>
           </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value="notifications" className="mt-4">
-        <Card>
-            <CardHeader>
-                <CardTitle>Notifications</CardTitle>
-                <CardDescription>A log of important project events and updates.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
-                    {project.notifications?.length > 0 ? (
-                        [...project.notifications].reverse().map(notification => (
-                            <div key={notification.id} className="flex items-start gap-3">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                    <Info className="h-4 w-4" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm">{notification.text}</p>
-                                    <p className="text-xs text-muted-foreground">{format(new Date(notification.timestamp), 'PPpp')}</p>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-center text-muted-foreground py-6">No notifications yet.</p>
-                    )}
-                </div>
-            </CardContent>
         </Card>
       </TabsContent>
     </Tabs>

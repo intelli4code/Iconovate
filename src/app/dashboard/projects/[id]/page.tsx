@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { CheckCircle, UploadCloud, Loader2, AlertTriangle, ShieldCheck, RefreshCw, XCircle, BrainCircuit } from "lucide-react"
+import { CheckCircle, UploadCloud, Loader2, AlertTriangle, ShieldCheck, RefreshCw, XCircle, BrainCircuit, Info } from "lucide-react"
 import Loading from "../../loading"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -261,7 +261,7 @@ export default function ProjectDetailPage() {
         
         const approvalNotification: Notification = {
             id: uuidv4(),
-            text: `Project approved and started. AI has generated an initial task list.`,
+            text: `Project approved and started. An initial task list has been generated.`,
             timestamp: new Date().toISOString(),
         };
 
@@ -274,7 +274,7 @@ export default function ProjectDetailPage() {
 
         toast({
             title: "Project Approved & Tasks Generated!",
-            description: `The project has been moved to "In Progress" and an initial task list has been created by AI.`,
+            description: `The project has been moved to "In Progress" and an initial task list has been created.`,
             action: <BrainCircuit className="text-green-500" />
         });
 
@@ -497,6 +497,31 @@ export default function ProjectDetailPage() {
         onRevisionLimitChange={handleRevisionLimitChange}
         onTaskDelete={handleTaskDelete}
       />
+      <Card className="mt-4">
+        <CardHeader>
+            <CardTitle>Notifications</CardTitle>
+            <CardDescription>A log of important project events and updates.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <div className="space-y-4">
+                {project.notifications?.length > 0 ? (
+                    [...project.notifications].reverse().map(notification => (
+                        <div key={notification.id} className="flex items-start gap-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                <Info className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm">{notification.text}</p>
+                                <p className="text-xs text-muted-foreground">{format(new Date(notification.timestamp), 'PPpp')}</p>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-center text-muted-foreground py-6">No notifications yet.</p>
+                )}
+            </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
