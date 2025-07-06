@@ -1,4 +1,6 @@
+
 export type ProjectStatus = 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Approved';
+export type ProjectType = 'Branding' | 'Web Design' | 'UI/UX' | 'Marketing' | 'Other';
 
 export interface Feedback {
   user: string;
@@ -15,9 +17,10 @@ export interface Task {
 export interface Asset {
   id: string;
   name: string;
-  fileType: 'PDF' | 'ZIP' | 'PNG' | 'SVG' | 'JPG';
+  fileType: string;
   size: string;
-  url: string; // a mock url for download
+  url: string;
+  createdAt: string;
 }
 
 export interface Project {
@@ -32,4 +35,7 @@ export interface Project {
   tasks: Task[];
   assets: Asset[];
   createdAt?: any;
+  projectType: ProjectType;
+  revisionLimit: number;
+  revisionsUsed: number;
 }

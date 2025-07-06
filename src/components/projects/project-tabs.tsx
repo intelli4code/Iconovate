@@ -11,12 +11,13 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import type { Project, Asset } from "@/types"
-import { Download, FileText, Image as ImageIcon, Palette, Type, Users, ListTodo, Check } from "lucide-react"
+import { Download, FileText, Image as ImageIcon, Palette, Type, Users, ListTodo, Check, RefreshCw } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Label } from "../ui/label"
+import { format } from "date-fns"
 
 
 interface ProjectTabsProps {
@@ -66,22 +67,37 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabs
             <CardTitle>Project Overview</CardTitle>
             <CardDescription>{project.description}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center">
-              <Users className="h-5 w-5 mr-2 text-muted-foreground" />
-              <span>Assigned Team: {project.team.join(', ')}</span>
+          <CardContent className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-4">
+                <div className="flex items-center">
+                  <Users className="h-5 w-5 mr-2 text-muted-foreground" />
+                  <span className="font-semibold mr-2">Client:</span>
+                  <span>{project.client}</span>
+                </div>
+                <div className="flex items-center">
+                  <Users className="h-5 w-5 mr-2 text-muted-foreground" />
+                  <span className="font-semibold mr-2">Assigned Team:</span>
+                  <span>{project.team.join(', ')}</span>
+                </div>
+                <div className="flex items-center">
+                    <span className="font-semibold mr-2">Project Type:</span>
+                    <Badge variant="secondary">{project.projectType}</Badge>
+                </div>
             </div>
-            <div className="flex items-center">
-              <Users className="h-5 w-5 mr-2 text-muted-foreground" />
-              <span>Client: {project.client}</span>
-            </div>
-            <div className="flex items-center">
-                <span className="font-semibold mr-2">Status:</span>
-                <Badge variant="outline">{project.status}</Badge>
-            </div>
-             <div className="flex items-center">
-                <span className="font-semibold mr-2">Due Date:</span>
-                <span>{project.dueDate}</span>
+            <div className="space-y-4">
+                <div className="flex items-center">
+                    <span className="font-semibold mr-2">Status:</span>
+                    <Badge variant="outline">{project.status}</Badge>
+                </div>
+                <div className="flex items-center">
+                    <span className="font-semibold mr-2">Due Date:</span>
+                    <span>{project.dueDate}</span>
+                </div>
+                <div className="flex items-center">
+                    <RefreshCw className="h-5 w-5 mr-2 text-muted-foreground" />
+                    <span className="font-semibold mr-2">Revisions:</span>
+                    <span>{project.revisionsUsed} of {project.revisionLimit} used</span>
+                </div>
             </div>
           </CardContent>
         </Card>
@@ -117,6 +133,9 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabs
                         </label>
                     </div>
                 ))}
+                 {(!project.tasks || project.tasks.length === 0) && (
+                    <p className="text-center text-muted-foreground py-6">No tasks have been added for this project yet.</p>
+                )}
             </div>
           </CardContent>
         </Card>
@@ -184,8 +203,9 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabs
                     <TableHeader>
                         <TableRow>
                             <TableHead>File Name</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Size</TableHead>
+                            <TableHead className="hidden sm:table-cell">Type</TableHead>
+                            <TableHead className="hidden md:table-cell">Size</TableHead>
+                            <TableHead className="hidden md:table-cell">Date Added</TableHead>
                             <TableHead className="text-right">Action</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -193,10 +213,11 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabs
                         {project.assets?.map((asset: Asset) => (
                         <TableRow key={asset.id}>
                             <TableCell className="font-medium">{asset.name}</TableCell>
-                            <TableCell>
+                            <TableCell className="hidden sm:table-cell">
                                 <Badge variant="secondary">{asset.fileType}</Badge>
                             </TableCell>
-                            <TableCell>{asset.size}</TableCell>
+                            <TableCell className="hidden md:table-cell">{asset.size}</TableCell>
+                            <TableCell className="hidden md:table-cell">{format(new Date(asset.createdAt), 'PP')}</TableCell>
                             <TableCell className="text-right">
                                 <Button variant="ghost" size="icon" asChild>
                                     <a href={asset.url} download>
@@ -208,7 +229,7 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabs
                         ))}
                         {(!project.assets || project.assets.length === 0) && (
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                                     No assets have been added yet.
                                 </TableCell>
                             </TableRow>

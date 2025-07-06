@@ -1,7 +1,8 @@
+
 "use client"
 
 import * as React from "react"
-import { useForm, SubmitHandler } from "react-hook-form"
+import { useForm, SubmitHandler, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import {
@@ -19,7 +20,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
-  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import {
   Dialog,
@@ -33,15 +33,16 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { Project, ProjectStatus } from "@/types"
+import type { Project, ProjectStatus, ProjectType } from "@/types"
 import { ListFilter, PlusCircle, MoreHorizontal, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { format } from "date-fns"
 import { db } from "@/lib/firebase"
-import { collection, addDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore"
+import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 
 
@@ -54,10 +55,15 @@ const statusStyles: { [key in ProjectStatus]: string } = {
   'Approved': 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300 border-teal-300',
 };
 
+const projectTypes: ProjectType[] = ['Branding', 'Web Design', 'UI/UX', 'Marketing', 'Other'];
+const allStatuses: ProjectStatus[] = ['In Progress', 'Pending Feedback', 'Completed', 'Blocked', 'Canceled', 'Approved'];
+
 const formSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters."),
   client: z.string().min(3, "Client name must be at least 3 characters."),
   description: z.string().optional(),
+  projectType: z.enum(projectTypes, { required_error: "Please select a project type." }),
+  revisionLimit: z.coerce.number().min(0, "Revision limit must be 0 or more.").default(3),
 });
 type FormValues = z.infer<typeof formSchema>;
 
@@ -68,8 +74,14 @@ export function ProjectList() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const { toast } = useToast();
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const [activeTab, setActiveTab] = React.useState("all");
+  const [statusFilters, setStatusFilters] = React.useState<ProjectStatus[]>([]);
+
+  const { control, register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      revisionLimit: 3,
+    },
   });
   
   React.useEffect(() => {
@@ -107,16 +119,21 @@ export function ProjectList() {
       dueDate: format(new Date(new Date().setMonth(new Date().getMonth() + 1)), "yyyy-MM-dd"),
       team: ["Alex"],
       feedback: [],
-      tasks: [],
+      tasks: [
+        { id: 'task-1', text: 'Initial client meeting and brief', completed: false },
+        { id: 'task-2', text: 'Mood board and initial concepts', completed: false },
+        { id: 'task-3', text: 'Develop 3 logo directions', completed: false },
+        { id: 'task-4', text: 'Create brand guideline draft', completed: false },
+      ],
       assets: [],
       createdAt: serverTimestamp(),
+      projectType: data.projectType,
+      revisionLimit: data.revisionLimit,
+      revisionsUsed: 0,
     };
 
     try {
-      const projectsRef = collection(db, 'projects');
-      const docRef = await addDoc(projectsRef, newProjectData);
-      // Now update the document to include its own ID, useful for client-side logic
-      await updateDoc(docRef, { id: docRef.id });
+      await addDoc(collection(db, 'projects'), newProjectData);
       
       reset();
       setIsDialogOpen(false);
@@ -134,11 +151,29 @@ export function ProjectList() {
     }
   };
 
-  // TODO: Add filtering logic based on tabs
-  const filteredProjects = projects;
+  const handleStatusFilterChange = (status: ProjectStatus) => {
+    setStatusFilters(prev => 
+      prev.includes(status) 
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  const filteredProjects = React.useMemo(() => {
+    return projects.filter(project => {
+        const tabMatch = activeTab === 'all' ||
+            (activeTab === 'active' && (project.status === 'In Progress' || project.status === 'Pending Feedback' || project.status === 'Blocked')) ||
+            (activeTab === 'completed' && project.status === 'Completed') ||
+            (activeTab === 'archived' && project.status === 'Canceled');
+        
+        const statusMatch = statusFilters.length === 0 || statusFilters.includes(project.status);
+
+        return tabMatch && statusMatch;
+    });
+  }, [projects, activeTab, statusFilters]);
 
   return (
-    <Tabs defaultValue="all">
+    <Tabs defaultValue="all" onValueChange={setActiveTab}>
       <div className="flex items-center">
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
@@ -161,11 +196,15 @@ export function ProjectList() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Filter by status</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem checked>
-                In Progress
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Completed</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Blocked</DropdownMenuCheckboxItem>
+              {allStatuses.map(status => (
+                 <DropdownMenuCheckboxItem
+                    key={status}
+                    checked={statusFilters.includes(status)}
+                    onCheckedChange={() => handleStatusFilterChange(status)}
+                 >
+                    {status}
+                </DropdownMenuCheckboxItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -175,7 +214,7 @@ export function ProjectList() {
                 Create Project
               </span>
             </Button>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Create New Project</DialogTitle>
                 <DialogDescription>
@@ -184,31 +223,46 @@ export function ProjectList() {
               </DialogHeader>
               <form onSubmit={handleSubmit(onSubmit)} id="new-project-form">
                 <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="name" className="text-right">
-                      Project Name
-                    </Label>
-                    <div className="col-span-3">
-                      <Input id="name" {...register("name")} placeholder="e.g. Aether-Core Rebrand" />
-                      {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Project Name</Label>
+                    <Input id="name" {...register("name")} placeholder="e.g. Aether-Core Rebrand" />
+                    {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="client" className="text-right">
-                      Client Name
-                    </Label>
-                    <div className="col-span-3">
-                      <Input id="client" {...register("client")} placeholder="e.g. Aether-Core Dynamics" />
-                      {errors.client && <p className="text-sm text-destructive mt-1">{errors.client.message}</p>}
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="client">Client Name</Label>
+                    <Input id="client" {...register("client")} placeholder="e.g. Aether-Core Dynamics" />
+                    {errors.client && <p className="text-sm text-destructive mt-1">{errors.client.message}</p>}
                   </div>
-                   <div className="grid grid-cols-4 items-start gap-4">
-                    <Label htmlFor="description" className="text-right pt-2">
-                      Description
-                    </Label>
-                     <div className="col-span-3">
-                      <Textarea id="description" {...register("description")} placeholder="Briefly describe the project goals..." />
-                      {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
+                   <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea id="description" {...register("description")} placeholder="Briefly describe the project goals..." />
+                    {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Project Type</Label>
+                       <Controller
+                          name="projectType"
+                          control={control}
+                          render={({ field }) => (
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {projectTypes.map(type => (
+                                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                          )}
+                        />
+                      {errors.projectType && <p className="text-sm text-destructive mt-1">{errors.projectType.message}</p>}
+                    </div>
+                     <div className="space-y-2">
+                      <Label htmlFor="revisionLimit">Revision Limit</Label>
+                      <Input id="revisionLimit" type="number" {...register("revisionLimit")} />
+                      {errors.revisionLimit && <p className="text-sm text-destructive mt-1">{errors.revisionLimit.message}</p>}
                     </div>
                   </div>
                 </div>
@@ -299,6 +353,69 @@ export function ProjectList() {
               </TableBody>
             </Table>
           </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="active">
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Projects</CardTitle>
+            <CardDescription>
+              Projects that are currently in progress or awaiting feedback.
+            </CardDescription>
+          </CardHeader>
+           <CardContent>
+             <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[250px]">Project Name</TableHead>
+                  <TableHead>Client</TableHead>
+                  <TableHead className="hidden md:table-cell">Status</TableHead>
+                  <TableHead className="hidden md:table-cell">Due Date</TableHead>
+                  <TableHead>
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                 {filteredProjects.map(project => (
+                    <TableRow key={project.id}>
+                      <TableCell className="font-medium">
+                        <Link href={`/dashboard/projects/${project.id}`} className="hover:underline">
+                          {project.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{project.client}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <Badge variant="outline" className={statusStyles[project.status]}>
+                          {project.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">{project.dueDate}</TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Toggle menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/dashboard/projects/${project.id}`} className="w-full cursor-pointer">
+                                View Details
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive">Archive</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+           </CardContent>
         </Card>
       </TabsContent>
     </Tabs>
