@@ -126,25 +126,42 @@ export function TeamList() {
                 await updateDoc(memberRef, { name: data.name, avatarUrl, avatarPath });
                 toast({ title: "Member Updated", description: `${data.name}'s details have been saved.` });
             } else {
-                 if (!data.password || data.password.length < 6) {
-                    setError("password", { type: "manual", message: "Password must be at least 6 characters." });
-                    return;
-                }
-                const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-                const user = userCredential.user;
-
                 const role: TeamMemberRole = data.email === 'infoathamza@gmail.com' ? 'Admin' : 'Designer';
+                let designerKey = '';
 
-                await addDoc(collection(db, "teamMembers"), { 
-                    name: data.name,
-                    email: data.email,
-                    role: role, 
-                    avatarUrl, 
-                    avatarPath, 
-                    createdAt: serverTimestamp(),
-                    authUid: user.uid,
-                });
-                toast({ title: "Invitation Sent!", description: `${data.email} has been invited as a ${role}.` });
+                if (role === 'Admin') {
+                    if (!data.password || data.password.length < 6) {
+                        setError("password", { type: "manual", message: "Password must be at least 6 characters." });
+                        return;
+                    }
+                    const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+                    await addDoc(collection(db, "teamMembers"), {
+                        authUid: userCredential.user.uid,
+                        name: data.name,
+                        email: data.email,
+                        role: 'Admin',
+                        avatarUrl,
+                        avatarPath,
+                        createdAt: serverTimestamp(),
+                    });
+                    toast({ title: "Admin Added!", description: `${data.name} has been added to the team.` });
+                } else {
+                    designerKey = uuidv4();
+                    await addDoc(collection(db, "teamMembers"), { 
+                        name: data.name,
+                        email: data.email,
+                        role: 'Designer', 
+                        designerKey,
+                        avatarUrl, 
+                        avatarPath, 
+                        createdAt: serverTimestamp(),
+                    });
+                    toast({ 
+                        title: "Designer Added!", 
+                        description: `${data.name}'s key: ${designerKey}`,
+                        duration: 10000,
+                    });
+                }
             }
             handleCloseDialog();
         } catch (error: any) {
@@ -157,7 +174,7 @@ export function TeamList() {
                  toast({ 
                     variant: "destructive", 
                     title: "Save Failed", 
-                    description: error.message || "An unexpected error occurred. Please check Supabase policies." 
+                    description: error.message || "An unexpected error occurred. Please check Supabase RLS policies." 
                 });
             }
         }
@@ -273,7 +290,7 @@ export function TeamList() {
                 <DialogContent onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={() => handleCloseDialog()}>
                     <DialogHeader>
                         <DialogTitle>{editingMember ? 'Edit Team Member' : 'Invite a new team member'}</DialogTitle>
-                        <DialogDescription>{editingMember ? `Update details for ${editingMember.name}.` : 'Enter their details to send an invitation. Role is assigned automatically.'}</DialogDescription>
+                        <DialogDescription>{editingMember ? `Update details for ${editingMember.name}.` : 'Enter their details to add them to the team.'}</DialogDescription>
                     </DialogHeader>
                     <form id="member-form" onSubmit={handleSubmit(onSubmit)}>
                         <div className="grid gap-4 py-4">
@@ -301,9 +318,10 @@ export function TeamList() {
                             </div>
                             {!editingMember && (
                                 <div className="space-y-2">
-                                    <Label htmlFor="password">Password</Label>
+                                    <Label htmlFor="password">Password (for Admins only)</Label>
                                     <Input id="password" type="password" placeholder="••••••••" {...register("password")} />
                                     {errors.password && <p className="text-sm text-destructive mt-1">{errors.password.message}</p>}
+                                    <p className="text-xs text-muted-foreground">Designers are assigned a unique key instead of a password.</p>
                                 </div>
                             )}
                         </div>
@@ -311,7 +329,7 @@ export function TeamList() {
                     <DialogFooter>
                         <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
                         <Button type="submit" form="member-form" disabled={isSubmitting}>
-                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : (editingMember ? 'Save Changes' : 'Send Invitation')}
+                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : (editingMember ? 'Save Changes' : 'Add to Team')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -1,13 +1,12 @@
 "use client"
 
 import { useState, useEffect, type FormEvent } from "react"
-import { doc, onSnapshot, updateDoc, arrayUnion, collection, query, where, getDocs } from "firebase/firestore"
-import { db, auth } from "@/lib/firebase"
+import { doc, onSnapshot, updateDoc, arrayUnion, getDoc } from "firebase/firestore"
+import { db } from "@/lib/firebase"
 import { supabase } from "@/lib/supabase"
 import type { Project, Feedback, Asset, Task, TeamMember } from "@/types"
-import { notFound, useParams } from "next/navigation"
+import { notFound, useParams, useRouter } from "next/navigation"
 import { v4 as uuidv4 } from 'uuid';
-import { onAuthStateChanged } from "firebase/auth"
 
 import { PageHeader } from "@/components/page-header"
 import Loading from "@/app/dashboard/loading"
@@ -173,6 +172,7 @@ function DesignerProjectTabs({
 
 export default function DesignerProjectPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const { toast } = useToast();
   
   const [project, setProject] = useState<Project | null>(null);
@@ -183,18 +183,25 @@ export default function DesignerProjectPage() {
   const [designer, setDesigner] = useState<TeamMember | null>(null);
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (authUser) => {
-        if (authUser) {
-            const teamRef = collection(db, "teamMembers");
-            const q = query(teamRef, where("email", "==", authUser.email));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                setDesigner({ id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as TeamMember);
-            }
+    const designerId = sessionStorage.getItem('designerId');
+    if (!designerId) {
+        router.push('/designer/login');
+        return;
+    }
+
+    const designerDocRef = doc(db, "teamMembers", designerId);
+    const unsubscribeDesigner = onSnapshot(designerDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+            setDesigner({ id: docSnap.id, ...docSnap.data() } as TeamMember);
+        } else {
+            // If the designer doc is deleted while they are logged in
+            sessionStorage.removeItem('designerId');
+            router.push('/designer/login');
         }
     });
-    return () => unsubscribeAuth();
-}, []);
+
+    return () => unsubscribeDesigner();
+  }, [router]);
 
 
   useEffect(() => {

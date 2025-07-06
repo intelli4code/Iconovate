@@ -8,13 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Rocket, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { auth, db } from '@/lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 
 export default function DesignerLoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [designerKey, setDesignerKey] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -23,36 +22,30 @@ export default function DesignerLoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Verify the user is a designer or admin
       const teamRef = collection(db, "teamMembers");
-      const q = query(teamRef, where("email", "==", user.email));
+      const q = query(
+        teamRef, 
+        where("name", "==", name.trim()), 
+        where("designerKey", "==", designerKey.trim())
+      );
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        throw new Error("You do not have access to this portal.");
+        throw new Error("Invalid name or key. Please try again.");
       }
       
-      const memberData = querySnapshot.docs[0].data();
-      if (memberData.role !== 'Designer' && memberData.role !== 'Admin') {
-          throw new Error("You do not have the required permissions.");
-      }
+      const designerDoc = querySnapshot.docs[0];
+      sessionStorage.setItem('designerId', designerDoc.id);
 
       router.push('/designer');
     } catch (error: any) {
       setLoading(false);
-      console.error("Firebase Auth Error:", error);
+      console.error("Designer Login Error:", error);
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: error.message || "Invalid credentials or insufficient permissions.",
+        description: error.message || "An unexpected error occurred.",
       });
-      // Optionally sign out the user if they managed to log in but lack permissions
-      if (auth.currentUser) {
-        await auth.signOut();
-      }
     }
   };
 
@@ -65,29 +58,30 @@ export default function DesignerLoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Designer Portal Login</CardTitle>
-          <CardDescription>Enter your credentials to access your projects.</CardDescription>
+          <CardDescription>Enter your name and designer key to access your projects.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="name">Full Name</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="designer@example.com"
+                id="name"
+                type="text"
+                placeholder="Casey"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="designer-key">Designer Key</Label>
               <Input
-                id="password"
+                id="designer-key"
                 type="password"
+                placeholder="Enter your unique key"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={designerKey}
+                onChange={(e) => setDesignerKey(e.target.value)}
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>

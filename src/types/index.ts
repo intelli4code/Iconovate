@@ -2,6 +2,7 @@
 
 
 
+
 export type ProjectStatus = 'Awaiting Brief' | 'Pending Approval' | 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Cancellation Requested' | 'Revision Requested';
 export type ProjectType = 'Branding' | 'Web Design' | 'UI/UX' | 'Marketing' | 'Other';
 export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
@@ -13,6 +14,7 @@ export interface TeamMember {
   name: string;
   email: string;
   role: TeamMemberRole;
+  designerKey?: string;
   avatarUrl?: string;
   avatarPath?: string;
   createdAt?: any;

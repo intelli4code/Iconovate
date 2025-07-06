@@ -18,9 +18,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 import type { TeamMember } from "@/types";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "./ui/skeleton"
@@ -31,22 +30,23 @@ export function DesignerUserNav() {
     const router = useRouter();
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
-            if (authUser) {
-                const teamRef = collection(db, "teamMembers");
-                const q = query(teamRef, where("email", "==", authUser.email));
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    setUser({ id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as TeamMember);
+        const designerId = sessionStorage.getItem('designerId');
+        if (designerId) {
+            const designerDocRef = doc(db, "teamMembers", designerId);
+            const unsubscribe = onSnapshot(designerDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    setUser({ id: docSnap.id, ...docSnap.data() } as TeamMember);
                 }
-            }
+                setLoading(false);
+            });
+            return () => unsubscribe();
+        } else {
             setLoading(false);
-        });
-        return () => unsubscribe();
+        }
     }, []);
 
-    const handleLogout = async () => {
-        await signOut(auth);
+    const handleLogout = () => {
+        sessionStorage.removeItem('designerId');
         router.push('/designer/login');
     };
 
