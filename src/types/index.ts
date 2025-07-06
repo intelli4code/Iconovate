@@ -28,6 +28,7 @@ export interface Project {
   id:string;
   name: string;
   client: string;
+  clientEmail?: string;
   status: ProjectStatus;
   dueDate: string;
   team: string[];

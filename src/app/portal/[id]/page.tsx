@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star } from "lucide-react"
+import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -174,6 +174,54 @@ function ClientReview({
   );
 }
 
+function EmailCollection({ project, onEmailSubmit }: { project: Project, onEmailSubmit: (email: string) => void }) {
+    const [email, setEmail] = useState("");
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (email.trim() && /\S+@\S+\.\S+/.test(email)) {
+            onEmailSubmit(email.trim());
+        }
+    }
+
+    if (project.clientEmail) {
+        return (
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Mail className="h-5 w-5 text-primary" />
+                        Email on File
+                    </CardTitle>
+                    <CardDescription>We'll use this email for important project notifications.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <p className="font-semibold text-foreground">{project.clientEmail}</p>
+                    <p className="text-sm text-muted-foreground mt-1">Thank you for providing your contact information.</p>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                     <Mail className="h-5 w-5 text-primary" />
+                     Stay Updated
+                </CardTitle>
+                <CardDescription>Please provide your email address to receive important project notifications.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-3">
+                    <Label htmlFor="client-email">Your Email Address</Label>
+                    <Input id="client-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    <Button type="submit" className="w-full">Save Email</Button>
+                </form>
+            </CardContent>
+        </Card>
+    )
+}
+
 
 export default function ClientPortalPage() {
   const params = useParams<{ id: string }>();
@@ -296,6 +344,19 @@ export default function ClientPortalPage() {
     });
   };
   
+  const handleEmailSubmit = async (email: string) => {
+    if (!project) return;
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, {
+      clientEmail: email,
+    });
+    toast({
+      title: "Email Saved!",
+      description: "Thank you! We will use this email for important updates.",
+      action: <CheckCircle className="text-green-500" />,
+    });
+  };
+
   const isFinalState = ['Approved', 'Completed', 'Canceled'].includes(project.status);
   const daysRemaining = differenceInDays(parseISO(project.dueDate), new Date());
   const revisionsRemaining = project.revisionLimit - project.revisionsUsed;
@@ -488,6 +549,7 @@ export default function ClientPortalPage() {
               </CardContent>
             </Card>
             <ClientChat feedback={project.feedback} onNewMessage={handleFeedbackSubmit} />
+            <EmailCollection project={project} onEmailSubmit={handleEmailSubmit} />
           </div>
         </div>
       </main>

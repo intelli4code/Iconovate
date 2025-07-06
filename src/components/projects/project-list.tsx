@@ -179,6 +179,79 @@ export function ProjectList() {
     });
   }, [projects, activeTab, statusFilters]);
 
+  const renderTable = (projectsToRender: Project[]) => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[250px]">Project Name</TableHead>
+          <TableHead>Client</TableHead>
+          <TableHead className="hidden sm:table-cell">Order ID</TableHead>
+          <TableHead className="hidden md:table-cell">Status</TableHead>
+          <TableHead className="hidden md:table-cell">Due Date</TableHead>
+          <TableHead>
+            <span className="sr-only">Actions</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {loading ? (
+          <TableRow>
+            <TableCell colSpan={6} className="text-center">
+              <div className="flex justify-center items-center p-4">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading projects...
+              </div>
+            </TableCell>
+          </TableRow>
+        ) : projectsToRender.length === 0 ? (
+           <TableRow>
+            <TableCell colSpan={6} className="text-center h-24">
+                No projects found for this view.
+            </TableCell>
+          </TableRow>
+        ) : (
+          projectsToRender.map(project => (
+            <TableRow key={project.id}>
+              <TableCell className="font-medium">
+                <Link href={`/dashboard/projects/${project.id}`} className="hover:underline">
+                  {project.name}
+                </Link>
+              </TableCell>
+              <TableCell>{project.client}</TableCell>
+              <TableCell className="hidden sm:table-cell font-mono text-xs">{project.id}</TableCell>
+              <TableCell className="hidden md:table-cell">
+                <Badge variant="outline" className={statusStyles[project.status]}>
+                  {project.status}
+                </Badge>
+              </TableCell>
+              <TableCell className="hidden md:table-cell">{project.dueDate}</TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Toggle menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/dashboard/projects/${project.id}`} className="w-full cursor-pointer">
+                        View Details
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive">Archive</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
+      </TableBody>
+    </Table>
+  );
+
   return (
     <Tabs defaultValue="all" onValueChange={setActiveTab}>
       <div className="flex items-center">
@@ -296,78 +369,11 @@ export function ProjectList() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[250px]">Project Name</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead className="hidden md:table-cell">Status</TableHead>
-                  <TableHead className="hidden md:table-cell">Due Date</TableHead>
-                  <TableHead>
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center">
-                      <div className="flex justify-center items-center p-4">
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Loading projects...
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : filteredProjects.length === 0 ? (
-                   <TableRow>
-                    <TableCell colSpan={5} className="text-center h-24">
-                        No projects found. Create one to get started.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredProjects.map(project => (
-                    <TableRow key={project.id}>
-                      <TableCell className="font-medium">
-                        <Link href={`/dashboard/projects/${project.id}`} className="hover:underline">
-                          {project.name}
-                        </Link>
-                      </TableCell>
-                      <TableCell>{project.client}</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <Badge variant="outline" className={statusStyles[project.status]}>
-                          {project.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">{project.dueDate}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button aria-haspopup="true" size="icon" variant="ghost">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Toggle menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem asChild>
-                              <Link href={`/dashboard/projects/${project.id}`} className="w-full cursor-pointer">
-                                View Details
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">Archive</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            {renderTable(filteredProjects)}
           </CardContent>
         </Card>
       </TabsContent>
-      <TabsContent value="active">
+       <TabsContent value="active">
         <Card>
           <CardHeader>
             <CardTitle>Active Projects</CardTitle>
@@ -376,57 +382,33 @@ export function ProjectList() {
             </CardDescription>
           </CardHeader>
            <CardContent>
-             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[250px]">Project Name</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead className="hidden md:table-cell">Status</TableHead>
-                  <TableHead className="hidden md:table-cell">Due Date</TableHead>
-                  <TableHead>
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                 {filteredProjects.map(project => (
-                    <TableRow key={project.id}>
-                      <TableCell className="font-medium">
-                        <Link href={`/dashboard/projects/${project.id}`} className="hover:underline">
-                          {project.name}
-                        </Link>
-                      </TableCell>
-                      <TableCell>{project.client}</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <Badge variant="outline" className={statusStyles[project.status]}>
-                          {project.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">{project.dueDate}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button aria-haspopup="true" size="icon" variant="ghost">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Toggle menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem asChild>
-                              <Link href={`/dashboard/projects/${project.id}`} className="w-full cursor-pointer">
-                                View Details
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">Archive</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
+            {renderTable(filteredProjects)}
+           </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="completed">
+        <Card>
+          <CardHeader>
+            <CardTitle>Completed Projects</CardTitle>
+            <CardDescription>
+              A log of all successfully completed projects.
+            </CardDescription>
+          </CardHeader>
+           <CardContent>
+            {renderTable(filteredProjects)}
+           </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="archived">
+        <Card>
+          <CardHeader>
+            <CardTitle>Archived Projects</CardTitle>
+            <CardDescription>
+              Canceled or otherwise archived projects.
+            </CardDescription>
+          </CardHeader>
+           <CardContent>
+            {renderTable(filteredProjects)}
            </CardContent>
         </Card>
       </TabsContent>

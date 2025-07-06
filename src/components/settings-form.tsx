@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useForm } from "react-hook-form"
@@ -44,9 +45,10 @@ export function SettingsForm() {
 
   return (
     <Tabs defaultValue="profile" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList className="grid w-full grid-cols-5">
         <TabsTrigger value="profile">Profile</TabsTrigger>
         <TabsTrigger value="account">Account</TabsTrigger>
+        <TabsTrigger value="team">Team</TabsTrigger>
         <TabsTrigger value="appearance">Appearance</TabsTrigger>
         <TabsTrigger value="notifications">Notifications</TabsTrigger>
       </TabsList>
@@ -85,6 +87,16 @@ export function SettingsForm() {
             <CardTitle>Account</CardTitle>
             <CardDescription>
               Manage your subscription, billing, and team settings. This feature is under construction.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </TabsContent>
+      <TabsContent value="team" className="mt-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Team Management</CardTitle>
+            <CardDescription>
+              Invite and manage your team members. This feature is under construction.
             </CardDescription>
           </CardHeader>
         </Card>

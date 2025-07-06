@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import type { Project, Asset } from "@/types"
-import { Users, ListTodo, RefreshCw, Download, Trash2, Pencil, Star } from "lucide-react"
+import { Users, ListTodo, RefreshCw, Download, Trash2, Pencil, Star, Fingerprint } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
@@ -75,11 +75,11 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
                   <span>{project.client}</span>
                 </div>
                 <div className="flex items-center">
-                  <Users className="h-5 w-5 mr-2 text-muted-foreground" />
-                  <span className="font-semibold mr-2">Assigned Team:</span>
-                  <span>{project.team.join(', ')}</span>
+                  <Fingerprint className="h-5 w-5 mr-2 text-muted-foreground" />
+                  <span className="font-semibold mr-2">Order ID:</span>
+                  <span className="font-mono text-xs bg-muted p-1 rounded-md">{project.id}</span>
                 </div>
-                <div className="flex items-center">
+                 <div className="flex items-center">
                     <span className="font-semibold mr-2">Project Type:</span>
                     <Badge variant="secondary">{project.projectType}</Badge>
                 </div>
