@@ -1,20 +1,22 @@
 
 "use client"
 
-import { useState, type FormEvent } from "react"
-import { mockProjects } from "@/lib/data"
+import { useState, type FormEvent, useEffect } from "react"
 import { notFound, useParams } from "next/navigation"
+import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore"
+import { db } from "@/lib/firebase"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
 import type { Project, Feedback as FeedbackType } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { differenceInDays, parseISO } from 'date-fns';
+import Loading from "@/app/dashboard/loading"
 
 function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNewMessage: (msg: string) => void }) {
   const [newMessage, setNewMessage] = useState("")
@@ -76,41 +78,58 @@ function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNe
 
 export default function ClientPortalPage() {
   const params = useParams<{ id: string }>();
-  const [project, setProject] = useState<Project | undefined>(() => mockProjects.find((p) => p.id === params.id));
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  if (!project) {
-    notFound();
-  }
-  
-  const [isApproved, setIsApproved] = useState(project.status === 'Approved' || project.status === 'Completed');
+  useEffect(() => {
+    if (!params.id) return;
+    setLoading(true);
+    const docRef = doc(db, "projects", params.id);
 
-  const handleFeedbackSubmit = (comment: string) => {
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setProject({ id: docSnap.id, ...docSnap.data() } as Project);
+      } else {
+        notFound();
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [params.id]);
+
+
+  if (loading || !project) {
+    return <Loading />;
+  }
+
+  const handleFeedbackSubmit = async (comment: string) => {
+    if (!comment.trim() || !project) return;
     const newFeedback: FeedbackType = {
       user: 'Client',
       comment,
       timestamp: new Date().toISOString(),
     };
     
-    setProject(prev => {
-        if (!prev) return prev;
-        return {
-            ...prev,
-            feedback: [...prev.feedback, newFeedback]
-        };
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, {
+        feedback: arrayUnion(newFeedback)
     });
   };
 
-  const handleApproveProject = () => {
-    setIsApproved(true);
-    setProject(prev => prev ? {...prev, status: 'Approved'} : prev);
+  const handleApproveProject = async () => {
+    if (!project) return;
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, { status: 'Approved' });
     toast({
       title: "Project Approved!",
       description: `Thank you for your approval. Your designer has been notified.`,
       action: <CheckCircle className="text-green-500" />,
     });
   };
-
+  
+  const isApproved = project.status === 'Approved' || project.status === 'Completed';
   const daysRemaining = differenceInDays(parseISO(project.dueDate), new Date());
 
   return (
@@ -154,7 +173,7 @@ export default function ClientPortalPage() {
                 <CardDescription>Download your final assets here.</CardDescription>
               </CardHeader>
               <CardContent>
-                {project.assets.length > 0 ? (
+                {project.assets && project.assets.length > 0 ? (
                   <ul className="space-y-3">
                     {project.assets.map(asset => (
                       <li key={asset.id} className="flex items-center justify-between p-3 rounded-md border bg-muted/50">

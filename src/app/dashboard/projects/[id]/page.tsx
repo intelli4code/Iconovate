@@ -1,7 +1,11 @@
+
 "use client"
 
-import { useState } from "react"
-import { mockProjects } from "@/lib/data"
+import { useState, useEffect } from "react"
+import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore"
+import { db } from "@/lib/firebase"
+import type { Project, Feedback } from "@/types"
+
 import { PageHeader } from "@/components/page-header"
 import { ProjectTabs } from "@/components/projects/project-tabs"
 import { Button } from "@/components/ui/button"
@@ -9,38 +13,71 @@ import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { CheckCircle } from "lucide-react"
+import Loading from "../../loading"
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>()
   const { toast } = useToast()
   
-  const initialProject = mockProjects.find((p) => p.id === params.id)
-  const [project, setProject] = useState(initialProject);
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!project) {
-    notFound()
+  useEffect(() => {
+    if (!params.id) return;
+    setLoading(true);
+    const docRef = doc(db, "projects", params.id);
+    
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setProject({ id: docSnap.id, ...docSnap.data() } as Project);
+      } else {
+        notFound();
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [params.id]);
+
+
+  if (loading || !project) {
+    return <Loading />;
   }
 
-  const handleDeliver = () => {
-    setProject(prev => prev ? {...prev, status: 'Completed'} : prev);
+  const handleDeliver = async () => {
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, { status: 'Completed' });
+
     toast({
       title: "Project Delivered!",
       description: `${project.name} has been marked as completed and the client notified.`,
       action: <CheckCircle className="text-green-500" />,
-    })
-    // In a real app, this would also trigger a backend API call
-    // to update the project status and notify the client.
-  }
-
-  const handleTaskToggle = (taskId: string) => {
-    setProject(prev => {
-        if (!prev) return prev;
-        const newTasks = prev.tasks.map(task => 
-            task.id === taskId ? { ...task, completed: !task.completed } : task
-        );
-        return { ...prev, tasks: newTasks };
     });
   }
+
+  const handleTaskToggle = async (taskId: string) => {
+    if (!project) return;
+    const newTasks = project.tasks.map(task => 
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+    );
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, { tasks: newTasks });
+  }
+
+  const handleFeedbackSubmit = async (comment: string) => {
+    if (!comment.trim() || !project) return;
+
+    const newFeedback: Feedback = {
+      user: 'Alex (Designer)', // Or get current user name
+      comment,
+      timestamp: new Date().toISOString(),
+    };
+
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, {
+      feedback: arrayUnion(newFeedback)
+    });
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -58,7 +95,7 @@ export default function ProjectDetailPage() {
           </div>
         }
       />
-      <ProjectTabs project={project} onTaskToggle={handleTaskToggle} />
+      <ProjectTabs project={project} onTaskToggle={handleTaskToggle} onNewMessage={handleFeedbackSubmit} />
     </div>
   )
 }

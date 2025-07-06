@@ -1,6 +1,8 @@
+
 "use client"
 
 import Image from "next/image"
+import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,14 +16,18 @@ import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Label } from "../ui/label"
 
 
 interface ProjectTabsProps {
   project: Project,
   onTaskToggle: (taskId: string) => void;
+  onNewMessage: (message: string) => void;
 }
 
-export function ProjectTabs({ project, onTaskToggle }: ProjectTabsProps) {
+export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabsProps) {
+  const [newComment, setNewComment] = useState("");
+  
   const mockups = [
     { src: 'https://placehold.co/600x400', alt: 'Business Card Mockup', hint: 'business card' },
     { src: 'https://placehold.co/600x400', alt: 'Website Mockup', hint: 'website design' },
@@ -31,9 +37,17 @@ export function ProjectTabs({ project, onTaskToggle }: ProjectTabsProps) {
     { src: 'https://placehold.co/600x400', alt: 'Stationery Mockup', hint: 'letterhead design' },
   ]
   
-  const completedTasks = project.tasks.filter(task => task.completed).length;
-  const totalTasks = project.tasks.length;
+  const completedTasks = project.tasks?.filter(task => task.completed).length || 0;
+  const totalTasks = project.tasks?.length || 0;
   const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+  const handleCommentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if(newComment.trim()){
+        onNewMessage(newComment.trim());
+        setNewComment("");
+    }
+  }
 
   return (
     <Tabs defaultValue="overview" className="w-full">
@@ -85,7 +99,7 @@ export function ProjectTabs({ project, onTaskToggle }: ProjectTabsProps) {
                 <span className="text-sm font-medium text-muted-foreground">{Math.round(progressPercentage)}%</span>
             </div>
             <div className="space-y-3 pt-2">
-                {project.tasks.map((task) => (
+                {project.tasks?.map((task) => (
                     <div key={task.id} className="flex items-center space-x-3 rounded-md border p-3">
                         <Checkbox 
                           id={`task-${task.id}`} 
@@ -176,7 +190,7 @@ export function ProjectTabs({ project, onTaskToggle }: ProjectTabsProps) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {project.assets.map((asset: Asset) => (
+                        {project.assets?.map((asset: Asset) => (
                         <TableRow key={asset.id}>
                             <TableCell className="font-medium">{asset.name}</TableCell>
                             <TableCell>
@@ -192,7 +206,7 @@ export function ProjectTabs({ project, onTaskToggle }: ProjectTabsProps) {
                             </TableCell>
                         </TableRow>
                         ))}
-                        {project.assets.length === 0 && (
+                        {(!project.assets || project.assets.length === 0) && (
                             <TableRow>
                                 <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
                                     No assets have been added yet.
@@ -214,7 +228,7 @@ export function ProjectTabs({ project, onTaskToggle }: ProjectTabsProps) {
           <CardContent>
             <ScrollArea className="h-72 w-full pr-4">
               <div className="space-y-6">
-                {project.feedback.length > 0 ? project.feedback.map((fb, index) => (
+                {project.feedback?.length > 0 ? project.feedback.map((fb, index) => (
                   <div key={index} className="flex items-start gap-4">
                     <Avatar>
                       <AvatarImage src={`https://placehold.co/40x40`} data-ai-hint={fb.user === 'Client' ? 'business person' : 'creative professional'} />
@@ -231,11 +245,11 @@ export function ProjectTabs({ project, onTaskToggle }: ProjectTabsProps) {
                 )) : <p className="text-muted-foreground text-center py-10">No feedback yet.</p>}
               </div>
             </ScrollArea>
-            <div className="mt-6 pt-6 border-t">
+            <form onSubmit={handleCommentSubmit} className="mt-6 pt-6 border-t">
               <Label htmlFor="new-comment" className="font-semibold">Add a comment or internal note</Label>
-              <Textarea id="new-comment" placeholder="Type your message..." className="mt-2" />
-              <Button className="mt-3">Submit Comment</Button>
-            </div>
+              <Textarea id="new-comment" placeholder="Type your message..." className="mt-2" value={newComment} onChange={(e) => setNewComment(e.target.value)} />
+              <Button className="mt-3" type="submit">Submit Comment</Button>
+            </form>
           </CardContent>
         </Card>
       </TabsContent>
