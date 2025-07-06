@@ -15,7 +15,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2 } from "lucide-react"
+import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -55,6 +55,14 @@ export function DashboardNav() {
               <Link href="/dashboard/clients">
                 <Users />
                 <span>Clients</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/reviews")}>
+              <Link href="/dashboard/reviews">
+                <Star />
+                <span>Reviews</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

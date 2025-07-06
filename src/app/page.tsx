@@ -10,10 +10,8 @@ import { Rocket, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import type { Project } from '@/types';
 
 export default function ClientLoginPage() {
-  const [name, setName] = useState('');
   const [orderId, setOrderId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,8 +22,8 @@ export default function ClientLoginPage() {
     setLoading(true);
     setError('');
 
-    if (!orderId.trim() || !name.trim()) {
-        setError('Please enter your name and Order ID.');
+    if (!orderId.trim()) {
+        setError('Please enter your Order ID.');
         setLoading(false);
         return;
     }
@@ -34,19 +32,10 @@ export default function ClientLoginPage() {
       const projectRef = doc(db, 'projects', orderId.trim());
       const projectDoc = await getDoc(projectRef);
 
-      if (!projectDoc.exists()) {
-        setError('Invalid Order ID. Please check and try again.');
-        setLoading(false);
-        return;
-      }
-      
-      const project = projectDoc.data() as Project;
-
-      // Case-insensitive check for the client's name
-      if (project.client.toLowerCase() === name.trim().toLowerCase()) {
+      if (projectDoc.exists()) {
         router.push(`/portal/${projectDoc.id}`);
       } else {
-        setError('The name provided does not match the client for this Order ID.');
+        setError('Invalid Order ID. Please check and try again.');
         setLoading(false);
       }
 
@@ -66,21 +55,10 @@ export default function ClientLoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Client Portal</CardTitle>
-          <CardDescription>Enter your details to view your project status.</CardDescription>
+          <CardDescription>Enter your Order ID to view your project status.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Your Name</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="e.g., Jane Doe"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="order-id">Order ID</Label>
               <Input
