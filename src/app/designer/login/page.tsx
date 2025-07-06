@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from 'react';
@@ -13,7 +12,7 @@ import { auth, db } from '@/lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 
-export default function LoginPage() {
+export default function DesignerLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,30 +26,30 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Verify the user is an admin
+      // Verify the user is a designer or admin
       const teamRef = collection(db, "teamMembers");
       const q = query(teamRef, where("email", "==", user.email));
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        throw new Error("You are not authorized to access the admin dashboard.");
+        throw new Error("You do not have access to this portal.");
       }
       
       const memberData = querySnapshot.docs[0].data();
-      if (memberData.role !== 'Admin') {
-          throw new Error("You do not have admin permissions.");
+      if (memberData.role !== 'Designer' && memberData.role !== 'Admin') {
+          throw new Error("You do not have the required permissions.");
       }
-      
-      router.push('/dashboard');
+
+      router.push('/designer');
     } catch (error: any) {
       setLoading(false);
       console.error("Firebase Auth Error:", error);
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: error.message || "Invalid email or password. Please try again.",
+        description: error.message || "Invalid credentials or insufficient permissions.",
       });
-      // Sign out the user if they managed to log in but lack permissions
+      // Optionally sign out the user if they managed to log in but lack permissions
       if (auth.currentUser) {
         await auth.signOut();
       }
@@ -65,8 +64,8 @@ export default function LoginPage() {
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Admin Login</CardTitle>
-          <CardDescription>Enter your credentials to access the dashboard.</CardDescription>
+          <CardTitle className="text-2xl">Designer Portal Login</CardTitle>
+          <CardDescription>Enter your credentials to access your projects.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -75,7 +74,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder="designer@example.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -97,10 +96,10 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
-       <p className="mt-4 text-center text-sm text-muted-foreground">
-        Client?{" "}
-        <a href="/" className="underline">
-          Access the Client Portal
+      <p className="mt-4 text-center text-sm text-muted-foreground">
+        Are you an admin?{" "}
+        <a href="/login" className="underline">
+          Admin Login
         </a>
       </p>
     </div>

@@ -1,25 +1,49 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { collection, onSnapshot, query, where, orderBy } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { collection, onSnapshot, query, where, orderBy, getDocs } from "firebase/firestore"
+import { db, auth } from "@/lib/firebase"
 import type { Project } from "@/types"
 import { PageHeader } from "@/components/page-header"
 import Loading from "@/app/dashboard/loading"
 import { DesignerProjectCard } from "@/components/designer-project-card"
-
-// Hardcoded designer name for demonstration purposes
-const DESIGNER_NAME = "Casey";
+import { onAuthStateChanged } from "firebase/auth"
+import { useRouter } from "next/navigation"
 
 export default function DesignerDashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [designerName, setDesignerName] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const teamRef = collection(db, "teamMembers");
+            const q = query(teamRef, where("email", "==", user.email));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                const designerData = querySnapshot.docs[0].data();
+                setDesignerName(designerData.name);
+            } else {
+                router.push('/designer/login');
+            }
+        } else {
+            router.push('/designer/login');
+        }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+
+  useEffect(() => {
+    if (!designerName) return;
+
     setLoading(true);
     const projectsQuery = query(
         collection(db, "projects"), 
-        where("team", "array-contains", DESIGNER_NAME),
+        where("team", "array-contains", designerName),
         orderBy("createdAt", "desc")
     );
     
@@ -32,9 +56,9 @@ export default function DesignerDashboardPage() {
     return () => {
       unsubscribeProjects();
     };
-  }, []);
+  }, [designerName]);
 
-  if (loading) {
+  if (loading || !designerName) {
     return <Loading />;
   }
 

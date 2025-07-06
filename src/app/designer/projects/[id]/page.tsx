@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect, type FormEvent } from "react"
-import { doc, onSnapshot, updateDoc, arrayUnion } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { doc, onSnapshot, updateDoc, arrayUnion, collection, query, where, getDocs } from "firebase/firestore"
+import { db, auth } from "@/lib/firebase"
 import { supabase } from "@/lib/supabase"
-import type { Project, Feedback, Asset, Task } from "@/types"
+import type { Project, Feedback, Asset, Task, TeamMember } from "@/types"
 import { notFound, useParams } from "next/navigation"
 import { v4 as uuidv4 } from 'uuid';
+import { onAuthStateChanged } from "firebase/auth"
 
 import { PageHeader } from "@/components/page-header"
 import Loading from "@/app/dashboard/loading"
@@ -31,10 +32,12 @@ import { format } from 'date-fns';
 
 function DesignerProjectTabs({
     project,
+    designer,
     onTaskToggle,
     onNewMessage,
 }: {
     project: Project;
+    designer: TeamMember | null;
     onTaskToggle: (taskId: string) => void;
     onNewMessage: (message: string, file?: any) => void;
 }) {
@@ -158,8 +161,8 @@ function DesignerProjectTabs({
                         </ScrollArea>
                         <form onSubmit={handleCommentSubmit} className="mt-6 pt-6 border-t">
                             <Label htmlFor="new-comment" className="font-semibold">Add a comment</Label>
-                            <Textarea id="new-comment" placeholder="Type your message..." className="mt-2" value={newComment} onChange={(e) => setNewComment(e.target.value)} />
-                            <Button className="mt-3" type="submit">Submit Comment</Button>
+                            <Textarea id="new-comment" placeholder="Type your message..." className="mt-2" value={newComment} onChange={(e) => setNewComment(e.target.value)} disabled={!designer} />
+                            <Button className="mt-3" type="submit" disabled={!newComment.trim() || !designer}>Submit Comment</Button>
                         </form>
                     </CardContent>
                 </Card>
@@ -177,6 +180,22 @@ export default function DesignerProjectPage() {
   const [isDeliverDialogOpen, setIsDeliverDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [designer, setDesigner] = useState<TeamMember | null>(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (authUser) => {
+        if (authUser) {
+            const teamRef = collection(db, "teamMembers");
+            const q = query(teamRef, where("email", "==", authUser.email));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                setDesigner({ id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as TeamMember);
+            }
+        }
+    });
+    return () => unsubscribeAuth();
+}, []);
+
 
   useEffect(() => {
     if (!params.id) return;
@@ -242,9 +261,9 @@ export default function DesignerProjectPage() {
   };
 
   const handleFeedbackSubmit = async (comment: string) => {
-    if (!comment.trim() || !project) return;
+    if (!comment.trim() || !project || !designer) return;
     const newFeedback: Feedback = {
-      user: 'Designer', 
+      user: designer.name, 
       comment,
       timestamp: new Date().toISOString(),
     };
@@ -252,7 +271,7 @@ export default function DesignerProjectPage() {
     await updateDoc(projectRef, { feedback: arrayUnion(newFeedback) });
   };
 
-  if (loading || !project) {
+  if (loading || !project || !designer) {
     return <Loading />;
   }
 
@@ -321,6 +340,7 @@ export default function DesignerProjectPage() {
         
         <DesignerProjectTabs
             project={project}
+            designer={designer}
             onTaskToggle={handleTaskToggle}
             onNewMessage={handleFeedbackSubmit}
         />

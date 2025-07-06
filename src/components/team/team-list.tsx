@@ -20,8 +20,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { db } from "@/lib/firebase"
+import { db, auth } from "@/lib/firebase"
 import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore"
+import { createUserWithEmailAndPassword } from "firebase/auth"
 import { supabase } from "@/lib/supabase"
 import type { TeamMember, TeamMemberRole } from "@/types"
 import Image from "next/image"
@@ -30,6 +31,7 @@ const memberFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email({ message: "Please enter a valid email address." }),
   role: z.enum(["Admin", "Designer", "Viewer"], { required_error: "Please select a role." }),
+  password: z.string().optional(),
 });
 type MemberFormValues = z.infer<typeof memberFormSchema>;
 
@@ -49,7 +51,7 @@ export function TeamList() {
         handleSubmit,
         formState: { errors, isSubmitting },
         reset,
-        setValue,
+        setError,
     } = useForm<MemberFormValues>({
         resolver: zodResolver(memberFormSchema),
     });
@@ -77,7 +79,7 @@ export function TeamList() {
             if (member.avatarUrl) setPreview(member.avatarUrl);
         } else {
             setEditingMember(null);
-            reset({ name: "", email: "", role: "Designer" });
+            reset({ name: "", email: "", role: "Designer", password: "" });
         }
         setIsFormDialogOpen(true);
     };
@@ -122,33 +124,50 @@ export function TeamList() {
             }
 
             if (editingMember) {
-                // Update existing member
                 const memberRef = doc(db, "teamMembers", editingMember.id);
-                await updateDoc(memberRef, { ...data, avatarUrl, avatarPath });
+                await updateDoc(memberRef, { name: data.name, role: data.role, avatarUrl, avatarPath });
                 toast({ title: "Member Updated", description: `${data.name}'s details have been saved.` });
             } else {
-                // Add new member
-                await addDoc(collection(db, "teamMembers"), { ...data, avatarUrl, avatarPath, createdAt: serverTimestamp() });
+                 if (!data.password || data.password.length < 6) {
+                    setError("password", { type: "manual", message: "Password must be at least 6 characters." });
+                    return;
+                }
+                const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+                const user = userCredential.user;
+
+                await addDoc(collection(db, "teamMembers"), { 
+                    name: data.name,
+                    email: data.email,
+                    role: data.role,
+                    avatarUrl, 
+                    avatarPath, 
+                    createdAt: serverTimestamp(),
+                    authUid: user.uid,
+                });
                 toast({ title: "Invitation Sent!", description: `${data.email} has been invited as a ${data.role}.` });
             }
             handleCloseDialog();
         } catch (error: any) {
             console.error("Error saving member: ", error);
-            toast({ 
-                variant: "destructive", 
-                title: "Save Failed", 
-                description: error.message || "Failed to upload avatar. Please check that the 'data-storage' bucket exists and its RLS policies allow public uploads to the 'team-pfps/' folder." 
-            });
+            if (error.code === 'auth/email-already-in-use') {
+                setError("email", { type: 'manual', message: 'This email is already registered.' });
+            } else if (error.code === 'auth/weak-password') {
+                setError("password", { type: 'manual', message: 'Password is too weak. Must be at least 6 characters.' });
+            } else {
+                 toast({ 
+                    variant: "destructive", 
+                    title: "Save Failed", 
+                    description: error.message || "An unexpected error occurred. Please check Supabase policies." 
+                });
+            }
         }
     };
 
     const handleDeleteMember = async (member: TeamMember) => {
         try {
-            // Delete avatar from Supabase if it exists
             if (member.avatarPath) {
                 await supabase.storage.from('data-storage').remove([member.avatarPath]);
             }
-            // Delete member from Firestore
             await deleteDoc(doc(db, "teamMembers", member.id));
             toast({ title: "Member Removed", description: `${member.name} has been removed from the team.` });
         } catch (error: any) {
@@ -156,7 +175,7 @@ export function TeamList() {
              toast({ 
                  variant: "destructive", 
                  title: "Deletion Failed", 
-                 description: error.message || "Failed to delete avatar. Please check your Supabase RLS policies for the 'data-storage' bucket." 
+                 description: error.message || "Failed to delete avatar. Please check Supabase RLS policies." 
             });
         }
     };
@@ -254,7 +273,7 @@ export function TeamList() {
                 <DialogContent onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={() => handleCloseDialog()}>
                     <DialogHeader>
                         <DialogTitle>{editingMember ? 'Edit Team Member' : 'Invite a new team member'}</DialogTitle>
-                        <DialogDescription>{editingMember ? `Update details for ${editingMember.name}.` : 'Enter the email and assign a role to send an invitation.'}</DialogDescription>
+                        <DialogDescription>{editingMember ? `Update details for ${editingMember.name}.` : 'Enter their details and assign a role to send an invitation.'}</DialogDescription>
                     </DialogHeader>
                     <form id="member-form" onSubmit={handleSubmit(onSubmit)}>
                         <div className="grid gap-4 py-4">
@@ -277,9 +296,16 @@ export function TeamList() {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email Address</Label>
-                                <Input id="email" type="email" placeholder="member@example.com" {...register("email")} />
+                                <Input id="email" type="email" placeholder="member@example.com" {...register("email")} disabled={!!editingMember} />
                                 {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
                             </div>
+                            {!editingMember && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Password</Label>
+                                    <Input id="password" type="password" placeholder="••••••••" {...register("password")} />
+                                    {errors.password && <p className="text-sm text-destructive mt-1">{errors.password.message}</p>}
+                                </div>
+                            )}
                             <div className="space-y-2">
                                 <Label htmlFor="role">Role</Label>
                                 <Controller
