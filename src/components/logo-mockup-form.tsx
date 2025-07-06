@@ -51,23 +51,27 @@ export function LogoMockupForm() {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
   });
   
-  const logoFile = watch('logo');
+  const logoRegistration = register("logo");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Manually call the onChange from react-hook-form's register to update the form state
+    logoRegistration.onChange(e);
+
+    // Then, handle the preview logic
     const file = e.target.files?.[0];
     if (file) {
-      setValue('logo', e.target.files, { shouldValidate: true });
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+    } else {
+      setPreview(null);
     }
   };
 
@@ -109,7 +113,15 @@ export function LogoMockupForm() {
                     <Upload className="h-8 w-8 text-muted-foreground" />
                   )}
                 </div>
-                <Input id="logo" type="file" accept="image/png, image/jpeg, image/svg+xml" {...register('logo')} onChange={handleFileChange} className="flex-1" />
+                <Input 
+                  id="logo" 
+                  type="file" 
+                  accept="image/png, image/jpeg, image/svg+xml"
+                  name={logoRegistration.name}
+                  ref={logoRegistration.ref}
+                  onBlur={logoRegistration.onBlur}
+                  onChange={handleFileChange}
+                  className="flex-1" />
               </div>
               {errors.logo && <p className="text-sm text-destructive mt-1">{(errors.logo.message as string)}</p>}
             </div>
