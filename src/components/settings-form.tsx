@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -15,7 +16,7 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
 import { Switch } from "./ui/switch"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog"
 import { db, auth } from "@/lib/firebase"
-import { collection, query, where, getDocs, updateDoc, doc } from "firestore"
+import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
 import type { TeamMember } from "@/types"
 import { supabase } from "@/lib/supabase"
@@ -390,3 +391,5 @@ export function SettingsForm() {
     </Tabs>
   )
 }
+
+    
