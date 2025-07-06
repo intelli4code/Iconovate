@@ -19,6 +19,11 @@ export const mockProjects: Project[] = [
         { id: 'task-1-3', text: 'Develop 3 logo directions', completed: false },
         { id: 'task-1-4', text: 'Create brand guideline draft', completed: false },
     ],
+    assets: [
+      { id: 'asset-1-1', name: 'Logo_Final_Transparent.png', fileType: 'PNG', size: '1.2MB', url: '#' },
+      { id: 'asset-1-2', name: 'Brand_Guidelines_v1.pdf', fileType: 'PDF', size: '5.4MB', url: '#' },
+      { id: 'asset-1-3', name: 'Full_Logo_Pack.zip', fileType: 'ZIP', size: '12.8MB', url: '#' },
+    ],
   },
   {
     id: 'proj-002',
@@ -37,6 +42,10 @@ export const mockProjects: Project[] = [
         { id: 'task-2-3', text: 'Design high-fidelity mockups', completed: false },
         { id: 'task-2-4', text: 'Prototype key user flows', completed: false },
     ],
+    assets: [
+      { id: 'asset-2-1', name: 'Homepage_Mockup.jpg', fileType: 'JPG', size: '3.1MB', url: '#' },
+      { id: 'asset-2-2', name: 'Design_System.pdf', fileType: 'PDF', size: '8.2MB', url: '#' },
+    ],
   },
   {
     id: 'proj-003',
@@ -54,6 +63,9 @@ export const mockProjects: Project[] = [
         { id: 'task-3-2', text: 'Design all presentation slides', completed: true },
         { id: 'task-3-3', text: 'Deliver final deck to client', completed: true },
     ],
+    assets: [
+       { id: 'asset-3-1', name: 'Pitch_Deck_Final.pdf', fileType: 'PDF', size: '15.0MB', url: '#' },
+    ],
   },
   {
     id: 'proj-004',
@@ -69,6 +81,7 @@ export const mockProjects: Project[] = [
         { id: 'task-4-2', text: 'Sketch initial concepts', completed: false },
         { id: 'task-4-3', text: 'Digitize top 3 concepts', completed: false },
      ],
+     assets: [],
   },
   {
     id: 'proj-005',
@@ -87,5 +100,6 @@ export const mockProjects: Project[] = [
         { id: 'task-5-3', text: 'Request assets from client', completed: true },
         { id: 'task-5-4', text: 'Lay out the brand guide document', completed: false },
     ],
+    assets: [],
   },
 ];

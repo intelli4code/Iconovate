@@ -6,17 +6,20 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, FileText, Palette, Type, MessageSquare, Rocket } from "lucide-react"
+import { Download, FileText, Palette, Type, MessageSquare, Rocket, CheckCircle } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import type { Project } from "@/types"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ClientPortalPage({ params }: { params: { id: string } }) {
   const initialProject = mockProjects.find((p) => p.id === params.id)
   const [project, setProject] = useState<Project | undefined>(initialProject)
   const [newComment, setNewComment] = useState("")
+  const [isApproved, setIsApproved] = useState(project?.status === 'Approved' || project?.status === 'Completed');
+  const { toast } = useToast()
 
   if (!project) {
     notFound()
@@ -41,6 +44,17 @@ export default function ClientPortalPage({ params }: { params: { id: string } })
     });
 
     setNewComment("");
+  }
+
+  const handleApproveProject = () => {
+    setIsApproved(true);
+    setProject(prev => prev ? {...prev, status: 'Approved'} : prev);
+    toast({
+      title: "Project Approved!",
+      description: `Thank you for your approval. Your designer has been notified.`,
+      action: <CheckCircle className="text-green-500" />,
+    });
+    // In a real app, this would trigger a backend API call.
   }
   
   const mockups = [
@@ -115,9 +129,29 @@ export default function ClientPortalPage({ params }: { params: { id: string } })
                     </Card>
                 </div>
 
-                {/* Feedback */}
-                <div className="lg:col-span-1">
+                {/* Right Column: Approval & Feedback */}
+                <div className="lg:col-span-1 space-y-8">
                     <Card className="sticky top-8">
+                        <CardHeader>
+                            <CardTitle>Project Approval</CardTitle>
+                            <CardDescription>Once you're happy, approve the project here.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {isApproved ? (
+                                <div className="flex flex-col items-center gap-3 rounded-lg border bg-green-50 dark:bg-green-900/20 p-4 text-center">
+                                    <CheckCircle className="h-10 w-10 text-green-500" />
+                                    <h3 className="font-semibold text-green-700 dark:text-green-400">Project Approved</h3>
+                                    <p className="text-sm text-muted-foreground">Thank you! We've notified your designer.</p>
+                                </div>
+                            ) : (
+                                <Button onClick={handleApproveProject} className="w-full bg-green-600 hover:bg-green-700">
+                                    <CheckCircle className="mr-2 h-4 w-4" /> Approve Final Project
+                                </Button>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Card>
                         <CardHeader>
                             <CardTitle>Project Feedback</CardTitle>
                             <CardDescription>Leave your comments and suggestions here.</CardDescription>

@@ -8,11 +8,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import type { Project } from "@/types"
+import type { Project, Asset } from "@/types"
 import { Download, FileText, Image as ImageIcon, Palette, Type, Users, ListTodo, Check } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+
 
 interface ProjectTabsProps {
   project: Project,
@@ -35,11 +37,12 @@ export function ProjectTabs({ project, onTaskToggle }: ProjectTabsProps) {
 
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+      <TabsList className="grid w-full grid-cols-3 sm:grid-cols-3 md:grid-cols-6">
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="tasks">Tasks</TabsTrigger>
-        <TabsTrigger value="presentation">Logo Presentation</TabsTrigger>
-        <TabsTrigger value="guidelines">Brand Guidelines</TabsTrigger>
+        <TabsTrigger value="presentation">Presentation</TabsTrigger>
+        <TabsTrigger value="guidelines">Guidelines</TabsTrigger>
+        <TabsTrigger value="assets">Assets</TabsTrigger>
         <TabsTrigger value="feedback">Feedback</TabsTrigger>
       </TabsList>
       
@@ -156,6 +159,52 @@ export function ProjectTabs({ project, onTaskToggle }: ProjectTabsProps) {
         </Card>
       </TabsContent>
       
+      <TabsContent value="assets" className="mt-4">
+        <Card>
+            <CardHeader>
+                <CardTitle>Project Assets</CardTitle>
+                <CardDescription>All final and deliverable assets for this project.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>File Name</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Size</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {project.assets.map((asset: Asset) => (
+                        <TableRow key={asset.id}>
+                            <TableCell className="font-medium">{asset.name}</TableCell>
+                            <TableCell>
+                                <Badge variant="secondary">{asset.fileType}</Badge>
+                            </TableCell>
+                            <TableCell>{asset.size}</TableCell>
+                            <TableCell className="text-right">
+                                <Button variant="ghost" size="icon" asChild>
+                                    <a href={asset.url} download>
+                                        <Download className="h-4 w-4" />
+                                    </a>
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                        ))}
+                        {project.assets.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                                    No assets have been added yet.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+      </TabsContent>
+
       <TabsContent value="feedback" className="mt-4">
         <Card>
           <CardHeader>

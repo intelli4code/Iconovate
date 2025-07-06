@@ -1,4 +1,4 @@
-export type ProjectStatus = 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled';
+export type ProjectStatus = 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Approved';
 
 export interface Feedback {
   user: string;
@@ -12,6 +12,14 @@ export interface Task {
   completed: boolean;
 }
 
+export interface Asset {
+  id: string;
+  name: string;
+  fileType: 'PDF' | 'ZIP' | 'PNG' | 'SVG' | 'JPG';
+  size: string;
+  url: string; // a mock url for download
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -22,4 +30,5 @@ export interface Project {
   description: string;
   feedback: Feedback[];
   tasks: Task[];
+  assets: Asset[];
 }
