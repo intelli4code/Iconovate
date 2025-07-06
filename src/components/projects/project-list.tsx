@@ -64,6 +64,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   projectType: z.enum(projectTypes, { required_error: "Please select a project type." }),
   revisionLimit: z.coerce.number().min(0, "Revision limit must be 0 or more.").default(3),
+  durationDays: z.coerce.number().min(1, "Duration must be at least 1 day.").default(30),
 });
 type FormValues = z.infer<typeof formSchema>;
 
@@ -81,6 +82,7 @@ export function ProjectList() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       revisionLimit: 3,
+      durationDays: 30,
     },
   });
   
@@ -111,12 +113,15 @@ export function ProjectList() {
 
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + data.durationDays);
+
     const newProjectData = {
       name: data.name,
       client: data.client,
       description: data.description || "No description provided.",
       status: "In Progress" as ProjectStatus,
-      dueDate: format(new Date(new Date().setMonth(new Date().getMonth() + 1)), "yyyy-MM-dd"),
+      dueDate: format(futureDate, "yyyy-MM-dd"),
       team: ["Alex"],
       feedback: [],
       tasks: [
@@ -238,31 +243,36 @@ export function ProjectList() {
                     <Textarea id="description" {...register("description")} placeholder="Briefly describe the project goals..." />
                     {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
                   </div>
+                  <div className="space-y-2">
+                    <Label>Project Type</Label>
+                      <Controller
+                        name="projectType"
+                        control={control}
+                        render={({ field }) => (
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {projectTypes.map(type => (
+                                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                        )}
+                      />
+                    {errors.projectType && <p className="text-sm text-destructive mt-1">{errors.projectType.message}</p>}
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Project Type</Label>
-                       <Controller
-                          name="projectType"
-                          control={control}
-                          render={({ field }) => (
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {projectTypes.map(type => (
-                                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                          )}
-                        />
-                      {errors.projectType && <p className="text-sm text-destructive mt-1">{errors.projectType.message}</p>}
-                    </div>
                      <div className="space-y-2">
                       <Label htmlFor="revisionLimit">Revision Limit</Label>
                       <Input id="revisionLimit" type="number" {...register("revisionLimit")} />
                       {errors.revisionLimit && <p className="text-sm text-destructive mt-1">{errors.revisionLimit.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="durationDays">Duration (days)</Label>
+                      <Input id="durationDays" type="number" {...register("durationDays")} />
+                      {errors.durationDays && <p className="text-sm text-destructive mt-1">{errors.durationDays.message}</p>}
                     </div>
                   </div>
                 </div>

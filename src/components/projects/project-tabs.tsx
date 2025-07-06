@@ -1,6 +1,7 @@
 
 "use client"
 
+import * as React from "react"
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import type { Project, Asset } from "@/types"
-import { Users, ListTodo, Check, RefreshCw, Download, Trash2 } from "lucide-react"
+import { Users, ListTodo, RefreshCw, Download, Trash2, Pencil } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
@@ -18,16 +19,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Label } from "../ui/label"
 import { format } from "date-fns"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
 interface ProjectTabsProps {
   project: Project,
   onTaskToggle: (taskId: string) => void;
   onNewMessage: (message: string) => void;
   onFileDelete: (asset: Asset) => void;
+  onRevisionLimitChange: (newLimit: number) => void;
 }
 
-export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete }: ProjectTabsProps) {
+export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete, onRevisionLimitChange }: ProjectTabsProps) {
   const [newComment, setNewComment] = useState("");
+  const [isEditRevisionsOpen, setIsEditRevisionsOpen] = React.useState(false);
+  const [newRevisionLimit, setNewRevisionLimit] = React.useState(project.revisionLimit);
   
   const completedTasks = project.tasks?.filter(task => task.completed).length || 0;
   const totalTasks = project.tasks?.length || 0;
@@ -39,6 +45,11 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete 
         onNewMessage(newComment.trim());
         setNewComment("");
     }
+  }
+
+  const handleSaveRevisions = () => {
+    onRevisionLimitChange(newRevisionLimit);
+    setIsEditRevisionsOpen(false);
   }
 
   return (
@@ -82,10 +93,39 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete 
                     <span className="font-semibold mr-2">Due Date:</span>
                     <span>{project.dueDate}</span>
                 </div>
-                <div className="flex items-center">
-                    <RefreshCw className="h-5 w-5 mr-2 text-muted-foreground" />
-                    <span className="font-semibold mr-2">Revisions:</span>
+                 <div className="flex items-center gap-2">
+                    <RefreshCw className="h-5 w-5 text-muted-foreground" />
+                    <span className="font-semibold">Revisions:</span>
                     <span>{project.revisionsUsed} of {project.revisionLimit} used</span>
+                    <Dialog open={isEditRevisionsOpen} onOpenChange={setIsEditRevisionsOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-xs">
+                            <DialogHeader>
+                                <DialogTitle>Edit Revision Limit</DialogTitle>
+                                <DialogDescription>
+                                    Set the total number of revisions for this project.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="py-4">
+                                <Label htmlFor="revision-limit-input">Total Revisions</Label>
+                                <Input 
+                                    id="revision-limit-input"
+                                    type="number"
+                                    value={newRevisionLimit}
+                                    onChange={(e) => setNewRevisionLimit(Number(e.target.value))}
+                                    min={project.revisionsUsed}
+                                />
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setIsEditRevisionsOpen(false)}>Cancel</Button>
+                                <Button onClick={handleSaveRevisions}>Save</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
           </CardContent>

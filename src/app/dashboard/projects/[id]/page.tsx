@@ -179,6 +179,24 @@ export default function ProjectDetailPage() {
     });
   };
 
+  const handleRevisionLimitChange = async (newLimit: number) => {
+    if (!project) return;
+    if (newLimit < project.revisionsUsed) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Revision Limit",
+        description: "The new limit cannot be less than the number of revisions already used.",
+      });
+      return;
+    }
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, { revisionLimit: newLimit });
+    toast({
+      title: "Revisions Updated",
+      description: `The revision limit has been set to ${newLimit}.`,
+    });
+  };
+
   if (loading || !project) {
     return <Loading />;
   }
@@ -236,6 +254,7 @@ export default function ProjectDetailPage() {
         onTaskToggle={handleTaskToggle} 
         onNewMessage={handleFeedbackSubmit}
         onFileDelete={handleFileDelete}
+        onRevisionLimitChange={handleRevisionLimitChange}
       />
     </div>
   )
