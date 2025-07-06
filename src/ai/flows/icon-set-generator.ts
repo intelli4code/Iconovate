@@ -11,13 +11,13 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const IconSetGeneratorInputSchema = z.object({
+const IconSetGeneratorInputSchema = z.object({
   style: z.string().describe('A detailed description of the visual style for the icon set (e.g., "minimalist line art", "3D clay render", "flat color with long shadows").'),
   concepts: z.string().describe("A comma-separated list of concepts for the icons (e.g., 'user, settings, home, mail, search'). Maximum of 8 concepts."),
 });
 export type IconSetGeneratorInput = z.infer<typeof IconSetGeneratorInputSchema>;
 
-export const IconSetGeneratorOutputSchema = z.object({
+const IconSetGeneratorOutputSchema = z.object({
   icons: z.array(
     z.object({
       concept: z.string().describe('The concept for the icon.'),

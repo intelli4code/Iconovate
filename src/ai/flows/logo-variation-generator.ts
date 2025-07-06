@@ -10,7 +10,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const LogoVariationInputSchema = z.object({
+const LogoVariationInputSchema = z.object({
   logoDataUri: z
     .string()
     .describe(
@@ -20,7 +20,7 @@ export const LogoVariationInputSchema = z.object({
 });
 export type LogoVariationInput = z.infer<typeof LogoVariationInputSchema>;
 
-export const LogoVariationOutputSchema = z.object({
+const LogoVariationOutputSchema = z.object({
   imageDataUri: z
     .string()
     .describe(

@@ -10,7 +10,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const SocialMediaKitInputSchema = z.object({
+const SocialMediaKitInputSchema = z.object({
   logoDataUri: z
     .string()
     .describe(
@@ -21,7 +21,7 @@ export const SocialMediaKitInputSchema = z.object({
 });
 export type SocialMediaKitInput = z.infer<typeof SocialMediaKitInputSchema>;
 
-export const SocialMediaKitOutputSchema = z.object({
+const SocialMediaKitOutputSchema = z.object({
   profilePictureUri: z.string().describe('The generated profile picture image, as a data URI.'),
   bannerUri: z.string().describe('The generated banner image, as a data URI.'),
 });

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { generateIconSet, IconSetGeneratorInputSchema, type IconSetGeneratorOutput } from '@/ai/flows/icon-set-generator';
+import { generateIconSet, type IconSetGeneratorOutput } from '@/ai/flows/icon-set-generator';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Sparkles, Shapes } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
-type FormValues = z.infer<typeof IconSetGeneratorInputSchema>;
+const FormSchema = z.object({
+  style: z.string().min(10, { message: "Please provide a more detailed style description." }),
+  concepts: z.string().min(3, { message: "Please provide at least one concept." }),
+});
+
+
+type FormValues = z.infer<typeof FormSchema>;
 
 export function IconGeneratorForm() {
   const [loading, setLoading] = useState(false);
@@ -27,7 +33,7 @@ export function IconGeneratorForm() {
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(IconSetGeneratorInputSchema),
+    resolver: zodResolver(FormSchema),
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
