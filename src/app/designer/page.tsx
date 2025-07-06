@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -80,14 +81,22 @@ export default function DesignerDashboardPage() {
     if (!designer) return;
 
     setLoading(true);
+    // The orderBy was removed to prevent a composite index error. Sorting is now done client-side.
     const projectsQuery = query(
         collection(db, "projects"), 
-        where("team", "array-contains", designer.name),
-        orderBy("createdAt", "desc")
+        where("team", "array-contains", designer.name)
     );
     
     const unsubscribeProjects = onSnapshot(projectsQuery, (snapshot) => {
-      const projectsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Project[];
+      let projectsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Project[];
+      
+      // Sort client-side to avoid needing a composite index in Firestore
+      projectsData.sort((a, b) => {
+          const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+          const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+          return dateB.getTime() - dateA.getTime();
+      });
+
       setProjects(projectsData);
       setLoading(false);
     }, (error) => {
