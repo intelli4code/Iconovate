@@ -27,8 +27,20 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Verify the user is an admin
       const teamRef = collection(db, "teamMembers");
+
+      // Handle first-run scenario where no team members exist
+      const teamSnapshot = await getDocs(teamRef);
+      if (teamSnapshot.empty) {
+        router.push('/dashboard');
+        toast({
+          title: "Welcome, Admin!",
+          description: "Please add yourself to the team in the Team Management page to complete setup.",
+        });
+        return; // Grant access and stop further checks
+      }
+
+      // Normal login: verify user exists in team and has Admin role
       const q = query(teamRef, where("email", "==", user.email));
       const querySnapshot = await getDocs(q);
 
