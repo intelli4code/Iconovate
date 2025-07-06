@@ -19,7 +19,6 @@ import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { db, auth } from "@/lib/firebase"
 import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore"
 import { createUserWithEmailAndPassword } from "firebase/auth"
@@ -30,7 +29,6 @@ import Image from "next/image"
 const memberFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  role: z.enum(["Admin", "Designer", "Viewer"], { required_error: "Please select a role." }),
   password: z.string().optional(),
 });
 type MemberFormValues = z.infer<typeof memberFormSchema>;
@@ -75,11 +73,11 @@ export function TeamList() {
     const handleOpenDialog = (member: TeamMember | null = null) => {
         if (member) {
             setEditingMember(member);
-            reset({ name: member.name, email: member.email, role: member.role });
+            reset({ name: member.name, email: member.email });
             if (member.avatarUrl) setPreview(member.avatarUrl);
         } else {
             setEditingMember(null);
-            reset({ name: "", email: "", role: "Designer", password: "" });
+            reset({ name: "", email: "", password: "" });
         }
         setIsFormDialogOpen(true);
     };
@@ -125,7 +123,7 @@ export function TeamList() {
 
             if (editingMember) {
                 const memberRef = doc(db, "teamMembers", editingMember.id);
-                await updateDoc(memberRef, { name: data.name, role: data.role, avatarUrl, avatarPath });
+                await updateDoc(memberRef, { name: data.name, avatarUrl, avatarPath });
                 toast({ title: "Member Updated", description: `${data.name}'s details have been saved.` });
             } else {
                  if (!data.password || data.password.length < 6) {
@@ -135,16 +133,18 @@ export function TeamList() {
                 const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
                 const user = userCredential.user;
 
+                const role: TeamMemberRole = data.email === 'infoathamza@gmail.com' ? 'Admin' : 'Designer';
+
                 await addDoc(collection(db, "teamMembers"), { 
                     name: data.name,
                     email: data.email,
-                    role: data.role,
+                    role: role, 
                     avatarUrl, 
                     avatarPath, 
                     createdAt: serverTimestamp(),
                     authUid: user.uid,
                 });
-                toast({ title: "Invitation Sent!", description: `${data.email} has been invited as a ${data.role}.` });
+                toast({ title: "Invitation Sent!", description: `${data.email} has been invited as a ${role}.` });
             }
             handleCloseDialog();
         } catch (error: any) {
@@ -273,7 +273,7 @@ export function TeamList() {
                 <DialogContent onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={() => handleCloseDialog()}>
                     <DialogHeader>
                         <DialogTitle>{editingMember ? 'Edit Team Member' : 'Invite a new team member'}</DialogTitle>
-                        <DialogDescription>{editingMember ? `Update details for ${editingMember.name}.` : 'Enter their details and assign a role to send an invitation.'}</DialogDescription>
+                        <DialogDescription>{editingMember ? `Update details for ${editingMember.name}.` : 'Enter their details to send an invitation. Role is assigned automatically.'}</DialogDescription>
                     </DialogHeader>
                     <form id="member-form" onSubmit={handleSubmit(onSubmit)}>
                         <div className="grid gap-4 py-4">
@@ -306,24 +306,6 @@ export function TeamList() {
                                     {errors.password && <p className="text-sm text-destructive mt-1">{errors.password.message}</p>}
                                 </div>
                             )}
-                            <div className="space-y-2">
-                                <Label htmlFor="role">Role</Label>
-                                <Controller
-                                    name="role"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <SelectTrigger id="role"><SelectValue placeholder="Select a role" /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Admin">Admin</SelectItem>
-                                                <SelectItem value="Designer">Designer</SelectItem>
-                                                <SelectItem value="Viewer">Viewer</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
-                                {errors.role && <p className="text-sm text-destructive mt-1">{errors.role.message}</p>}
-                            </div>
                         </div>
                     </form>
                     <DialogFooter>
