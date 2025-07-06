@@ -62,7 +62,7 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
         <TabsTrigger value="feedback">Feedback</TabsTrigger>
       </TabsList>
       
-      <TabsContent value="overview" className="mt-4">
+      <TabsContent value="overview" className="mt-4 space-y-4">
         <Card>
           <CardHeader>
             <CardTitle>Project Overview</CardTitle>
@@ -130,6 +130,34 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
                 </div>
             </div>
           </CardContent>
+        </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle>Client Brief</CardTitle>
+                <CardDescription>The initial requirements and links provided by the client.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 {project.briefDescription || project.briefLinks ? (
+                    <>
+                        {project.briefDescription && (
+                            <div>
+                                <Label className="font-semibold">Description & Requirements</Label>
+                                <p className="text-sm text-muted-foreground p-3 bg-secondary rounded-md whitespace-pre-wrap mt-1">{project.briefDescription}</p>
+                            </div>
+                        )}
+                        {project.briefLinks && (
+                            <div>
+                                <Label className="font-semibold">Provided Links</Label>
+                                <p className="text-sm text-muted-foreground p-3 bg-secondary rounded-md whitespace-pre-wrap mt-1">{project.briefLinks}</p>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <div className="text-center text-muted-foreground py-6">
+                        <p>The client has not submitted a brief for this project yet.</p>
+                    </div>
+                )}
+            </CardContent>
         </Card>
       </TabsContent>
       

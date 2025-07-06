@@ -275,7 +275,7 @@ export default function ProjectDetailPage() {
         toast({
             title: "Project Approved & Tasks Generated!",
             description: `The project has been moved to "In Progress" and an initial task list has been created.`,
-            action: <BrainCircuit className="text-green-500" />
+            action: <BrainCircuit className="text-green-500" />,
         });
 
     } catch (error) {
@@ -467,18 +467,10 @@ export default function ProjectDetailPage() {
               Client Brief Submitted - Ready for Approval
             </CardTitle>
             <CardDescription>
-              Review the client's initial brief and approve the project to begin work.
+              Review the client's initial brief in the "Overview" tab and approve the project to begin work.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label className="font-semibold">Brief Description</Label>
-              <p className="text-sm text-muted-foreground p-3 bg-secondary rounded-md whitespace-pre-wrap">{project.briefDescription || 'No description provided.'}</p>
-            </div>
-             <div>
-              <Label className="font-semibold">Links Provided</Label>
-              <p className="text-sm text-muted-foreground p-3 bg-secondary rounded-md whitespace-pre-wrap">{project.briefLinks || 'No links provided.'}</p>
-            </div>
+          <CardContent>
             <div className="flex gap-2">
                 <Button onClick={handleApproveAndStartProject} disabled={isSubmitting}>
                     {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <BrainCircuit className="mr-2 h-4 w-4" />}
