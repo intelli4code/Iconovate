@@ -9,13 +9,17 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import type { Project } from "@/types"
-import { Download, FileText, Image as ImageIcon, Palette, Type, Users } from "lucide-react"
+import { Download, FileText, Image as ImageIcon, Palette, Type, Users, ListTodo, Check } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { Checkbox } from "@/components/ui/checkbox"
+import { cn } from "@/lib/utils"
 
 interface ProjectTabsProps {
-  project: Project
+  project: Project,
+  onTaskToggle: (taskId: string) => void;
 }
 
-export function ProjectTabs({ project }: ProjectTabsProps) {
+export function ProjectTabs({ project, onTaskToggle }: ProjectTabsProps) {
   const mockups = [
     { src: 'https://placehold.co/600x400', alt: 'Business Card Mockup', hint: 'business card' },
     { src: 'https://placehold.co/600x400', alt: 'Website Mockup', hint: 'website design' },
@@ -24,11 +28,16 @@ export function ProjectTabs({ project }: ProjectTabsProps) {
     { src: 'https://placehold.co/600x400', alt: 'Merchandise Mockup', hint: 'tshirt branding' },
     { src: 'https://placehold.co/600x400', alt: 'Stationery Mockup', hint: 'letterhead design' },
   ]
+  
+  const completedTasks = project.tasks.filter(task => task.completed).length;
+  const totalTasks = project.tasks.length;
+  const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
         <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="tasks">Tasks</TabsTrigger>
         <TabsTrigger value="presentation">Logo Presentation</TabsTrigger>
         <TabsTrigger value="guidelines">Brand Guidelines</TabsTrigger>
         <TabsTrigger value="feedback">Feedback</TabsTrigger>
@@ -56,6 +65,41 @@ export function ProjectTabs({ project }: ProjectTabsProps) {
              <div className="flex items-center">
                 <span className="font-semibold mr-2">Due Date:</span>
                 <span>{project.dueDate}</span>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="tasks" className="mt-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Task Checklist</CardTitle>
+            <CardDescription>Internal checklist for project deliverables.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+                <Progress value={progressPercentage} className="h-2" />
+                <span className="text-sm font-medium text-muted-foreground">{Math.round(progressPercentage)}%</span>
+            </div>
+            <div className="space-y-3 pt-2">
+                {project.tasks.map((task) => (
+                    <div key={task.id} className="flex items-center space-x-3 rounded-md border p-3">
+                        <Checkbox 
+                          id={`task-${task.id}`} 
+                          checked={task.completed} 
+                          onCheckedChange={() => onTaskToggle(task.id)} 
+                        />
+                        <label 
+                          htmlFor={`task-${task.id}`} 
+                          className={cn(
+                            "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70", 
+                            task.completed && "line-through text-muted-foreground"
+                          )}
+                        >
+                            {task.text}
+                        </label>
+                    </div>
+                ))}
             </div>
           </CardContent>
         </Card>

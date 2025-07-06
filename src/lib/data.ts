@@ -13,6 +13,12 @@ export const mockProjects: Project[] = [
       { user: 'Client', comment: 'The initial concepts look promising. Can we explore a darker blue for the primary color?', timestamp: '2024-08-05T14:30:00Z' },
       { user: 'Maria', comment: 'Agreed. I will prepare a revised palette for review.', timestamp: '2024-08-05T16:00:00Z' },
     ],
+    tasks: [
+        { id: 'task-1-1', text: 'Initial client meeting and brief', completed: true },
+        { id: 'task-1-2', text: 'Mood board and initial concepts', completed: true },
+        { id: 'task-1-3', text: 'Develop 3 logo directions', completed: false },
+        { id: 'task-1-4', text: 'Create brand guideline draft', completed: false },
+    ],
   },
   {
     id: 'proj-002',
@@ -24,6 +30,12 @@ export const mockProjects: Project[] = [
     description: 'UI/UX design for a new e-commerce platform for an organic skincare line. The design should feel natural, clean, and trustworthy.',
      feedback: [
       { user: 'Chloe', comment: 'The wireframes are complete and have been sent to the client for review.', timestamp: '2024-08-10T11:00:00Z' },
+    ],
+    tasks: [
+        { id: 'task-2-1', text: 'User research and persona creation', completed: true },
+        { id: 'task-2-2', text: 'Create low-fidelity wireframes', completed: true },
+        { id: 'task-2-3', text: 'Design high-fidelity mockups', completed: false },
+        { id: 'task-2-4', text: 'Prototype key user flows', completed: false },
     ],
   },
   {
@@ -37,6 +49,11 @@ export const mockProjects: Project[] = [
      feedback: [
       { user: 'Client', comment: 'The final presentation was a huge success. Thank you!', timestamp: '2024-07-19T10:00:00Z' },
     ],
+    tasks: [
+        { id: 'task-3-1', text: 'Finalize presentation content', completed: true },
+        { id: 'task-3-2', text: 'Design all presentation slides', completed: true },
+        { id: 'task-3-3', text: 'Deliver final deck to client', completed: true },
+    ],
   },
   {
     id: 'proj-004',
@@ -47,6 +64,11 @@ export const mockProjects: Project[] = [
     team: ['Maria'],
     description: 'Logo design for a new mobile fitness application. The brand needs to feel energetic, motivating, and accessible to a wide audience.',
      feedback: [],
+     tasks: [
+        { id: 'task-4-1', text: 'Research competitor logos', completed: true },
+        { id: 'task-4-2', text: 'Sketch initial concepts', completed: false },
+        { id: 'task-4-3', text: 'Digitize top 3 concepts', completed: false },
+     ],
   },
   {
     id: 'proj-005',
@@ -58,6 +80,12 @@ export const mockProjects: Project[] = [
     description: 'Create a comprehensive brand identity guide for a luxury hotel chain. Project is currently blocked pending client asset delivery.',
      feedback: [
       { user: 'Sam', comment: 'Still waiting on the high-resolution photography from the client before we can proceed with the guide layout.', timestamp: '2024-08-08T09:12:00Z' },
+    ],
+    tasks: [
+        { id: 'task-5-1', text: 'Define brand voice and tone', completed: true },
+        { id: 'task-5-2', text: 'Finalize color palette and typography', completed: true },
+        { id: 'task-5-3', text: 'Request assets from client', completed: true },
+        { id: 'task-5-4', text: 'Lay out the brand guide document', completed: false },
     ],
   },
 ];

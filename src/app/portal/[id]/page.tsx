@@ -1,3 +1,6 @@
+"use client"
+
+import { useState, type FormEvent } from "react"
 import { mockProjects } from "@/lib/data"
 import { notFound } from "next/navigation"
 import Image from "next/image"
@@ -8,12 +11,36 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import type { Project } from "@/types"
 
 export default function ClientPortalPage({ params }: { params: { id: string } }) {
-  const project = mockProjects.find((p) => p.id === params.id)
+  const initialProject = mockProjects.find((p) => p.id === params.id)
+  const [project, setProject] = useState<Project | undefined>(initialProject)
+  const [newComment, setNewComment] = useState("")
 
   if (!project) {
     notFound()
+  }
+  
+  const handleFeedbackSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (newComment.trim() === "") return;
+
+    const feedback = {
+      user: 'Client',
+      comment: newComment,
+      timestamp: new Date().toISOString(),
+    };
+    
+    setProject(prevProject => {
+        if (!prevProject) return prevProject;
+        return {
+            ...prevProject,
+            feedback: [...prevProject.feedback, feedback]
+        };
+    });
+
+    setNewComment("");
   }
   
   const mockups = [
@@ -115,13 +142,13 @@ export default function ClientPortalPage({ params }: { params: { id: string } })
                                 {project.feedback.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No feedback has been shared yet.</p>}
                             </div>
                             <Separator className="my-4" />
-                            <div>
+                            <form onSubmit={handleFeedbackSubmit}>
                                 <Label htmlFor="client-comment" className="font-semibold">Add your feedback</Label>
-                                <Textarea id="client-comment" placeholder="The logo looks great, but could we try..." className="mt-2" />
-                                <Button className="mt-3 w-full">
+                                <Textarea id="client-comment" placeholder="The logo looks great, but could we try..." className="mt-2" value={newComment} onChange={(e) => setNewComment(e.target.value)} />
+                                <Button className="mt-3 w-full" type="submit">
                                     <MessageSquare className="mr-2 h-4 w-4" /> Submit Feedback
                                 </Button>
-                            </div>
+                            </form>
                         </CardContent>
                     </Card>
                 </div>

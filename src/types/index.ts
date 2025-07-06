@@ -6,6 +6,12 @@ export interface Feedback {
   timestamp: string;
 }
 
+export interface Task {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -15,4 +21,5 @@ export interface Project {
   team: string[];
   description: string;
   feedback: Feedback[];
+  tasks: Task[];
 }

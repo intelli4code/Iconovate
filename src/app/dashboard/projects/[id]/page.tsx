@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { mockProjects } from "@/lib/data"
 import { PageHeader } from "@/components/page-header"
 import { ProjectTabs } from "@/components/projects/project-tabs"
@@ -12,13 +13,16 @@ import { CheckCircle } from "lucide-react"
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>()
   const { toast } = useToast()
-  const project = mockProjects.find((p) => p.id === params.id)
+  
+  const initialProject = mockProjects.find((p) => p.id === params.id)
+  const [project, setProject] = useState(initialProject);
 
   if (!project) {
     notFound()
   }
 
   const handleDeliver = () => {
+    setProject(prev => prev ? {...prev, status: 'Completed'} : prev);
     toast({
       title: "Project Delivered!",
       description: `${project.name} has been marked as completed and the client notified.`,
@@ -26,6 +30,16 @@ export default function ProjectDetailPage() {
     })
     // In a real app, this would also trigger a backend API call
     // to update the project status and notify the client.
+  }
+
+  const handleTaskToggle = (taskId: string) => {
+    setProject(prev => {
+        if (!prev) return prev;
+        const newTasks = prev.tasks.map(task => 
+            task.id === taskId ? { ...task, completed: !task.completed } : task
+        );
+        return { ...prev, tasks: newTasks };
+    });
   }
 
   return (
@@ -44,7 +58,7 @@ export default function ProjectDetailPage() {
           </div>
         }
       />
-      <ProjectTabs project={project} />
+      <ProjectTabs project={project} onTaskToggle={handleTaskToggle} />
     </div>
   )
 }
