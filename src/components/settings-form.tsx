@@ -10,16 +10,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CheckCircle, Loader2 } from "lucide-react"
+import { CheckCircle, Loader2, UploadCloud } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
 import { Switch } from "./ui/switch"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog"
-import { db } from "@/lib/firebase"
-import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore"
+import { db, auth } from "@/lib/firebase"
+import { collection, query, where, getDocs, updateDoc, doc } from "firestore"
+import { onAuthStateChanged } from "firebase/auth"
 import type { TeamMember } from "@/types"
-
-// Mock current user - replace with actual auth context
-const MOCK_CURRENT_USER_EMAIL = "alex@brandboost.ai";
+import { supabase } from "@/lib/supabase"
+import { v4 as uuidv4 } from 'uuid';
+import Image from "next/image"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
@@ -38,6 +40,8 @@ export function SettingsForm() {
   const { toast } = useToast()
   const [currentUser, setCurrentUser] = useState<TeamMember | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const {
     register: registerProfile,
@@ -62,55 +66,77 @@ export function SettingsForm() {
   });
 
   useEffect(() => {
-    const fetchUser = async () => {
-        setLoadingUser(true);
-        try {
-            const teamRef = collection(db, "teamMembers");
-            const q = query(teamRef, where("email", "==", MOCK_CURRENT_USER_EMAIL));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                const userDoc = querySnapshot.docs[0];
-                const userData = { id: userDoc.id, ...userDoc.data() } as TeamMember;
-                setCurrentUser(userData);
-                resetProfileForm({ fullName: userData.name, email: userData.email });
-            } else {
-                 toast({
-                    variant: "destructive",
-                    title: "Profile Not Found",
-                    description: `Could not load profile for ${MOCK_CURRENT_USER_EMAIL}.`,
-                });
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            setLoadingUser(true);
+            try {
+                const teamRef = collection(db, "teamMembers");
+                const q = query(teamRef, where("email", "==", user.email));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    const userDoc = querySnapshot.docs[0];
+                    const userData = { id: userDoc.id, ...userDoc.data() } as TeamMember;
+                    setCurrentUser(userData);
+                    resetProfileForm({ fullName: userData.name, email: userData.email });
+                    setPreview(userData.avatarUrl || null);
+                } else {
+                    toast({ variant: "destructive", title: "Profile Not Found" });
+                }
+            } catch (error) {
+                toast({ variant: "destructive", title: "Error Loading Profile" });
+            } finally {
+                setLoadingUser(false);
             }
-        } catch (error) {
-             toast({
-                variant: "destructive",
-                title: "Error Loading Profile",
-                description: "There was a problem fetching your data.",
-            });
-        } finally {
+        } else {
             setLoadingUser(false);
         }
-    };
-    fetchUser();
+    });
+    return () => unsubscribe();
   }, [resetProfileForm, toast]);
 
 
   const onProfileSubmit = async (data: ProfileFormValues) => {
     if (!currentUser) {
-        toast({
-            variant: "destructive",
-            title: "Update Failed",
-            description: "User profile not loaded. Cannot save changes.",
-        });
+        toast({ variant: "destructive", title: "Update Failed", description: "User profile not loaded." });
         return;
-    };
+    }
+
+    let avatarUrl = currentUser.avatarUrl || '';
+    let avatarPath = currentUser.avatarPath || '';
+
     try {
+        if (selectedFile) {
+            const filePath = `team-pfps/${uuidv4()}-${selectedFile.name}`;
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('data-storage')
+                .upload(filePath, selectedFile, { upsert: true });
+
+            if (uploadError) throw uploadError;
+
+            avatarPath = uploadData.path;
+            const { data: publicUrlData } = supabase.storage.from('data-storage').getPublicUrl(avatarPath);
+            avatarUrl = publicUrlData.publicUrl;
+        }
+        
         const userDocRef = doc(db, "teamMembers", currentUser.id);
-        await updateDoc(userDocRef, { name: data.fullName, email: data.email });
+        
+        // Prevent changing the email of the main demo admin account
+        const emailToUpdate = currentUser.email === 'alex@brandboost.ai' ? currentUser.email : data.email;
+        if(currentUser.email !== 'alex@brandboost.ai' && currentUser.email !== data.email) {
+            // Note: In a real app, updating the email in Firebase Auth would require re-authentication.
+            // Here we only update it in our Firestore database.
+            console.warn("User email change requested. Firestore will be updated, but Firebase Auth email is not changed in this demo.")
+        }
+
+
+        await updateDoc(userDocRef, { name: data.fullName, email: emailToUpdate, avatarUrl, avatarPath });
+        
         toast({
             title: "Profile Updated!",
             description: "Your changes have been saved successfully.",
             action: <CheckCircle className="text-green-500" />,
         });
+        setSelectedFile(null); // Clear file after successful upload
     } catch (error: any) {
         toast({
             variant: "destructive",
@@ -119,6 +145,19 @@ export function SettingsForm() {
         });
     }
   }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+        setSelectedFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => setPreview(reader.result as string);
+        reader.readAsDataURL(file);
+    } else {
+        setSelectedFile(null);
+        setPreview(currentUser?.avatarUrl || null);
+    }
+  };
 
   const onNotificationsSubmit = async (data: NotificationsFormValues) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -157,6 +196,18 @@ export function SettingsForm() {
           <CardContent>
             <form onSubmit={handleProfileSubmit(onProfileSubmit)}>
                 <fieldset disabled={loadingUser || isProfileSubmitting} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label>Avatar</Label>
+                        <div className="flex items-center gap-4">
+                            <Avatar className="w-16 h-16">
+                                <AvatarImage src={preview || undefined} />
+                                <AvatarFallback>
+                                    <UploadCloud />
+                                </AvatarFallback>
+                            </Avatar>
+                            <Input id="avatar-file" type="file" onChange={handleFileChange} accept="image/*" />
+                        </div>
+                    </div>
                     <div>
                         <Label htmlFor="fullName">Full Name</Label>
                         <Input id="fullName" {...registerProfile("fullName")} />
@@ -164,7 +215,8 @@ export function SettingsForm() {
                     </div>
                     <div>
                         <Label htmlFor="email">Email Address</Label>
-                        <Input id="email" type="email" {...registerProfile("email")} />
+                        <Input id="email" type="email" {...registerProfile("email")} disabled={currentUser?.email === 'alex@brandboost.ai'} />
+                        {currentUser?.email === 'alex@brandboost.ai' && <p className="text-xs text-muted-foreground mt-1">The primary admin email cannot be changed in this demo.</p>}
                         {profileErrors.email && <p className="text-sm text-destructive mt-1">{profileErrors.email.message}</p>}
                     </div>
                     <Button type="submit">
