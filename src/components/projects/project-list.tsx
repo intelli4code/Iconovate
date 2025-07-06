@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import * as React from "react"
@@ -45,8 +46,8 @@ import { format, differenceInDays, parseISO } from "date-fns"
 import { db } from "@/lib/firebase"
 import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { FormField, FormItem, FormControl, FormLabel } from "./ui/form"
-import { Checkbox } from "./ui/checkbox"
+import { FormField, FormItem, FormControl, FormLabel } from "@/components/ui/form"
+import { Checkbox } from "@/components/ui/checkbox"
 
 
 const statusStyles: { [key in ProjectStatus]: string } = {
