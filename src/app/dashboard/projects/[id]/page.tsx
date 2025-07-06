@@ -12,19 +12,12 @@ import { Button } from "@/components/ui/button"
 import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { CheckCircle, UploadCloud, Loader2 } from "lucide-react"
+import { CheckCircle, UploadCloud, Loader2, LinkIcon } from "lucide-react"
 import Loading from "../../loading"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { v4 as uuidv4 } from 'uuid';
-
-const toDataURL = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+import { Label } from "@/components/ui/label"
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>()
@@ -34,8 +27,13 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
 
   const [isDeliverDialogOpen, setIsDeliverDialogOpen] = useState(false);
-  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [assetUrl, setAssetUrl] = useState('');
+  const [assetName, setAssetName] = useState('');
+  const [assetType, setAssetType] = useState('');
+  const [assetSize, setAssetSize] = useState('');
+
 
   useEffect(() => {
     if (!params.id) return;
@@ -56,30 +54,24 @@ export default function ProjectDetailPage() {
 
 
   const handleDeliverAsset = async () => {
-    if (!fileToUpload || !project) return;
-    
-    // Firestore documents have a 1MB size limit. Base64 encoding increases file size.
-    // We'll check for a safe limit, e.g., 750KB.
-    if (fileToUpload.size > 750 * 1024) { 
+    if (!assetUrl || !assetName || !project) {
         toast({
             variant: "destructive",
-            title: "File Too Large",
-            description: "Please upload files smaller than 750KB to store them directly in the project.",
+            title: "Missing Information",
+            description: "Please provide a valid URL and a name for the asset.",
         });
         return;
     }
 
-    setIsUploading(true);
+    setIsSubmitting(true);
 
     try {
-        const dataUrl = await toDataURL(fileToUpload);
-        
         const newAsset: Asset = {
           id: uuidv4(),
-          name: fileToUpload.name,
-          url: dataUrl,
-          size: `${(fileToUpload.size / 1024).toFixed(2)} KB`,
-          fileType: fileToUpload.type || 'unknown',
+          name: assetName,
+          url: assetUrl,
+          size: assetSize || 'N/A',
+          fileType: assetType || 'link',
           createdAt: new Date().toISOString(),
         };
 
@@ -90,16 +82,19 @@ export default function ProjectDetailPage() {
         
         toast({
             title: "Asset Delivered!",
-            description: "The client can now access the new file in their portal.",
+            description: "The client can now access the new file link in their portal.",
             action: <CheckCircle className="text-green-500" />,
         });
 
     } catch (error) {
         console.error("File delivery failed", error);
-        toast({ variant: "destructive", title: "Delivery Failed", description: "There was an error processing your file." });
+        toast({ variant: "destructive", title: "Delivery Failed", description: "There was an error saving the asset link." });
     } finally {
-        setIsUploading(false);
-        setFileToUpload(null);
+        setIsSubmitting(false);
+        setAssetUrl('');
+        setAssetName('');
+        setAssetType('');
+        setAssetSize('');
         setIsDeliverDialogOpen(false);
     }
   };
@@ -162,19 +157,36 @@ export default function ProjectDetailPage() {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Deliver New Asset</DialogTitle>
+                  <DialogTitle>Deliver New Asset via Link</DialogTitle>
                   <DialogDescription>
-                    Upload a file to make it available to the client. Max file size: 750KB.
+                    Paste a link to a file hosted on a service like Google Drive or Dropbox.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4">
-                  <Input type="file" onChange={(e) => setFileToUpload(e.target.files?.[0] || null)} />
+                <div className="space-y-4 py-2">
+                    <div>
+                        <Label htmlFor="asset-url">File URL</Label>
+                        <Input id="asset-url" type="url" placeholder="https://..." value={assetUrl} onChange={(e) => setAssetUrl(e.target.value)} />
+                    </div>
+                     <div>
+                        <Label htmlFor="asset-name">File Name</Label>
+                        <Input id="asset-name" type="text" placeholder="e.g., Final_Logo.zip" value={assetName} onChange={(e) => setAssetName(e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="asset-type">File Type (Optional)</Label>
+                            <Input id="asset-type" type="text" placeholder="e.g., ZIP" value={assetType} onChange={(e) => setAssetType(e.target.value)} />
+                        </div>
+                        <div>
+                            <Label htmlFor="asset-size">File Size (Optional)</Label>
+                            <Input id="asset-size" type="text" placeholder="e.g., 25 MB" value={assetSize} onChange={(e) => setAssetSize(e.target.value)} />
+                        </div>
+                    </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsDeliverDialogOpen(false)} disabled={isUploading}>Cancel</Button>
-                  <Button onClick={handleDeliverAsset} disabled={!fileToUpload || isUploading}>
-                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
-                    Upload & Deliver
+                  <Button variant="outline" onClick={() => setIsDeliverDialogOpen(false)} disabled={isSubmitting}>Cancel</Button>
+                  <Button onClick={handleDeliverAsset} disabled={isSubmitting}>
+                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
+                    Link & Deliver
                   </Button>
                 </DialogFooter>
               </DialogContent>
