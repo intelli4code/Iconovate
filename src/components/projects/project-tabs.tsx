@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import type { Project, Asset } from "@/types"
-import { Users, ListTodo, RefreshCw, Download, Trash2, Pencil } from "lucide-react"
+import { Users, ListTodo, RefreshCw, Download, Trash2, Pencil, Star } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
@@ -244,6 +244,25 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
             <CardDescription>Review and address client comments on the project.</CardDescription>
           </CardHeader>
           <CardContent>
+            {project.review && (
+              <div className="mb-6 border-b pb-6">
+                <h3 className="text-sm font-semibold mb-2 text-muted-foreground">FINAL REVIEW</h3>
+                <div className="flex items-center gap-1 my-2">
+                    {[...Array(5)].map((_, i) => (
+                        <Star
+                        key={i}
+                        className={cn(
+                            'h-5 w-5',
+                            (project.rating || 0) > i ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'
+                        )}
+                        />
+                    ))}
+                </div>
+                <blockquote className="italic text-foreground border-l-2 pl-4 py-2 bg-secondary/30 rounded-r-md">
+                    {project.review}
+                </blockquote>
+              </div>
+            )}
             <ScrollArea className="h-72 w-full pr-4">
               <div className="space-y-6">
                 {project.feedback?.length > 0 ? project.feedback.map((fb, index) => (

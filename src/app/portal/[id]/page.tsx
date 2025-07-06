@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle } from "lucide-react"
+import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -81,6 +81,99 @@ function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNe
     </Card>
   )
 }
+
+function ClientReview({
+  project,
+  onReviewSubmit,
+}: {
+  project: Project
+  onReviewSubmit: (rating: number, review: string) => void
+}) {
+  const [rating, setRating] = useState(project.rating || 0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewText, setReviewText] = useState(project.review || "");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (rating > 0 && reviewText.trim()) {
+      onReviewSubmit(rating, reviewText.trim());
+    }
+  };
+
+  if (project.review && project.rating) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Review</CardTitle>
+          <CardDescription>Thank you for your feedback!</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-1 mb-2">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={cn(
+                  'h-5 w-5',
+                  (project.rating || 0) > i ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'
+                )}
+              />
+            ))}
+          </div>
+          <p className="text-muted-foreground italic">"{project.review}"</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Leave a Review</CardTitle>
+        <CardDescription>Your feedback helps us improve.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Your Rating</Label>
+            <div className="flex items-center gap-1 mt-2">
+              {[...Array(5)].map((_, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  onMouseEnter={() => setHoverRating(i + 1)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  onClick={() => setRating(i + 1)}
+                  className="focus:outline-none"
+                >
+                  <Star
+                    className={cn(
+                      'h-6 w-6 cursor-pointer transition-colors',
+                      (hoverRating || rating) > i ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'
+                    )}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="review-text">Your Review</Label>
+            <Textarea
+              id="review-text"
+              value={reviewText}
+              onChange={(e) => setReviewText(e.target.value)}
+              placeholder="Tell us about your experience..."
+              rows={4}
+            />
+          </div>
+          <Button type="submit" disabled={!rating || !reviewText.trim()}>
+            Submit Review
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 
 export default function ClientPortalPage() {
   const params = useParams<{ id: string }>();
@@ -186,6 +279,20 @@ export default function ClientPortalPage() {
     toast({
         title: "Cancellation Requested",
         description: "Your cancellation request has been sent to the designer for review.",
+    });
+  };
+
+  const handleReviewSubmit = async (rating: number, review: string) => {
+    if (!project) return;
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, {
+      rating: rating,
+      review: review,
+    });
+    toast({
+      title: "Review Submitted!",
+      description: "Thank you for your valuable feedback.",
+      action: <CheckCircle className="text-green-500" />,
     });
   };
   
@@ -307,6 +414,11 @@ export default function ClientPortalPage() {
                 </Card>
               </TabsContent>
             </Tabs>
+
+            {(project.status === 'Completed' || project.status === 'Approved') && (
+              <ClientReview project={project} onReviewSubmit={handleReviewSubmit} />
+            )}
+
           </div>
           
           <div className="lg:col-span-1 space-y-8">

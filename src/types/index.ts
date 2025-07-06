@@ -39,4 +39,6 @@ export interface Project {
   projectType: ProjectType;
   revisionLimit: number;
   revisionsUsed: number;
+  rating?: number;
+  review?: string;
 }
