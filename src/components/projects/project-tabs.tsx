@@ -1,7 +1,6 @@
 
 "use client"
 
-import Image from "next/image"
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,32 +10,24 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import type { Project, Asset } from "@/types"
-import { Download, FileText, Image as ImageIcon, Palette, Type, Users, ListTodo, Check, RefreshCw } from "lucide-react"
+import { Users, ListTodo, Check, RefreshCw, Download, Trash2 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Label } from "../ui/label"
 import { format } from "date-fns"
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
 interface ProjectTabsProps {
   project: Project,
   onTaskToggle: (taskId: string) => void;
   onNewMessage: (message: string) => void;
+  onFileDelete: (asset: Asset) => void;
 }
 
-export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabsProps) {
+export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete }: ProjectTabsProps) {
   const [newComment, setNewComment] = useState("");
-  
-  const mockups = [
-    { src: 'https://placehold.co/600x400', alt: 'Business Card Mockup', hint: 'business card' },
-    { src: 'https://placehold.co/600x400', alt: 'Website Mockup', hint: 'website design' },
-    { src: 'https://placehold.co/600x400', alt: 'Signage Mockup', hint: 'office signage' },
-    { src: 'https://placehold.co/600x400', alt: 'App Icon Mockup', hint: 'mobile app' },
-    { src: 'https://placehold.co/600x400', alt: 'Merchandise Mockup', hint: 'tshirt branding' },
-    { src: 'https://placehold.co/600x400', alt: 'Stationery Mockup', hint: 'letterhead design' },
-  ]
   
   const completedTasks = project.tasks?.filter(task => task.completed).length || 0;
   const totalTasks = project.tasks?.length || 0;
@@ -52,11 +43,9 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabs
 
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-3 sm:grid-cols-3 md:grid-cols-6">
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-2 md:grid-cols-4">
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="tasks">Tasks</TabsTrigger>
-        <TabsTrigger value="presentation">Presentation</TabsTrigger>
-        <TabsTrigger value="guidelines">Guidelines</TabsTrigger>
         <TabsTrigger value="assets">Assets</TabsTrigger>
         <TabsTrigger value="feedback">Feedback</TabsTrigger>
       </TabsList>
@@ -107,7 +96,7 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabs
         <Card>
           <CardHeader>
             <CardTitle>Task Checklist</CardTitle>
-            <CardDescription>Internal checklist for project deliverables.</CardDescription>
+            <CardDescription>Internal checklist for project deliverables. Client-added tasks are also shown here.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-4">
@@ -140,57 +129,6 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabs
           </CardContent>
         </Card>
       </TabsContent>
-
-      <TabsContent value="presentation" className="mt-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Logo Presentation Mockups</CardTitle>
-            <CardDescription>Visualizing the new brand identity in various contexts.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockups.map((mockup, index) => (
-                <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg border">
-                  <Image src={mockup.src} alt={mockup.alt} layout="fill" objectFit="cover" data-ai-hint={mockup.hint} />
-                </div>
-              ))}
-            </div>
-            <Button className="mt-6">
-              <Download className="mr-2 h-4 w-4" /> Export as PDF
-            </Button>
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="guidelines" className="mt-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Brand Identity Guidelines</CardTitle>
-            <CardDescription>The comprehensive rulebook for the new brand identity.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <section>
-              <h3 className="flex items-center text-lg font-semibold font-headline mb-2"><FileText className="mr-2 h-5 w-5" />Logo Usage</h3>
-              <p className="text-muted-foreground">Rules for clear space, minimum size, and correct application.</p>
-            </section>
-            <section>
-              <h3 className="flex items-center text-lg font-semibold font-headline mb-2"><Palette className="mr-2 h-5 w-5" />Color Palette</h3>
-              <p className="text-muted-foreground">Primary and secondary colors with HEX, RGB, and CMYK values.</p>
-            </section>
-            <section>
-              <h3 className="flex items-center text-lg font-semibold font-headline mb-2"><Type className="mr-2 h-5 w-5" />Typography</h3>
-              <p className="text-muted-foreground">Specifications for headlines, body text, and other typographic elements.</p>
-            </section>
-             <section>
-              <h3 className="flex items-center text-lg font-semibold font-headline mb-2"><ImageIcon className="mr-2 h-5 w-5" />Imagery Style</h3>
-              <p className="text-muted-foreground">Guidelines for photography and illustration to ensure brand consistency.</p>
-            </section>
-            <Button className="mt-6">
-              <Download className="mr-2 h-4 w-4" /> Download Full Guidelines (PDF)
-            </Button>
-          </CardContent>
-        </Card>
-      </TabsContent>
       
       <TabsContent value="assets" className="mt-4">
         <Card>
@@ -206,7 +144,7 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabs
                             <TableHead className="hidden sm:table-cell">Type</TableHead>
                             <TableHead className="hidden md:table-cell">Size</TableHead>
                             <TableHead className="hidden md:table-cell">Date Added</TableHead>
-                            <TableHead className="text-right">Action</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -219,6 +157,25 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabs
                             <TableCell className="hidden md:table-cell">{asset.size}</TableCell>
                             <TableCell className="hidden md:table-cell">{format(new Date(asset.createdAt), 'PP')}</TableCell>
                             <TableCell className="text-right">
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This will permanently delete "{asset.name}". This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => onFileDelete(asset)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                                 <Button variant="ghost" size="icon" asChild>
                                     <a href={asset.url} download>
                                         <Download className="h-4 w-4" />
@@ -230,7 +187,7 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage }: ProjectTabs
                         {(!project.assets || project.assets.length === 0) && (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                                    No assets have been added yet.
+                                    No assets have been delivered yet.
                                 </TableCell>
                             </TableRow>
                         )}

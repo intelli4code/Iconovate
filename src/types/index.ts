@@ -20,6 +20,7 @@ export interface Asset {
   fileType: string;
   size: string;
   url: string;
+  path: string;
   createdAt: string;
 }
 

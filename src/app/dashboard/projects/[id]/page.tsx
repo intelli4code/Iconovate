@@ -82,6 +82,7 @@ export default function ProjectDetailPage() {
           id: uuidv4(),
           name: selectedFile.name,
           url: publicUrlData.publicUrl,
+          path: data.path,
           size: `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`,
           fileType: selectedFile.type || 'file',
           createdAt: new Date().toISOString(),
@@ -109,6 +110,36 @@ export default function ProjectDetailPage() {
         setIsSubmitting(false);
         setSelectedFile(null);
         setIsDeliverDialogOpen(false);
+    }
+  };
+
+  const handleFileDelete = async (assetToDelete: Asset) => {
+    if (!project) return;
+    try {
+      // 1. Delete from Supabase Storage
+      const { error: storageError } = await supabase.storage.from('data-storage').remove([assetToDelete.path]);
+      if (storageError) {
+        throw storageError;
+      }
+
+      // 2. Delete from Firestore
+      const projectRef = doc(db, "projects", project.id);
+      const updatedAssets = project.assets.filter(asset => asset.id !== assetToDelete.id);
+      await updateDoc(projectRef, {
+        assets: updatedAssets,
+      });
+
+      toast({
+        title: "Asset Deleted",
+        description: `"${assetToDelete.name}" has been successfully removed.`,
+      });
+    } catch (error: any) {
+      console.error("Error deleting asset:", error);
+      toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: error.message || "Could not delete the asset. Please try again.",
+      });
     }
   };
   
@@ -200,7 +231,12 @@ export default function ProjectDetailPage() {
           </div>
         }
       />
-      <ProjectTabs project={project} onTaskToggle={handleTaskToggle} onNewMessage={handleFeedbackSubmit} />
+      <ProjectTabs 
+        project={project} 
+        onTaskToggle={handleTaskToggle} 
+        onNewMessage={handleFeedbackSubmit}
+        onFileDelete={handleFileDelete}
+      />
     </div>
   )
 }
