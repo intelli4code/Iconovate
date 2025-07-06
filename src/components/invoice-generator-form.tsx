@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from 'react';
-import { useForm, SubmitHandler, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { generateInvoiceData, InvoiceGeneratorInputSchema, type InvoiceGeneratorOutput } from '@/ai/flows/invoice-generator';
+import { generateInvoiceData, type InvoiceGeneratorInput, type InvoiceGeneratorOutput } from '@/ai/flows/invoice-generator';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,22 @@ import { Loader2, FileText, Plus, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from './ui/separator';
 
-type FormValues = z.infer<typeof InvoiceGeneratorInputSchema>;
+const LineItemSchema = z.object({
+  description: z.string().min(1, "Description is required."),
+  quantity: z.coerce.number().min(1, "Quantity must be at least 1."),
+  price: z.coerce.number().min(0, "Price cannot be negative."),
+});
+
+const FormSchema = z.object({
+  clientName: z.string().min(2, "Client name is required."),
+  clientAddress: z.string().min(5, "Client address is required."),
+  projectName: z.string().min(2, "Project name is required."),
+  lineItems: z.array(LineItemSchema).min(1, "At least one line item is required."),
+  taxRate: z.coerce.number().optional().default(0),
+  notes: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof FormSchema>;
 
 export function InvoiceGeneratorForm() {
   const [loading, setLoading] = useState(false);
@@ -29,7 +44,7 @@ export function InvoiceGeneratorForm() {
     control,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(InvoiceGeneratorInputSchema),
+    resolver: zodResolver(FormSchema),
     defaultValues: {
         lineItems: [{ description: "", quantity: 1, price: 0 }]
     }
@@ -44,7 +59,7 @@ export function InvoiceGeneratorForm() {
     setLoading(true);
     setResult(null);
     try {
-      const response = await generateInvoiceData(data);
+      const response = await generateInvoiceData(data as InvoiceGeneratorInput);
       setResult(response);
     } catch (error) {
       console.error("Error generating invoice:", error);
@@ -93,15 +108,25 @@ export function InvoiceGeneratorForm() {
                 <Label>Line Items</Label>
                 {fields.map((field, index) => (
                     <div key={field.id} className="flex gap-2 items-start p-2 border rounded-md">
-                        <Textarea {...register(`lineItems.${index}.description`)} placeholder="Description" className="h-10 text-xs" />
-                        <Input {...register(`lineItems.${index}.quantity`)} type="number" placeholder="Qty" className="w-16 text-xs" />
-                        <Input {...register(`lineItems.${index}.price`)} type="number" step="0.01" placeholder="Price" className="w-24 text-xs" />
+                        <div className="flex-1">
+                          <Textarea {...register(`lineItems.${index}.description`)} placeholder="Description" className="h-10 text-xs" />
+                          {errors.lineItems?.[index]?.description && <p className="text-xs text-destructive mt-1">{errors.lineItems[index]?.description?.message}</p>}
+                        </div>
+                        <div className="w-20">
+                          <Input {...register(`lineItems.${index}.quantity`)} type="number" placeholder="Qty" className="text-xs" />
+                          {errors.lineItems?.[index]?.quantity && <p className="text-xs text-destructive mt-1">{errors.lineItems[index]?.quantity?.message}</p>}
+                        </div>
+                         <div className="w-24">
+                          <Input {...register(`lineItems.${index}.price`)} type="number" step="0.01" placeholder="Price" className="text-xs" />
+                           {errors.lineItems?.[index]?.price && <p className="text-xs text-destructive mt-1">{errors.lineItems[index]?.price?.message}</p>}
+                        </div>
                         <Button type="button" variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => remove(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
                 ))}
                 <Button type="button" variant="outline" size="sm" onClick={() => append({ description: "", quantity: 1, price: 0 })}>
                     <Plus className="mr-2 h-4 w-4" /> Add Item
                 </Button>
+                {errors.lineItems && <p className="text-sm text-destructive mt-1">{errors.lineItems.message}</p>}
             </div>
 
             <Separator />

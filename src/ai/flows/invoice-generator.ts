@@ -9,7 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 import { format } from 'date-fns';
 
 const LineItemSchema = z.object({
@@ -18,7 +18,7 @@ const LineItemSchema = z.object({
   price: z.coerce.number().describe('The price per unit of the item.'),
 });
 
-export const InvoiceGeneratorInputSchema = z.object({
+const InvoiceGeneratorInputSchema = z.object({
   clientName: z.string().describe('The name of the client being invoiced.'),
   clientAddress: z.string().describe('The full address of the client.'),
   projectName: z.string().describe('The name of the project this invoice is for.'),
@@ -28,7 +28,7 @@ export const InvoiceGeneratorInputSchema = z.object({
 });
 export type InvoiceGeneratorInput = z.infer<typeof InvoiceGeneratorInputSchema>;
 
-export const InvoiceGeneratorOutputSchema = z.object({
+const InvoiceGeneratorOutputSchema = z.object({
   invoiceNumber: z.string().describe('A unique invoice number.'),
   issueDate: z.string().describe('The date the invoice was issued.'),
   dueDate: z.string().describe('The date the invoice is due.'),
