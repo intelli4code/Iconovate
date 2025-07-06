@@ -242,7 +242,7 @@ export function TeamList() {
                                                             <DropdownMenuItem
                                                                 onSelect={(e) => e.preventDefault()}
                                                                 className="text-destructive"
-                                                                disabled={member.email === 'alex@brandboost.ai'}
+                                                                disabled={member.email === 'infoathamza@gmail.com'}
                                                             >
                                                                 Remove Member
                                                             </DropdownMenuItem>

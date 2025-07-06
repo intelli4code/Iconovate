@@ -126,7 +126,7 @@ export function ProjectList() {
       description: data.description || "No description provided.",
       status: "Awaiting Brief" as ProjectStatus,
       dueDate: format(futureDate, "yyyy-MM-dd"),
-      team: ["Alex", "Casey"],
+      team: ["Hamza", "Casey"],
       feedback: [],
       tasks: [],
       assets: [],
@@ -418,5 +418,3 @@ export function ProjectList() {
     </Tabs>
   )
 }
-
-    

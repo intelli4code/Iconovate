@@ -122,8 +122,8 @@ export function SettingsForm() {
         const userDocRef = doc(db, "teamMembers", currentUser.id);
         
         // Prevent changing the email of the main demo admin account
-        const emailToUpdate = currentUser.email === 'alex@brandboost.ai' ? currentUser.email : data.email;
-        if(currentUser.email !== 'alex@brandboost.ai' && currentUser.email !== data.email) {
+        const emailToUpdate = currentUser.email === 'infoathamza@gmail.com' ? currentUser.email : data.email;
+        if(currentUser.email !== 'infoathamza@gmail.com' && currentUser.email !== data.email) {
             // Note: In a real app, updating the email in Firebase Auth would require re-authentication.
             // Here we only update it in our Firestore database.
             console.warn("User email change requested. Firestore will be updated, but Firebase Auth email is not changed in this demo.")
@@ -216,8 +216,8 @@ export function SettingsForm() {
                     </div>
                     <div>
                         <Label htmlFor="email">Email Address</Label>
-                        <Input id="email" type="email" {...registerProfile("email")} disabled={currentUser?.email === 'alex@brandboost.ai'} />
-                        {currentUser?.email === 'alex@brandboost.ai' && <p className="text-xs text-muted-foreground mt-1">The primary admin email cannot be changed in this demo.</p>}
+                        <Input id="email" type="email" {...registerProfile("email")} disabled={currentUser?.email === 'infoathamza@gmail.com'} />
+                        {currentUser?.email === 'infoathamza@gmail.com' && <p className="text-xs text-muted-foreground mt-1">The primary admin email cannot be changed in this demo.</p>}
                         {profileErrors.email && <p className="text-sm text-destructive mt-1">{profileErrors.email.message}</p>}
                     </div>
                     <Button type="submit">
@@ -368,7 +368,7 @@ export function SettingsForm() {
                         </div>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive" disabled={currentUser?.email === 'alex@brandboost.ai'}>
+                                <Button variant="destructive" disabled={currentUser?.email === 'infoathamza@gmail.com'}>
                                     Request Account Deletion
                                 </Button>
                             </AlertDialogTrigger>
@@ -391,5 +391,3 @@ export function SettingsForm() {
     </Tabs>
   )
 }
-
-    
