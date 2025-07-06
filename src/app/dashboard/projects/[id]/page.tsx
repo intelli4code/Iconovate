@@ -66,12 +66,12 @@ export default function ProjectDetailPage() {
     try {
         const filePath = `${project.id}/${uuidv4()}-${selectedFile.name}`;
         
-        const { data, error } = await supabase.storage
+        const { data, error: uploadError } = await supabase.storage
             .from('data-storage')
             .upload(filePath, selectedFile);
 
-        if (error) {
-            throw error;
+        if (uploadError) {
+            throw uploadError;
         }
 
         const { data: publicUrlData } = supabase.storage
@@ -98,9 +98,13 @@ export default function ProjectDetailPage() {
             action: <CheckCircle className="text-green-500" />,
         });
 
-    } catch (error) {
-        console.error("File upload failed", error);
-        toast({ variant: "destructive", title: "Upload Failed", description: "There was an error uploading the file. Check console for details." });
+    } catch (error: any) {
+        console.error("Supabase upload error:", error);
+        toast({ 
+            variant: "destructive", 
+            title: "Upload Failed", 
+            description: error.message || "An unknown error occurred during file upload. Check the console."
+        });
     } finally {
         setIsSubmitting(false);
         setSelectedFile(null);
