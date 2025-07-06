@@ -3,8 +3,7 @@
 
 import { useState, useEffect } from "react"
 import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore"
-import { db, storage } from "@/lib/firebase"
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { db } from "@/lib/firebase"
 import type { Project, Feedback, Asset } from "@/types"
 
 import { PageHeader } from "@/components/page-header"
@@ -17,8 +16,15 @@ import { CheckCircle, UploadCloud, Loader2 } from "lucide-react"
 import Loading from "../../loading"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
 import { v4 as uuidv4 } from 'uuid';
+
+const toDataURL = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>()
@@ -29,7 +35,6 @@ export default function ProjectDetailPage() {
 
   const [isDeliverDialogOpen, setIsDeliverDialogOpen] = useState(false);
   const [fileToUpload, setFileToUpload] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
@@ -52,32 +57,28 @@ export default function ProjectDetailPage() {
 
   const handleDeliverAsset = async () => {
     if (!fileToUpload || !project) return;
+    
+    // Firestore documents have a 1MB size limit. Base64 encoding increases file size.
+    // We'll check for a safe limit, e.g., 750KB.
+    if (fileToUpload.size > 750 * 1024) { 
+        toast({
+            variant: "destructive",
+            title: "File Too Large",
+            description: "Please upload files smaller than 750KB to store them directly in the project.",
+        });
+        return;
+    }
+
     setIsUploading(true);
-    setUploadProgress(0);
 
-    const assetId = uuidv4();
-    const fileExtension = fileToUpload.name.split('.').pop();
-    const storageRef = ref(storage, `projects/${project.id}/${assetId}.${fileExtension}`);
-    const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
-
-    uploadTask.on('state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setUploadProgress(progress);
-      },
-      (error) => {
-        console.error("Upload failed", error);
-        toast({ variant: "destructive", title: "Upload Failed", description: "There was an error uploading your file." });
-        setIsUploading(false);
-      },
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+    try {
+        const dataUrl = await toDataURL(fileToUpload);
         
         const newAsset: Asset = {
-          id: assetId,
+          id: uuidv4(),
           name: fileToUpload.name,
-          url: downloadURL,
-          size: `${(fileToUpload.size / 1024 / 1024).toFixed(2)} MB`,
+          url: dataUrl,
+          size: `${(fileToUpload.size / 1024).toFixed(2)} KB`,
           fileType: fileToUpload.type || 'unknown',
           createdAt: new Date().toISOString(),
         };
@@ -87,16 +88,20 @@ export default function ProjectDetailPage() {
           assets: arrayUnion(newAsset)
         });
         
-        setIsUploading(false);
-        setFileToUpload(null);
-        setIsDeliverDialogOpen(false);
         toast({
             title: "Asset Delivered!",
             description: "The client can now access the new file in their portal.",
             action: <CheckCircle className="text-green-500" />,
         });
-      }
-    );
+
+    } catch (error) {
+        console.error("File delivery failed", error);
+        toast({ variant: "destructive", title: "Delivery Failed", description: "There was an error processing your file." });
+    } finally {
+        setIsUploading(false);
+        setFileToUpload(null);
+        setIsDeliverDialogOpen(false);
+    }
   };
   
   const handleCompleteProject = async () => {
@@ -159,17 +164,11 @@ export default function ProjectDetailPage() {
                 <DialogHeader>
                   <DialogTitle>Deliver New Asset</DialogTitle>
                   <DialogDescription>
-                    Upload a file to make it available to the client in their portal.
+                    Upload a file to make it available to the client. Max file size: 750KB.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <Input type="file" onChange={(e) => setFileToUpload(e.target.files?.[0] || null)} />
-                  {isUploading && (
-                    <div className="space-y-2">
-                        <Progress value={uploadProgress} />
-                        <p className="text-sm text-muted-foreground text-center">Uploading... {Math.round(uploadProgress)}%</p>
-                    </div>
-                  )}
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsDeliverDialogOpen(false)} disabled={isUploading}>Cancel</Button>
