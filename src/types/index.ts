@@ -3,6 +3,7 @@
 
 
 
+
 export type ProjectStatus = 'Awaiting Brief' | 'Pending Approval' | 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Cancellation Requested' | 'Revision Requested';
 export type ProjectType = 'Branding' | 'Web Design' | 'UI/UX' | 'Marketing' | 'Other';
 export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
@@ -43,6 +44,13 @@ export interface Task {
   id: string;
   text: string;
   completed: boolean;
+  loggedTime?: {
+    id: string;
+    designerId: string;
+    designerName: string;
+    minutes: number;
+    date: string;
+  }[];
 }
 
 export interface Asset {
@@ -81,6 +89,14 @@ export interface Invoice {
   createdAt: any;
 }
 
+export interface InternalNote {
+  id: string;
+  authorId: string;
+  authorName: string;
+  note: string;
+  timestamp: string;
+}
+
 export interface Project {
   id:string;
   name: string;
@@ -94,6 +110,7 @@ export interface Project {
   tasks: Task[];
   assets: Asset[];
   notifications: Notification[];
+  internalNotes?: InternalNote[];
   createdAt?: any;
   projectType: ProjectType;
   revisionLimit: number;

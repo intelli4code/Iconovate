@@ -3,7 +3,7 @@
 "use client"
 
 import * as React from "react"
-import { useForm, SubmitHandler, Controller } from "react-hook-form"
+import { useForm, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import {
@@ -148,6 +148,7 @@ export function ProjectList() {
       tasks: [],
       assets: [],
       notifications: [],
+      internalNotes: [],
       createdAt: serverTimestamp(),
       projectType: data.projectType,
       revisionLimit: data.revisionLimit,
@@ -325,28 +326,55 @@ export function ProjectList() {
                 <form onSubmit={form.handleSubmit(onSubmit)} id="new-project-form">
                   <div className="grid gap-4 py-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Project Name</Label>
-                      <Input id="name" {...form.register("name")} placeholder="e.g. Aether-Core Rebrand" />
-                      {form.formState.errors.name && <p className="text-sm text-destructive mt-1">{form.formState.errors.name.message}</p>}
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Project Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. Aether-Core Rebrand" {...field} />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="client">Client Name</Label>
-                      <Input id="client" {...form.register("client")} placeholder="e.g. Aether-Core Dynamics" />
-                      {form.formState.errors.client && <p className="text-sm text-destructive mt-1">{form.formState.errors.client.message}</p>}
+                       <FormField
+                        control={form.control}
+                        name="client"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Client Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. Aether-Core Dynamics" {...field} />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea id="description" {...form.register("description")} placeholder="Briefly describe the project goals..." />
-                      {form.formState.errors.description && <p className="text-sm text-destructive mt-1">{form.formState.errors.description.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                      <Controller
-                          name="projectType"
+                      <FormField
                           control={form.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Briefly describe the project goals..." {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                       <FormField
+                          control={form.control}
+                          name="projectType"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Project Type</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                               <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
                                     <SelectValue placeholder="Select a type" />
@@ -361,18 +389,35 @@ export function ProjectList() {
                             </FormItem>
                           )}
                         />
-                      {form.formState.errors.projectType && <p className="text-sm text-destructive mt-1">{form.formState.errors.projectType.message}</p>}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="revisionLimit">Revision Limit</Label>
-                        <Input id="revisionLimit" type="number" {...form.register("revisionLimit")} />
-                        {form.formState.errors.revisionLimit && <p className="text-sm text-destructive mt-1">{form.formState.errors.revisionLimit.message}</p>}
+                        <FormField
+                            control={form.control}
+                            name="revisionLimit"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Revision Limit</FormLabel>
+                                <FormControl>
+                                  <Input type="number" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="durationDays">Duration (days)</Label>
-                        <Input id="durationDays" type="number" {...form.register("durationDays")} />
-                        {form.formState.errors.durationDays && <p className="text-sm text-destructive mt-1">{form.formState.errors.durationDays.message}</p>}
+                        <FormField
+                            control={form.control}
+                            name="durationDays"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Duration (days)</FormLabel>
+                                <FormControl>
+                                   <Input type="number" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
                       </div>
                     </div>
                     <div className="space-y-2">

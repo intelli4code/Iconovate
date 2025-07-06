@@ -1,11 +1,13 @@
 
+
 "use client"
 
 import { useState, useEffect } from "react"
-import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { doc, getDoc, updateDoc, arrayUnion, onSnapshot, collection, query, where } from "firebase/firestore"
+import { db, auth } from "@/lib/firebase"
+import { onAuthStateChanged } from "firebase/auth"
 import { supabase } from "@/lib/supabase"
-import type { Project, Feedback, Asset, Task, Notification } from "@/types"
+import type { Project, Feedback, Asset, Task, Notification, InternalNote, TeamMember } from "@/types"
 import { format, addDays } from 'date-fns';
 import { generateTasksFromBrief } from "@/ai/flows/task-generator"
 
@@ -30,6 +32,7 @@ export default function ProjectDetailPage() {
   
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  const [adminUser, setAdminUser] = useState<TeamMember | null>(null);
 
   const [isDeliverDialogOpen, setIsDeliverDialogOpen] = useState(false);
   const [isRevisionDialogOpen, setIsRevisionDialogOpen] = useState(false);
@@ -53,7 +56,25 @@ export default function ProjectDetailPage() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    const unsubscribeAuth = onAuthStateChanged(auth, (authUser) => {
+        if (authUser?.email) {
+            const teamRef = collection(db, "teamMembers");
+            const q = query(teamRef, where("email", "==", authUser.email));
+            const unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
+                if (!querySnapshot.empty) {
+                    setAdminUser({ id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as TeamMember);
+                }
+            });
+            return () => unsubscribeSnapshot();
+        } else {
+            setAdminUser(null);
+        }
+    });
+
+    return () => {
+        unsubscribe();
+        unsubscribeAuth();
+    };
   }, [params.id]);
 
 
@@ -208,6 +229,24 @@ export default function ProjectDetailPage() {
       feedback: arrayUnion(newFeedback)
     });
   };
+
+  const handleNewInternalNote = async (noteText: string) => {
+    if (!noteText.trim() || !project || !adminUser) return;
+    
+    const newNote: InternalNote = {
+      id: uuidv4(),
+      authorId: adminUser.id,
+      authorName: adminUser.name,
+      note: noteText.trim(),
+      timestamp: new Date().toISOString(),
+    };
+
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, {
+      internalNotes: arrayUnion(newNote)
+    });
+  };
+
 
   const handleRevisionLimitChange = async (newLimit: number) => {
     if (!project) return;
@@ -482,12 +521,14 @@ export default function ProjectDetailPage() {
         </Card>
       )}
       <ProjectTabs 
-        project={project} 
+        project={project}
+        adminUser={adminUser}
         onTaskToggle={handleTaskToggle} 
         onNewMessage={handleFeedbackSubmit}
         onFileDelete={handleFileDelete}
         onRevisionLimitChange={handleRevisionLimitChange}
         onTaskDelete={handleTaskDelete}
+        onNewInternalNote={handleNewInternalNote}
       />
       <Card className="mt-4">
         <CardHeader>

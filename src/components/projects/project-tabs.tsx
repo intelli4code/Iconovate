@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import * as React from "react"
@@ -10,8 +11,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import type { Project, Asset } from "@/types"
-import { Users, ListTodo, RefreshCw, Download, Trash2, Pencil, Star, Fingerprint, Info, Link2 } from "lucide-react"
+import type { Project, Asset, TeamMember, InternalNote } from "@/types"
+import { Users, ListTodo, RefreshCw, Download, Trash2, Pencil, Star, Fingerprint, Info, Link2, Timer, NotebookPen } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
@@ -24,15 +25,18 @@ import { Input } from "@/components/ui/input"
 
 interface ProjectTabsProps {
   project: Project,
+  adminUser: TeamMember | null,
   onTaskToggle: (taskId: string) => void;
   onNewMessage: (message: string, file?: any) => void;
   onFileDelete: (asset: Asset) => void;
   onRevisionLimitChange: (newLimit: number) => void;
   onTaskDelete: (taskId: string) => void;
+  onNewInternalNote: (note: string) => void;
 }
 
-export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete, onRevisionLimitChange, onTaskDelete }: ProjectTabsProps) {
+export function ProjectTabs({ project, adminUser, onTaskToggle, onNewMessage, onFileDelete, onRevisionLimitChange, onTaskDelete, onNewInternalNote }: ProjectTabsProps) {
   const [newComment, setNewComment] = useState("");
+  const [newInternalNote, setNewInternalNote] = useState("");
   const [isEditRevisionsOpen, setIsEditRevisionsOpen] = React.useState(false);
   const [newRevisionLimit, setNewRevisionLimit] = React.useState(project.revisionLimit);
   
@@ -48,6 +52,15 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
     }
   }
 
+  const handleInternalNoteSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newInternalNote.trim()) {
+      onNewInternalNote(newInternalNote.trim());
+      setNewInternalNote("");
+    }
+  };
+
+
   const handleSaveRevisions = () => {
     onRevisionLimitChange(newRevisionLimit);
     setIsEditRevisionsOpen(false);
@@ -55,11 +68,12 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
 
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+      <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5">
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="tasks">Tasks</TabsTrigger>
         <TabsTrigger value="assets">Assets</TabsTrigger>
         <TabsTrigger value="feedback">Feedback</TabsTrigger>
+        <TabsTrigger value="internal_notes">Internal Notes</TabsTrigger>
       </TabsList>
       
       <TabsContent value="overview" className="mt-4 space-y-4">
@@ -184,45 +198,56 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
                 <span className="text-sm font-medium text-muted-foreground">{Math.round(progressPercentage)}%</span>
             </div>
             <div className="space-y-3 pt-2">
-                {project.tasks?.map((task) => (
-                    <div key={task.id} className="flex items-center space-x-3 rounded-md border p-3 group">
-                        <Checkbox 
-                          id={`task-${task.id}`} 
-                          checked={task.completed} 
-                          onCheckedChange={() => onTaskToggle(task.id)} 
-                        />
-                        <label 
-                          htmlFor={`task-${task.id}`} 
-                          className={cn(
-                            "text-sm font-medium leading-none flex-1 peer-disabled:cursor-not-allowed peer-disabled:opacity-70", 
-                            task.completed && "line-through text-muted-foreground"
-                          )}
-                        >
-                            {task.text}
-                        </label>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive">
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will permanently delete the task: "{task.text}". This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => onTaskDelete(task.id)} className={buttonVariants({ variant: "destructive" })}>
-                                Delete Task
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
-                ))}
+                {project.tasks?.map((task) => {
+                    const totalMinutes = task.loggedTime?.reduce((acc, log) => acc + log.minutes, 0) || 0;
+                    return (
+                        <div key={task.id} className="flex items-center space-x-3 rounded-md border p-3 group">
+                            <Checkbox 
+                              id={`task-${task.id}`} 
+                              checked={task.completed} 
+                              onCheckedChange={() => onTaskToggle(task.id)} 
+                            />
+                            <div className="flex-1">
+                                <label 
+                                htmlFor={`task-${task.id}`} 
+                                className={cn(
+                                    "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70", 
+                                    task.completed && "line-through text-muted-foreground"
+                                )}
+                                >
+                                    {task.text}
+                                </label>
+                                {totalMinutes > 0 && (
+                                    <div className="flex items-center text-xs text-muted-foreground mt-1">
+                                        <Timer className="h-3 w-3 mr-1"/>
+                                        <span>{totalMinutes} min logged</span>
+                                    </div>
+                                )}
+                            </div>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive">
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will permanently delete the task: "{task.text}". This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => onTaskDelete(task.id)} className={buttonVariants({ variant: "destructive" })}>
+                                    Delete Task
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    )
+                })}
                  {(!project.tasks || project.tasks.length === 0) && (
                     <p className="text-center text-muted-foreground py-6">No tasks have been added for this project yet.</p>
                 )}
@@ -358,6 +383,54 @@ export function ProjectTabs({ project, onTaskToggle, onNewMessage, onFileDelete,
           </CardContent>
         </Card>
       </TabsContent>
+
+      <TabsContent value="internal_notes" className="mt-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Internal Notes</CardTitle>
+            <CardDescription>Private notes for your team. Not visible to the client.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-72 w-full pr-4">
+              <div className="space-y-6">
+                {project.internalNotes?.length > 0 ? project.internalNotes.map((note: InternalNote) => (
+                  <div key={note.id} className="flex items-start gap-4">
+                    <Avatar>
+                      <AvatarImage src={`https://placehold.co/40x40`} data-ai-hint={'creative professional'} />
+                      <AvatarFallback>{note.authorName.substring(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center">
+                        <p className="font-semibold">{note.authorName}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(note.timestamp).toLocaleString()}</p>
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1 p-3 bg-secondary/50 rounded-lg whitespace-pre-wrap">
+                        {note.note}
+                      </div>
+                    </div>
+                  </div>
+                )) : <p className="text-muted-foreground text-center py-10">No internal notes yet.</p>}
+              </div>
+            </ScrollArea>
+            <form onSubmit={handleInternalNoteSubmit} className="mt-6 pt-6 border-t">
+              <Label htmlFor="internal-note" className="font-semibold">Add an Internal Note</Label>
+              <Textarea
+                id="internal-note"
+                placeholder="Type your private note here..."
+                className="mt-2"
+                value={newInternalNote}
+                onChange={(e) => setNewInternalNote(e.target.value)}
+                disabled={!adminUser}
+              />
+              <Button className="mt-3" type="submit" disabled={!newInternalNote.trim() || !adminUser}>
+                <NotebookPen className="mr-2 h-4 w-4" />
+                Save Note
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
     </Tabs>
   )
 }
