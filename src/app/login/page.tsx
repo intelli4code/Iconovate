@@ -8,21 +8,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Rocket, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { auth } from '@/lib/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // In a real app, you would integrate with Firebase Auth here.
-    // For this prototype, we'll simulate a successful login and redirect.
-    setTimeout(() => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
       router.push('/dashboard');
-    }, 1000);
+    } catch (error: any) {
+      setLoading(false);
+      console.error("Firebase Auth Error:", error);
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Invalid email or password. Please try again.",
+      });
+    }
   };
 
   return (

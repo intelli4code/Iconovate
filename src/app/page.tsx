@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Rocket, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { mockProjects } from '@/lib/data';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import type { Project } from '@/types';
 
 export default function ClientLoginPage() {
   const [name, setName] = useState('');
@@ -17,24 +19,46 @@ export default function ClientLoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // In a real app, you would query your database.
-    // For this prototype, we'll check against mock data.
-    const project = mockProjects.find(p => p.id === orderId.trim());
+    if (!orderId.trim() || !name.trim()) {
+        setError('Please enter your name and Order ID.');
+        setLoading(false);
+        return;
+    }
 
-    setTimeout(() => {
-      if (project) {
-        // A real implementation would also check the client's name.
-        router.push(`/portal/${project.id}`);
-      } else {
+    try {
+      const projectsRef = collection(db, 'projects');
+      // In Firestore, you often use the document ID directly. 
+      // If 'id' is a field in the document, this query is correct.
+      const q = query(projectsRef, where("id", "==", orderId.trim()));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
         setError('Invalid Order ID. Please check and try again.');
         setLoading(false);
+        return;
       }
-    }, 1000);
+      
+      const projectDoc = querySnapshot.docs[0];
+      const project = projectDoc.data() as Project;
+
+      // Case-insensitive check for the client's name
+      if (project.client.toLowerCase() === name.trim().toLowerCase()) {
+        router.push(`/portal/${project.id}`);
+      } else {
+        setError('The name provided does not match the client for this Order ID.');
+        setLoading(false);
+      }
+
+    } catch (err) {
+      console.error("Firestore query error:", err);
+      setError('Could not verify your details. Please try again later.');
+      setLoading(false);
+    }
   };
 
   return (
