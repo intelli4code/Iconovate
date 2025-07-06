@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail } from "lucide-react"
+import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -228,6 +228,8 @@ export default function ClientPortalPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState("");
+  const [briefDescription, setBriefDescription] = useState("");
+  const [briefLinks, setBriefLinks] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -237,7 +239,10 @@ export default function ClientPortalPage() {
 
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
-        setProject({ id: docSnap.id, ...docSnap.data() } as Project);
+        const projectData = { id: docSnap.id, ...docSnap.data() } as Project
+        setProject(projectData);
+        setBriefDescription(projectData.briefDescription || "");
+        setBriefLinks(projectData.briefLinks || "");
       } else {
         notFound();
       }
@@ -295,13 +300,13 @@ export default function ClientPortalPage() {
     }
   };
 
-  const handleApproveProject = async () => {
+  const handleCompleteProject = async () => {
     if (!project) return;
     const projectRef = doc(db, "projects", project.id);
-    await updateDoc(projectRef, { status: 'Approved' });
+    await updateDoc(projectRef, { status: 'Completed' });
     toast({
-      title: "Project Approved!",
-      description: `Thank you for your approval. Your designer has been notified.`,
+      title: "Project Completed!",
+      description: `Thank you for confirming completion. We appreciate your business!`,
       action: <CheckCircle className="text-green-500" />,
     });
   };
@@ -315,13 +320,13 @@ export default function ClientPortalPage() {
     });
     toast({
       title: "Revision Requested",
-      description: `Your designer has been notified. You have ${project.revisionLimit - project.revisionsUsed - 1} revisions remaining.`,
+      description: `Your designer has been notified. Please add your revision requests to the task list. You have ${project.revisionLimit - project.revisionsUsed - 1} revisions remaining.`,
     });
   };
 
   const handleRequestCancellation = async () => {
     if (!project) return;
-    if (project.status === 'Completed' || project.status === 'Canceled' || project.status === 'Approved') return;
+    if (project.status === 'Completed' || project.status === 'Canceled') return;
     const projectRef = doc(db, "projects", project.id);
     await updateDoc(projectRef, { status: 'Cancellation Requested' });
     toast({
@@ -357,10 +362,36 @@ export default function ClientPortalPage() {
     });
   };
 
-  const isFinalState = ['Approved', 'Completed', 'Canceled'].includes(project.status);
+  const handleBriefSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!project || (!briefDescription.trim() && !briefLinks.trim())) {
+        toast({
+            variant: "destructive",
+            title: "Brief is Empty",
+            description: "Please provide a description or some links for your project.",
+        });
+        return;
+    }
+
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, {
+        briefDescription: briefDescription,
+        briefLinks: briefLinks,
+        status: 'Pending Approval',
+    });
+
+    toast({
+        title: "Brief Submitted!",
+        description: "Your project brief has been sent to the designer for approval.",
+    });
+  };
+
+  const isFinalState = ['Completed', 'Canceled'].includes(project.status);
   const daysRemaining = differenceInDays(parseISO(project.dueDate), new Date());
   const revisionsRemaining = project.revisionLimit - project.revisionsUsed;
   const canRequestRevision = revisionsRemaining > 0 && !isFinalState;
+  const canCompleteProject = project.assets && project.assets.length > 0 && !isFinalState;
+  const defaultTab = project.status === 'Awaiting Brief' ? 'brief' : 'deliverables';
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -378,6 +409,15 @@ export default function ClientPortalPage() {
               <AlertTitle>Cancellation Pending</AlertTitle>
               <AlertDescription>
                 Your request to cancel this project is currently being reviewed by the designer.
+              </AlertDescription>
+            </Alert>
+        )}
+        {project.status === 'Awaiting Brief' && (
+             <Alert variant="default" className="mb-8 border-primary">
+              <FileText className="h-4 w-4" />
+              <AlertTitle>Action Required: Submit Your Project Brief</AlertTitle>
+              <AlertDescription>
+                Please provide the initial details for your project in the "Project Brief" tab below to get started.
               </AlertDescription>
             </Alert>
         )}
@@ -406,11 +446,45 @@ export default function ClientPortalPage() {
               </CardContent>
             </Card>
 
-            <Tabs defaultValue="deliverables" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+            <Tabs defaultValue={defaultTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="brief" disabled={project.status !== 'Awaiting Brief'}>Project Brief</TabsTrigger>
                 <TabsTrigger value="deliverables">Deliverables</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
               </TabsList>
+               <TabsContent value="brief" className="mt-4">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Initial Project Brief</CardTitle>
+                        <CardDescription>Provide your designer with the necessary files, links, and descriptions to start the project.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                       <form onSubmit={handleBriefSubmit} className="space-y-4">
+                           <div>
+                               <Label htmlFor="brief-description">Project Description & Requirements</Label>
+                               <Textarea 
+                                   id="brief-description" 
+                                   rows={6}
+                                   placeholder="Describe your project, goals, target audience, and any other important details..."
+                                   value={briefDescription}
+                                   onChange={(e) => setBriefDescription(e.target.value)}
+                                />
+                           </div>
+                           <div>
+                               <Label htmlFor="brief-links">Relevant Links (optional, one per line)</Label>
+                               <Textarea 
+                                   id="brief-links"
+                                   rows={4}
+                                   placeholder="e.g., https://your-company.com\nhttps://inspiration-site.com"
+                                   value={briefLinks}
+                                   onChange={(e) => setBriefLinks(e.target.value)}
+                                />
+                           </div>
+                           <Button type="submit">Submit Brief for Approval</Button>
+                       </form>
+                    </CardContent>
+                </Card>
+              </TabsContent>
               <TabsContent value="deliverables" className="mt-4">
                  <Card>
                     <CardHeader>
@@ -476,7 +550,7 @@ export default function ClientPortalPage() {
               </TabsContent>
             </Tabs>
 
-            {(project.status === 'Completed' || project.status === 'Approved') && (
+            {project.status === 'Completed' && (
               <ClientReview project={project} onReviewSubmit={handleReviewSubmit} />
             )}
 
@@ -491,21 +565,26 @@ export default function ClientPortalPage() {
               <CardContent className="space-y-4">
                   {isFinalState ? (
                       <Alert className={cn(
-                          project.status === 'Approved' && 'border-green-500 text-green-500 [&>svg]:!text-green-500',
-                          project.status === 'Completed' && 'border-blue-500 text-blue-500 [&>svg]:!text-blue-500',
+                          project.status === 'Completed' && 'border-green-500 text-green-500 [&>svg]:!text-green-500',
+                          project.status === 'Canceled' && 'border-destructive text-destructive [&>svg]:!text-destructive'
                       )}>
                           <CheckCircle className="h-4 w-4" />
                           <AlertTitle>Project {project.status}</AlertTitle>
                           <AlertDescription>
-                            {project.status === 'Approved' && 'Thank you! Your final assets are being prepared.'}
                             {project.status === 'Completed' && 'This project is complete. Thank you for your business!'}
                             {project.status === 'Canceled' && 'This project has been canceled.'}
                           </AlertDescription>
                       </Alert>
-                  ) : (
-                      <Button onClick={handleApproveProject} className="w-full bg-green-600 hover:bg-green-700">
-                          <CheckCircle className="mr-2 h-4 w-4" /> Approve Final Project
+                  ) : canCompleteProject ? (
+                      <Button onClick={handleCompleteProject} className="w-full bg-green-600 hover:bg-green-700">
+                          <CheckCircle className="mr-2 h-4 w-4" /> Mark Project as Complete
                       </Button>
+                  ) : (
+                    <Alert>
+                        <Info className="h-4 w-4" />
+                        <AlertTitle>Awaiting Deliverables</AlertTitle>
+                        <AlertDescription>The completion button will appear here once your designer has uploaded the final assets.</AlertDescription>
+                    </Alert>
                   )}
                   {canRequestRevision ? (
                      <Button onClick={handleRequestRevision} variant="outline" className="w-full">
@@ -516,7 +595,7 @@ export default function ClientPortalPage() {
                       <AlertTriangle className="h-4 w-4" />
                       <AlertTitle>No Revisions Remaining</AlertTitle>
                       <AlertDescription>
-                        You have used all your revisions. Please approve the project or contact your designer.
+                        You have used all your revisions. Please contact your designer for further changes.
                       </AlertDescription>
                     </Alert>
                   )}

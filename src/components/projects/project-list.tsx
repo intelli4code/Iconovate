@@ -41,24 +41,25 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { format } from "date-fns"
+import { format, differenceInDays, parseISO } from "date-fns"
 import { db } from "@/lib/firebase"
 import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 
 
 const statusStyles: { [key in ProjectStatus]: string } = {
+  'Awaiting Brief': 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300 border-orange-300',
+  'Pending Approval': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300 border-cyan-300',
   'In Progress': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border-blue-300',
   'Pending Feedback': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 border-yellow-300',
   'Completed': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-300',
   'Blocked': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 border-red-300',
   'Canceled': 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300 border-gray-300',
-  'Approved': 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300 border-teal-300',
   'Cancellation Requested': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 border-purple-300',
 };
 
 const projectTypes: ProjectType[] = ['Branding', 'Web Design', 'UI/UX', 'Marketing', 'Other'];
-const allStatuses: ProjectStatus[] = ['In Progress', 'Pending Feedback', 'Completed', 'Blocked', 'Canceled', 'Approved', 'Cancellation Requested'];
+const allStatuses: ProjectStatus[] = ['Awaiting Brief', 'Pending Approval', 'In Progress', 'Pending Feedback', 'Completed', 'Blocked', 'Canceled', 'Cancellation Requested'];
 
 const formSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters."),
@@ -122,7 +123,7 @@ export function ProjectList() {
       name: data.name,
       client: data.client,
       description: data.description || "No description provided.",
-      status: "In Progress" as ProjectStatus,
+      status: "Awaiting Brief" as ProjectStatus,
       dueDate: format(futureDate, "yyyy-MM-dd"),
       team: ["Alex"],
       feedback: [],
@@ -137,6 +138,8 @@ export function ProjectList() {
       projectType: data.projectType,
       revisionLimit: data.revisionLimit,
       revisionsUsed: 0,
+      briefDescription: "",
+      briefLinks: "",
     };
 
     try {
@@ -169,7 +172,7 @@ export function ProjectList() {
   const filteredProjects = React.useMemo(() => {
     return projects.filter(project => {
         const tabMatch = activeTab === 'all' ||
-            (activeTab === 'active' && (project.status === 'In Progress' || project.status === 'Pending Feedback' || project.status === 'Blocked' || project.status === 'Cancellation Requested')) ||
+            (activeTab === 'active' && ['In Progress', 'Pending Feedback', 'Blocked', 'Awaiting Brief', 'Pending Approval', 'Cancellation Requested'].includes(project.status)) ||
             (activeTab === 'completed' && project.status === 'Completed') ||
             (activeTab === 'archived' && project.status === 'Canceled');
         
@@ -187,7 +190,7 @@ export function ProjectList() {
           <TableHead>Client</TableHead>
           <TableHead className="hidden sm:table-cell">Order ID</TableHead>
           <TableHead className="hidden md:table-cell">Status</TableHead>
-          <TableHead className="hidden md:table-cell">Due Date</TableHead>
+          <TableHead className="hidden md:table-cell">Time Remaining</TableHead>
           <TableHead>
             <span className="sr-only">Actions</span>
           </TableHead>
@@ -210,43 +213,46 @@ export function ProjectList() {
             </TableCell>
           </TableRow>
         ) : (
-          projectsToRender.map(project => (
-            <TableRow key={project.id}>
-              <TableCell className="font-medium">
-                <Link href={`/dashboard/projects/${project.id}`} className="hover:underline">
-                  {project.name}
-                </Link>
-              </TableCell>
-              <TableCell>{project.client}</TableCell>
-              <TableCell className="hidden sm:table-cell font-mono text-xs">{project.id}</TableCell>
-              <TableCell className="hidden md:table-cell">
-                <Badge variant="outline" className={statusStyles[project.status]}>
-                  {project.status}
-                </Badge>
-              </TableCell>
-              <TableCell className="hidden md:table-cell">{project.dueDate}</TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button aria-haspopup="true" size="icon" variant="ghost">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Toggle menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/dashboard/projects/${project.id}`} className="w-full cursor-pointer">
-                        View Details
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">Archive</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))
+          projectsToRender.map(project => {
+            const daysRemaining = differenceInDays(parseISO(project.dueDate), new Date());
+            return (
+              <TableRow key={project.id}>
+                <TableCell className="font-medium">
+                  <Link href={`/dashboard/projects/${project.id}`} className="hover:underline">
+                    {project.name}
+                  </Link>
+                </TableCell>
+                <TableCell>{project.client}</TableCell>
+                <TableCell className="hidden sm:table-cell font-mono text-xs">{project.id}</TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <Badge variant="outline" className={statusStyles[project.status]}>
+                    {project.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="hidden md:table-cell">{daysRemaining >= 0 ? `${daysRemaining} days` : 'Past due'}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button aria-haspopup="true" size="icon" variant="ghost">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Toggle menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/dashboard/projects/${project.id}`} className="w-full cursor-pointer">
+                          View Details
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive">Archive</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            )
+          })
         )}
       </TableBody>
     </Table>

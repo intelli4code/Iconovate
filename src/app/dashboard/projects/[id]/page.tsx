@@ -13,13 +13,14 @@ import { Button } from "@/components/ui/button"
 import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { CheckCircle, UploadCloud, Loader2, AlertTriangle } from "lucide-react"
+import { CheckCircle, UploadCloud, Loader2, AlertTriangle, ShieldCheck } from "lucide-react"
 import Loading from "../../loading"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { v4 as uuidv4 } from 'uuid';
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>()
@@ -218,6 +219,16 @@ export default function ProjectDetailPage() {
     });
   };
 
+  const handleApproveAndStartProject = async () => {
+    if (!project) return;
+    const projectRef = doc(db, "projects", project.id);
+    await updateDoc(projectRef, { status: 'In Progress' });
+    toast({
+      title: "Project Approved!",
+      description: `The project has been moved to "In Progress".`,
+    });
+  }
+
 
   if (loading || !project) {
     return <Loading />;
@@ -283,6 +294,32 @@ export default function ProjectDetailPage() {
             </div>
           </AlertDescription>
         </Alert>
+      )}
+      {project.status === 'Pending Approval' && (
+        <Card className="mb-4 border-cyan-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-cyan-500" />
+              Client Brief Submitted - Ready for Approval
+            </CardTitle>
+            <CardDescription>
+              Review the client's initial brief and approve the project to begin work.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label className="font-semibold">Brief Description</Label>
+              <p className="text-sm text-muted-foreground p-3 bg-secondary rounded-md whitespace-pre-wrap">{project.briefDescription || 'No description provided.'}</p>
+            </div>
+             <div>
+              <Label className="font-semibold">Links Provided</Label>
+              <p className="text-sm text-muted-foreground p-3 bg-secondary rounded-md whitespace-pre-wrap">{project.briefLinks || 'No links provided.'}</p>
+            </div>
+            <Button onClick={handleApproveAndStartProject}>
+              Approve & Start Project
+            </Button>
+          </CardContent>
+        </Card>
       )}
       <ProjectTabs 
         project={project} 
