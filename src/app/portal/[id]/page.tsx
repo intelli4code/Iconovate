@@ -278,9 +278,16 @@ export default function ClientPortalPage() {
     });
 
     const invoicesRef = collection(db, "invoices");
-    const q = query(invoicesRef, where("projectId", "==", params.id), orderBy("createdAt", "desc"));
+    const q = query(invoicesRef, where("projectId", "==", params.id));
     const unsubscribeInvoices = onSnapshot(q, (querySnapshot) => {
-        const invoicesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Invoice[];
+        let invoicesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Invoice[];
+        
+        invoicesData.sort((a, b) => {
+          const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+          const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+          return dateB.getTime() - dateA.getTime();
+        });
+
         setInvoices(invoicesData);
     });
 
