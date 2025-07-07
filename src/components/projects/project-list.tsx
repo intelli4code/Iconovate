@@ -1,6 +1,5 @@
 
 
-
 "use client"
 
 import * as React from "react"
@@ -146,7 +145,7 @@ export function ProjectList() {
       description: data.description || "No description provided.",
       status: "Awaiting Brief" as ProjectStatus,
       dueDate: format(futureDate, "yyyy-MM-dd"),
-      team: [...data.team, "Hamza"],
+      team: data.team,
       feedback: [],
       tasks: [],
       assets: [],
