@@ -4,7 +4,7 @@
 import * as React from "react"
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
-import Link from "next/link"
+import { LoadingLink } from "@/components/ui/loading-link"
 import { format } from 'date-fns'
 
 import type { Invoice, InvoiceStatus } from "@/types"
@@ -107,9 +107,9 @@ export function InvoiceList() {
                 <CardDescription>A list of all your generated invoices.</CardDescription>
             </div>
             <Button asChild>
-                <Link href="/dashboard/invoice-generator">
+                <LoadingLink href="/dashboard/invoice-generator">
                     <PlusCircle className="mr-2"/> Create Invoice
-                </Link>
+                </LoadingLink>
             </Button>
         </div>
       </CardHeader>

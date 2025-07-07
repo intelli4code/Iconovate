@@ -1,8 +1,8 @@
 // This component is based on the v0 `dashboard-05` reference
 "use client"
 
-import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { LoadingLink } from "@/components/ui/loading-link"
 
 import {
   Sidebar,
@@ -14,7 +14,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail, FileText, Megaphone, SearchCode, ReceiptText, Brush, ClipboardCheck, UsersRound, CalendarClock } from "lucide-react"
+import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail, FileText, Megaphone, SearchCode, ReceiptText, Brush, ClipboardCheck, UsersRound, CalendarClock, CreditCard } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -35,66 +35,74 @@ export function DashboardNav() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard")}>
-              <Link href="/dashboard">
+              <LoadingLink href="/dashboard">
                 <LayoutGrid />
                 <span>Dashboard</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith("/dashboard/projects")}>
-              <Link href="/dashboard/projects">
+              <LoadingLink href="/dashboard/projects">
                 <FolderKanban />
                 <span>Projects</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith("/dashboard/clients")}>
-              <Link href="/dashboard/clients">
+              <LoadingLink href="/dashboard/clients">
                 <Users />
                 <span>Clients</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
            <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/invoices")}>
-              <Link href="/dashboard/invoices">
+              <LoadingLink href="/dashboard/invoices">
                 <ReceiptText />
                 <span>Invoices</span>
-              </Link>
+              </LoadingLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/payments")}>
+              <LoadingLink href="/dashboard/payments">
+                <CreditCard />
+                <span>Payments</span>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/team")}>
-              <Link href="/dashboard/team">
+              <LoadingLink href="/dashboard/team">
                 <Users />
                 <span>Team</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/designers")}>
-                <Link href="/dashboard/designers">
+                <LoadingLink href="/dashboard/designers">
                     <Brush />
                     <span>Designers</span>
-                </Link>
+                </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/emails")}>
-                <Link href="/dashboard/emails">
+                <LoadingLink href="/dashboard/emails">
                     <Mail />
                     <span>Collected Emails</span>
-                </Link>
+                </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/reviews")}>
-              <Link href="/dashboard/reviews">
+              <LoadingLink href="/dashboard/reviews">
                 <Star />
                 <span>Reviews</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <Separator className="my-2" />
@@ -103,146 +111,146 @@ export function DashboardNav() {
           </SidebarMenuItem>
            <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/brief-analysis")}>
-              <Link href="/dashboard/brief-analysis">
+              <LoadingLink href="/dashboard/brief-analysis">
                 <ClipboardCheck />
                 <span>Brief Analysis</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/persona-generator")}>
-              <Link href="/dashboard/persona-generator">
+              <LoadingLink href="/dashboard/persona-generator">
                 <UsersRound />
                 <span>Persona Generator</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/brand-research")}>
-              <Link href="/dashboard/brand-research">
+              <LoadingLink href="/dashboard/brand-research">
                 <BrainCircuit />
                 <span>AI Brand Research</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
            <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/competitor-analysis")}>
-              <Link href="/dashboard/competitor-analysis">
+              <LoadingLink href="/dashboard/competitor-analysis">
                 <SearchCode />
                 <span>Competitor Analysis</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/mood-board")}>
-              <Link href="/dashboard/mood-board">
+              <LoadingLink href="/dashboard/mood-board">
                 <Grid3x3 />
                 <span>AI Mood Board</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/icon-generator")}>
-              <Link href="/dashboard/icon-generator">
+              <LoadingLink href="/dashboard/icon-generator">
                 <Shapes />
                 <span>AI Icon Generator</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/logo-generator")}>
-              <Link href="/dashboard/logo-generator">
+              <LoadingLink href="/dashboard/logo-generator">
                 <PenTool />
                 <span>AI Logo Generator</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
            <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/logo-variations")}>
-              <Link href="/dashboard/logo-variations">
+              <LoadingLink href="/dashboard/logo-variations">
                 <Blend />
                 <span>Logo Variations</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
            <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/color-palette")}>
-              <Link href="/dashboard/color-palette">
+              <LoadingLink href="/dashboard/color-palette">
                 <Palette />
                 <span>AI Color Palette</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/typography-pairing")}>
-              <Link href="/dashboard/typography-pairing">
+              <LoadingLink href="/dashboard/typography-pairing">
                 <Baseline />
                 <span>Typography Pairing</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
            <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/slogan-generator")}>
-              <Link href="/dashboard/slogan-generator">
+              <LoadingLink href="/dashboard/slogan-generator">
                 <Quote />
                 <span>Slogan Generator</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/presentation-text")}>
-              <Link href="/dashboard/presentation-text">
+              <LoadingLink href="/dashboard/presentation-text">
                 <Presentation />
                 <span>Presentation Text</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/logo-mockups")}>
-              <Link href="/dashboard/logo-mockups">
+              <LoadingLink href="/dashboard/logo-mockups">
                 <GalleryHorizontalEnd />
                 <span>Logo Mockups</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/brand-guidelines")}>
-              <Link href="/dashboard/brand-guidelines">
+              <LoadingLink href="/dashboard/brand-guidelines">
                 <BookText />
                 <span>Brand Guidelines</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/social-media-kit")}>
-              <Link href="/dashboard/social-media-kit">
+              <LoadingLink href="/dashboard/social-media-kit">
                 <Share2 />
                 <span>Social Media Kit</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/social-media-posts")}>
-              <Link href="/dashboard/social-media-posts">
+              <LoadingLink href="/dashboard/social-media-posts">
                 <Megaphone />
                 <span>Social Media Posts</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
            <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/weekly-summary")}>
-              <Link href="/dashboard/weekly-summary">
+              <LoadingLink href="/dashboard/weekly-summary">
                 <CalendarClock />
                 <span>Weekly Summary</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/invoice-generator")}>
-              <Link href="/dashboard/invoice-generator">
+              <LoadingLink href="/dashboard/invoice-generator">
                 <FileText />
                 <span>Invoice Generator</span>
-              </Link>
+              </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -251,18 +259,18 @@ export function DashboardNav() {
          <SidebarMenu>
             <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive("/dashboard/settings")}>
-                <Link href="/dashboard/settings">
+                <LoadingLink href="/dashboard/settings">
                     <Settings />
                     <span>Settings</span>
-                </Link>
+                </LoadingLink>
                 </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                <Link href="#">
+                <LoadingLink href="#">
                     <LifeBuoy />
                     <span>Help & Support</span>
-                </Link>
+                </LoadingLink>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>

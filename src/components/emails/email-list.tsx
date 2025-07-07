@@ -23,7 +23,7 @@ import type { Project } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { LoadingLink } from "@/components/ui/loading-link"
 
 interface EmailEntry {
   id: string;
@@ -116,9 +116,9 @@ export function EmailList() {
                   <TableCell className="font-medium">{entry.clientName}</TableCell>
                   <TableCell>{entry.clientEmail}</TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    <Link href={`/dashboard/projects/${entry.id}`} className="hover:underline">
+                    <LoadingLink href={`/dashboard/projects/${entry.id}`} className="hover:underline">
                       {entry.projectName}
-                    </Link>
+                    </LoadingLink>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => copyToClipboard(entry.clientEmail)}>

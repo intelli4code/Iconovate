@@ -1,11 +1,13 @@
 
 
+
 "use client"
 
 import * as React from "react"
 import { useForm, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { useRouter } from "next/navigation"
 import {
   Table,
   TableBody,
@@ -37,7 +39,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Project, ProjectStatus, ProjectType, TeamMember } from "@/types"
 import { ListFilter, PlusCircle, MoreHorizontal, Loader2 } from "lucide-react"
-import Link from "next/link"
+import { LoadingLink } from "@/components/ui/loading-link"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -85,6 +87,7 @@ export function ProjectList() {
   const [loading, setLoading] = React.useState(true);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const [activeTab, setActiveTab] = React.useState("all");
   const [statusFilters, setStatusFilters] = React.useState<ProjectStatus[]>([]);
@@ -231,11 +234,11 @@ export function ProjectList() {
           projectsToRender.map(project => {
             const daysRemaining = differenceInDays(parseISO(project.dueDate), new Date());
             return (
-              <TableRow key={project.id}>
+              <TableRow key={project.id} onDoubleClick={() => router.push(`/dashboard/projects/${project.id}`)} className="cursor-pointer">
                 <TableCell className="font-medium">
-                  <Link href={`/dashboard/projects/${project.id}`} className="hover:underline">
+                  <LoadingLink href={`/dashboard/projects/${project.id}`} className="hover:underline">
                     {project.name}
-                  </Link>
+                  </LoadingLink>
                 </TableCell>
                 <TableCell>{project.client}</TableCell>
                 <TableCell className="hidden sm:table-cell font-mono text-xs">{project.id}</TableCell>
@@ -256,9 +259,9 @@ export function ProjectList() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem asChild>
-                        <Link href={`/dashboard/projects/${project.id}`} className="w-full cursor-pointer">
+                        <LoadingLink href={`/dashboard/projects/${project.id}`} className="w-full cursor-pointer">
                           View Details
-                        </Link>
+                        </LoadingLink>
                       </DropdownMenuItem>
                       <DropdownMenuItem>Edit</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">Archive</DropdownMenuItem>

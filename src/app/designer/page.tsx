@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { FolderKanban, FolderCheck, Star } from "lucide-react"
 import { cn } from "@/lib/utils"
-import Link from "next/link"
+import { LoadingLink } from "@/components/ui/loading-link"
 
 function CompletedProjectReviewCard({ project }: { project: Project }) {
     return (
@@ -42,9 +42,9 @@ function CompletedProjectReviewCard({ project }: { project: Project }) {
                 )}
             </CardContent>
              <CardFooter>
-                 <Link href={`/designer/projects/${project.id}`} className="text-sm text-primary hover:underline">
+                 <LoadingLink href={`/designer/projects/${project.id}`} className="text-sm text-primary hover:underline">
                     View Project Details
-                </Link>
+                </LoadingLink>
             </CardFooter>
         </Card>
     );

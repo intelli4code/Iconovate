@@ -6,7 +6,7 @@ import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
 import { LogIn, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { LoadingLink } from "@/components/ui/loading-link"
 import { GlobalSearch } from "@/components/global-search"
 import { NotificationCenter } from "@/components/notification-center"
 
@@ -40,14 +40,14 @@ export default function DashboardLayout({
           <div className="flex items-center gap-2">
             <NotificationCenter />
             <Button variant="outline" size="sm" asChild>
-                <Link href="/">
+                <LoadingLink href="/">
                     <LogIn className="mr-2 h-4 w-4" /> Client Portal
-                </Link>
+                </LoadingLink>
             </Button>
             <Button variant="outline" size="sm" asChild>
-                <Link href="/designer/login">
+                <LoadingLink href="/designer/login">
                     <LogIn className="mr-2 h-4 w-4" /> Designer Portal
-                </Link>
+                </LoadingLink>
             </Button>
           </div>
           <UserNav />

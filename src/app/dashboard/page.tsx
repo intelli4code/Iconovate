@@ -26,7 +26,7 @@ import {
   Legend
 } from "recharts"
 import { PageHeader } from "@/components/page-header"
-import Link from "next/link"
+import { LoadingLink } from "@/components/ui/loading-link"
 import { FolderKanban, DollarSign, FolderClock, Star, Info, Banknote, TrendingUp } from "lucide-react"
 import { format, getMonth, startOfMonth } from "date-fns"
 import Loading from "./loading"
@@ -219,7 +219,7 @@ export default function Dashboard() {
                                 <div className="flex-1">
                                     <p className="text-sm">{activity.text}</p>
                                     <p className="text-xs text-muted-foreground">
-                                        <Link href={`/dashboard/projects/${activity.projectId}`} className="hover:underline">{activity.projectName}</Link>
+                                        <LoadingLink href={`/dashboard/projects/${activity.projectId}`} className="hover:underline">{activity.projectName}</LoadingLink>
                                         {' - '}{format(new Date(activity.timestamp), 'PP')}
                                     </p>
                                 </div>

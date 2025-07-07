@@ -10,16 +10,20 @@ import { Rocket, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { useLoading } from '@/contexts/loading-context';
+import { LoadingLink } from '@/components/ui/loading-link';
 
 export default function ClientLoginPage() {
   const [orderId, setOrderId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { showLoader } = useLoading();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    showLoader();
     setError('');
 
     if (!orderId.trim()) {
@@ -79,15 +83,15 @@ export default function ClientLoginPage() {
       </Card>
       <p className="mt-4 text-center text-sm text-muted-foreground">
         Are you an admin?{" "}
-        <a href="/login" className="underline">
+        <LoadingLink href="/login" className="underline">
           Admin Login
-        </a>
+        </LoadingLink>
       </p>
       <p className="mt-2 text-center text-sm text-muted-foreground">
         Are you a designer?{" "}
-        <a href="/designer/login" className="underline">
+        <LoadingLink href="/designer/login" className="underline">
           Designer Portal
-        </a>
+        </LoadingLink>
       </p>
     </div>
   );

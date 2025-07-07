@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { LoadingLink } from '@/components/ui/loading-link';
+import { useLoading } from '@/contexts/loading-context';
 
 export default function DesignerLoginPage() {
   const [name, setName] = useState('');
@@ -17,10 +19,12 @@ export default function DesignerLoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const { showLoader } = useLoading();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    showLoader();
     try {
       const teamRef = collection(db, "teamMembers");
       const q = query(
@@ -92,9 +96,9 @@ export default function DesignerLoginPage() {
       </Card>
       <p className="mt-4 text-center text-sm text-muted-foreground">
         Are you an admin?{" "}
-        <a href="/login" className="underline">
+        <LoadingLink href="/login" className="underline">
           Admin Login
-        </a>
+        </LoadingLink>
       </p>
     </div>
   );

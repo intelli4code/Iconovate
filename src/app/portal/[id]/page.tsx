@@ -3,19 +3,19 @@
 
 import { useState, type FormEvent, useEffect, useRef } from "react"
 import { notFound, useParams } from "next/navigation"
-import { doc, getDoc, updateDoc, arrayUnion, onSnapshot, collection, query, where, orderBy } from "firebase/firestore"
+import { doc, getDoc, updateDoc, arrayUnion, onSnapshot, collection, query, where, orderBy, addDoc, serverTimestamp } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { supabase } from "@/lib/supabase"
 import { v4 as uuidv4 } from 'uuid';
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2, ReceiptText, CreditCard } from "lucide-react"
+import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2, ReceiptText, CreditCard, SendHorizone, Send } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import type { Project, Feedback as FeedbackType, Task, Notification, Invoice, InvoiceStatus } from "@/types"
+import type { Project, Feedback as FeedbackType, Task, Notification, Invoice, InvoiceStatus, Payment, PaymentStatus } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { differenceInDays, parseISO, format } from 'date-fns';
@@ -236,18 +236,24 @@ const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 }
 
-const statusStyles: { [key in InvoiceStatus]: string } = {
+const invoiceStatusStyles: { [key in InvoiceStatus]: string } = {
   'Draft': 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300 border-gray-300',
   'Sent': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border-blue-300',
   'Paid': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-300',
   'Overdue': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 border-red-300',
 };
 
+const paymentStatusStyles: { [key in PaymentStatus]: string } = {
+  'Pending': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 border-yellow-300',
+  'Approved': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-300',
+  'Rejected': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 border-red-300',
+};
 
 export default function ClientPortalPage() {
   const params = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState("");
   const [briefDescription, setBriefDescription] = useState("");
@@ -259,6 +265,11 @@ export default function ClientPortalPage() {
   const [email, setEmail] = useState("");
   const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+
+  // State for new payment submission
+  const [paymentAmount, setPaymentAmount] = useState<number | string>("");
+  const [paymentReference, setPaymentReference] = useState("");
+
 
   useEffect(() => {
     if (!params.id) return;
@@ -278,23 +289,25 @@ export default function ClientPortalPage() {
     });
 
     const invoicesRef = collection(db, "invoices");
-    const q = query(invoicesRef, where("projectId", "==", params.id));
-    const unsubscribeInvoices = onSnapshot(q, (querySnapshot) => {
+    const qInvoices = query(invoicesRef, where("projectId", "==", params.id));
+    const unsubscribeInvoices = onSnapshot(qInvoices, (querySnapshot) => {
         let invoicesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Invoice[];
-        
-        invoicesData.sort((a, b) => {
-          const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
-          const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
-          return dateB.getTime() - dateA.getTime();
-        });
-
+        invoicesData.sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime());
         setInvoices(invoicesData);
+    });
+    
+    const paymentsRef = collection(db, "payments");
+    const qPayments = query(paymentsRef, where("projectId", "==", params.id), orderBy("requestedAt", "desc"));
+    const unsubscribePayments = onSnapshot(qPayments, (snapshot) => {
+        const paymentsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Payment[];
+        setPayments(paymentsData);
     });
 
 
     return () => {
         unsubscribeProject();
         unsubscribeInvoices();
+        unsubscribePayments();
     };
   }, [params.id]);
 
@@ -485,6 +498,37 @@ export default function ClientPortalPage() {
     }
   };
 
+  const handlePaymentRequestSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!project || !paymentAmount || !paymentReference.trim()) {
+        toast({ variant: "destructive", title: "Missing Information", description: "Please provide both amount and a reference."});
+        return;
+    }
+
+    const newPayment: Omit<Payment, 'id'> = {
+        projectId: project.id,
+        projectName: project.name,
+        clientName: project.client,
+        amount: Number(paymentAmount),
+        reference: paymentReference.trim(),
+        status: 'Pending',
+        requestedAt: serverTimestamp(),
+    };
+
+    try {
+        await addDoc(collection(db, "payments"), newPayment);
+        toast({
+            title: "Payment Submitted!",
+            description: "Your payment notification has been sent for approval.",
+        });
+        setPaymentAmount("");
+        setPaymentReference("");
+    } catch (error) {
+         toast({ variant: "destructive", title: "Submission Failed" });
+    }
+  }
+
+
   const visibleInvoices = invoices.filter(inv => inv.status !== 'Draft');
   const isFinalState = ['Completed', 'Canceled'].includes(project.status);
   const daysRemaining = differenceInDays(parseISO(project.dueDate), new Date());
@@ -556,11 +600,12 @@ export default function ClientPortalPage() {
             </Card>
 
             <Tabs defaultValue={defaultTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="brief" disabled={project.status !== 'Awaiting Brief'}>Project Brief</TabsTrigger>
                 <TabsTrigger value="deliverables">Deliverables</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
                 <TabsTrigger value="invoices">Invoices</TabsTrigger>
+                <TabsTrigger value="payments">Payments</TabsTrigger>
               </TabsList>
                <TabsContent value="brief" className="mt-4">
                  <Card>
@@ -677,7 +722,7 @@ export default function ClientPortalPage() {
                                             </div>
                                         </div>
                                          <div className="flex items-center gap-2">
-                                            <Badge variant="outline" className={statusStyles[invoice.status]}>{invoice.status}</Badge>
+                                            <Badge variant="outline" className={invoiceStatusStyles[invoice.status]}>{invoice.status}</Badge>
                                             <Button variant="outline" size="sm" onClick={() => { setSelectedInvoice(invoice); setIsInvoiceDialogOpen(true); }}>View</Button>
                                          </div>
                                     </li>
@@ -686,6 +731,61 @@ export default function ClientPortalPage() {
                         ) : (
                             <p className="text-center text-muted-foreground py-6">No invoices have been issued for this project.</p>
                         )}
+                    </CardContent>
+                </Card>
+              </TabsContent>
+               <TabsContent value="payments" className="mt-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Payment History</CardTitle>
+                        <CardDescription>Notify us of a new payment or view your payment history.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <Card className="bg-secondary/50">
+                            <CardHeader>
+                                <CardTitle className="text-lg">Submit a Payment</CardTitle>
+                            </CardHeader>
+                             <CardContent>
+                                <form onSubmit={handlePaymentRequestSubmit} className="grid sm:grid-cols-3 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="payment-amount">Amount Paid</Label>
+                                        <Input id="payment-amount" type="number" placeholder="100.00" value={paymentAmount} onChange={(e) => setPaymentAmount(e.target.value)} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="payment-ref">Reference / Transaction ID</Label>
+                                        <Input id="payment-ref" placeholder="e.g., Stripe ID, Bank Ref" value={paymentReference} onChange={(e) => setPaymentReference(e.target.value)} />
+                                    </div>
+                                    <div className="self-end">
+                                        <Button type="submit" className="w-full"><Send className="mr-2 h-4 w-4"/>Submit for Approval</Button>
+                                    </div>
+                                </form>
+                             </CardContent>
+                        </Card>
+                        <div>
+                             <h4 className="font-medium mb-2">Submitted Payments</h4>
+                             {payments.length > 0 ? (
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Amount</TableHead>
+                                            <TableHead>Reference</TableHead>
+                                            <TableHead>Status</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {payments.map(p => (
+                                            <TableRow key={p.id}>
+                                                <TableCell>{formatCurrency(p.amount)}</TableCell>
+                                                <TableCell className="font-mono text-xs">{p.reference}</TableCell>
+                                                <TableCell><Badge variant="outline" className={paymentStatusStyles[p.status]}>{p.status}</Badge></TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                             ) : (
+                                <p className="text-center text-muted-foreground py-6 border rounded-lg">No payments have been submitted for this project.</p>
+                             )}
+                        </div>
                     </CardContent>
                 </Card>
               </TabsContent>

@@ -1,12 +1,11 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { formatDistanceToNow } from "date-fns"
 import type { Project, Notification } from "@/types"
-
+import { LoadingLink } from "@/components/ui/loading-link"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,13 +63,13 @@ export function NotificationCenter() {
         ) : notifications.length > 0 ? (
           notifications.map(n => (
             <DropdownMenuItem key={n.id} asChild className="cursor-pointer">
-              <Link href={`/dashboard/projects/${n.projectId}`} className="flex items-start gap-3">
+              <LoadingLink href={`/dashboard/projects/${n.projectId}`} className="flex items-start gap-3">
                 <Info className="h-4 w-4 mt-1 text-primary"/>
                 <div className="flex-1">
                     <p className="text-sm leading-tight whitespace-normal">{n.text}</p>
                     <p className="text-xs text-muted-foreground">{n.projectName} - {formatDistanceToNow(new Date(n.timestamp), { addSuffix: true })}</p>
                 </div>
-              </Link>
+              </LoadingLink>
             </DropdownMenuItem>
           ))
         ) : (

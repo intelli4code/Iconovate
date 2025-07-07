@@ -17,7 +17,7 @@ import type { Project } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2, Star } from "lucide-react"
 import { cn } from "@/lib/utils"
-import Link from "next/link"
+import { LoadingLink } from "@/components/ui/loading-link"
 
 export function ReviewList() {
   const [reviews, setReviews] = React.useState<Project[]>([]);
@@ -82,7 +82,7 @@ export function ReviewList() {
                     <div className="flex-1">
                         <CardTitle>{project.client}</CardTitle>
                         <CardDescription>
-                           Review for <Link href={`/dashboard/projects/${project.id}`} className="text-primary hover:underline">{project.name}</Link>
+                           Review for <LoadingLink href={`/dashboard/projects/${project.id}`} className="text-primary hover:underline">{project.name}</LoadingLink>
                         </CardDescription>
                     </div>
                 </CardHeader>

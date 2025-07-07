@@ -17,18 +17,20 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import Link from "next/link"
+import { LoadingLink } from "@/components/ui/loading-link"
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { collection, query, where, getDocs, onSnapshot } from "firebase/firestore";
 import type { TeamMember } from "@/types";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "./ui/skeleton"
+import { useLoading } from "@/contexts/loading-context"
 
 export function UserNav() {
     const [user, setUser] = useState<TeamMember | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { showLoader } = useLoading();
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, (authUser) => {
@@ -51,6 +53,7 @@ export function UserNav() {
     }, []);
 
     const handleLogout = async () => {
+        showLoader();
         await signOut(auth);
         router.push('/login');
     };
@@ -62,7 +65,7 @@ export function UserNav() {
     if (!user) {
         return (
             <Button asChild variant="outline">
-                <Link href="/login">Login</Link>
+                <LoadingLink href="/login">Login</LoadingLink>
             </Button>
         )
     }
@@ -89,23 +92,23 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-             <Link href="/dashboard/settings" className="w-full cursor-pointer">
+             <LoadingLink href="/dashboard/settings" className="w-full cursor-pointer">
               Profile
-            </Link>
+            </LoadingLink>
           </DropdownMenuItem>
           <DropdownMenuItem>
             Billing
             <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-             <Link href="/dashboard/settings" className="w-full cursor-pointer">
+             <LoadingLink href="/dashboard/settings" className="w-full cursor-pointer">
                 Settings
-            </Link>
+            </LoadingLink>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/dashboard/team" className="w-full cursor-pointer">
+            <LoadingLink href="/dashboard/team" className="w-full cursor-pointer">
               Team
-            </Link>
+            </LoadingLink>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { LoadingLink } from "@/components/ui/loading-link"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -50,9 +50,9 @@ export function DesignerProjectCard({ project }: DesignerProjectCardProps) {
             </CardContent>
             <CardFooter>
                  <Button asChild className="w-full">
-                    <Link href={`/designer/projects/${project.id}`}>
+                    <LoadingLink href={`/designer/projects/${project.id}`}>
                         View Project
-                    </Link>
+                    </LoadingLink>
                 </Button>
             </CardFooter>
         </Card>

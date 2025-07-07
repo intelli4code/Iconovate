@@ -12,6 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { auth, db } from '@/lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { LoadingLink } from '@/components/ui/loading-link';
+import { useLoading } from '@/contexts/loading-context';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -19,10 +21,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const { showLoader } = useLoading();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    showLoader();
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -111,15 +115,15 @@ export default function LoginPage() {
       </Card>
        <p className="mt-4 text-center text-sm text-muted-foreground">
         Client?{" "}
-        <a href="/" className="underline">
+        <LoadingLink href="/" className="underline">
           Access the Client Portal
-        </a>
+        </LoadingLink>
       </p>
       <p className="mt-2 text-center text-sm text-muted-foreground">
         Are you a designer?{" "}
-        <a href="/designer/login" className="underline">
+        <LoadingLink href="/designer/login" className="underline">
           Designer Portal
-        </a>
+        </LoadingLink>
       </p>
     </div>
   );

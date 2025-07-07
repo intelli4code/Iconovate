@@ -9,7 +9,7 @@ import Loading from "@/app/dashboard/loading"
 import { PageHeader } from "@/components/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import Link from "next/link"
+import { LoadingLink } from "@/components/ui/loading-link"
 import { Badge } from "@/components/ui/badge"
 import { format } from 'date-fns'
 
@@ -125,7 +125,7 @@ export default function ClientDetailPage() {
                       {projects.map(project => (
                           <TableRow key={project.id}>
                               <TableCell className="font-medium">
-                                 <Link href={`/dashboard/projects/${project.id}`} className="hover:underline">{project.name}</Link>
+                                 <LoadingLink href={`/dashboard/projects/${project.id}`} className="hover:underline">{project.name}</LoadingLink>
                               </TableCell>
                               <TableCell><Badge variant="outline">{project.status}</Badge></TableCell>
                               <TableCell className="text-right">{format(new Date(project.dueDate), 'PP')}</TableCell>

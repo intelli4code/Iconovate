@@ -2,6 +2,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
+import { LoadingProvider } from '@/contexts/loading-context';
+import { PageLoader } from '@/components/ui/page-loader';
+import { NavigationEvents } from '@/components/navigation-events';
 
 export const metadata: Metadata = {
   title: 'BrandBoost AI',
@@ -21,7 +24,11 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        {children}
+        <LoadingProvider>
+            {children}
+            <PageLoader />
+            <NavigationEvents />
+        </LoadingProvider>
         <Toaster />
       </body>
     </html>

@@ -17,17 +17,19 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import Link from "next/link"
+import { LoadingLink } from "@/components/ui/loading-link"
 import { db } from "@/lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 import type { TeamMember } from "@/types";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "./ui/skeleton"
+import { useLoading } from "@/contexts/loading-context"
 
 export function DesignerUserNav() {
     const [user, setUser] = useState<TeamMember | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { showLoader } = useLoading();
 
     useEffect(() => {
         const designerId = sessionStorage.getItem('designerId');
@@ -46,6 +48,7 @@ export function DesignerUserNav() {
     }, []);
 
     const handleLogout = () => {
+        showLoader();
         sessionStorage.removeItem('designerId');
         router.push('/designer/login');
     };
@@ -57,7 +60,7 @@ export function DesignerUserNav() {
     if (!user) {
          return (
             <Button variant="outline" asChild>
-                <Link href="/designer/login">Login</Link>
+                <LoadingLink href="/designer/login">Login</LoadingLink>
             </Button>
          )
     }

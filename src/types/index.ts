@@ -6,6 +6,21 @@ export interface Expense {
   date: string;
 }
 
+export type PaymentStatus = 'Pending' | 'Approved' | 'Rejected';
+
+export interface Payment {
+  id: string;
+  projectId: string;
+  clientName: string;
+  projectName: string;
+  amount: number;
+  reference: string;
+  status: PaymentStatus;
+  requestedAt: any;
+  reviewedAt?: string;
+  reviewedBy?: string;
+}
+
 export type ProjectStatus = 'Awaiting Brief' | 'Pending Approval' | 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Cancellation Requested' | 'Revision Requested';
 export type ProjectType = 'Branding' | 'Web Design' | 'UI/UX' | 'Marketing' | 'Other';
 export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
