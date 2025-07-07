@@ -79,6 +79,11 @@ export default function ProjectDetailPage() {
 
 
   const handleFileUpload = async () => {
+    if (!supabase) {
+      toast({ variant: "destructive", title: "Storage Not Configured", description: "File uploads are disabled. Please add Supabase credentials in your environment file." });
+      return;
+    }
+
     if (!selectedFile || !project) {
         toast({
             variant: "destructive",
@@ -142,6 +147,10 @@ export default function ProjectDetailPage() {
 
   const handleFileDelete = async (assetToDelete: Asset) => {
     if (!project) return;
+     if (!supabase) {
+      toast({ variant: "destructive", title: "Storage Not Configured", description: "File deletion is disabled. Please add Supabase credentials in your environment file." });
+      return;
+    }
     try {
       // 1. Delete from Supabase Storage
       const { error: storageError } = await supabase.storage.from('data-storage').remove([assetToDelete.path]);

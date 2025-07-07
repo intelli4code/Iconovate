@@ -273,6 +273,10 @@ export default function DesignerProjectPage() {
   }, [params.id]);
   
   const handleFileUpload = async () => {
+    if (!supabase) {
+      toast({ variant: "destructive", title: "Storage Not Configured", description: "File uploads are disabled. Please add Supabase credentials in your environment file." });
+      return;
+    }
     if (!selectedFile || !project) {
         toast({ variant: "destructive", title: "No File Selected" });
         return;

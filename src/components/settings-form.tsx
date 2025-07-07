@@ -107,6 +107,10 @@ export function SettingsForm() {
 
     try {
         if (selectedFile) {
+            if (!supabase) {
+                toast({ variant: "destructive", title: "Storage Not Configured", description: "Avatar uploads are disabled. Please add Supabase credentials in your environment file." });
+                return;
+            }
             const filePath = `team-pfps/${uuidv4()}-${selectedFile.name}`;
             const { data: uploadData, error: uploadError } = await supabase.storage
                 .from('data-storage')

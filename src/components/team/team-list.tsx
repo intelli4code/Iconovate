@@ -111,6 +111,10 @@ export function TeamList() {
 
         try {
             if (selectedFile) {
+                if (!supabase) {
+                    toast({ variant: "destructive", title: "Storage Not Configured", description: "Avatar uploads are disabled. Please configure Supabase credentials."});
+                    return;
+                }
                 const filePath = `team-pfps/${uuidv4()}-${selectedFile.name}`;
                 const { data: uploadData, error: uploadError } = await supabase.storage
                     .from('data-storage')
@@ -185,6 +189,10 @@ export function TeamList() {
     const handleDeleteMember = async (member: TeamMember) => {
         try {
             if (member.avatarPath) {
+                if (!supabase) {
+                    toast({ variant: "destructive", title: "Storage Not Configured", description: "Avatar deletion is disabled."});
+                    return;
+                }
                 await supabase.storage.from('data-storage').remove([member.avatarPath]);
             }
             await deleteDoc(doc(db, "teamMembers", member.id));

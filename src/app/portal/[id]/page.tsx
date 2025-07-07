@@ -39,6 +39,10 @@ function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNe
     if (!newMessage.trim() && !selectedFile) return;
 
     if (selectedFile) {
+        if (!supabase) {
+          toast({ variant: "destructive", title: "Storage Not Configured", description: "File uploads are disabled. Please configure Supabase credentials."});
+          return;
+        }
         setIsUploading(true);
         try {
             if (selectedFile.size > 200 * 1024 * 1024) { // 200MB limit

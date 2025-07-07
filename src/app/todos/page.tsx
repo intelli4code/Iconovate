@@ -9,6 +9,11 @@ export default function TodosPage() {
 
   useEffect(() => {
     async function getTodos() {
+      if (!supabase) {
+        console.warn("Supabase not configured, cannot fetch todos.");
+        setLoading(false);
+        return;
+      }
       // You may need to create a 'todos' table in your Supabase project.
       const { data, error } = await supabase.from('todos').select();
 
@@ -26,7 +31,9 @@ export default function TodosPage() {
   return (
     <div className="container mx-auto p-8">
         <h1 className="text-2xl font-bold mb-4">My Todos</h1>
-        {loading ? (
+        {!supabase ? (
+          <p className="text-destructive">Supabase is not configured. Please add your credentials to the .env file to use this feature.</p>
+        ) : loading ? (
             <p className="text-muted-foreground">Loading...</p>
         ) : todos.length > 0 ? (
             <ul className="list-disc list-inside space-y-2">
