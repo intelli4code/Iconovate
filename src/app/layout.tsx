@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { LoadingProvider } from '@/contexts/loading-context';
+import { ThemeProvider } from "@/contexts/theme-provider";
 import { PageLoader } from '@/components/ui/page-loader';
 import { NavigationEvents } from '@/components/navigation-events';
 
@@ -17,19 +18,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" style={{colorScheme: "dark"}}>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <LoadingProvider>
-            {children}
-            <PageLoader />
-            <NavigationEvents />
-        </LoadingProvider>
-        <Toaster />
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <LoadingProvider>
+                {children}
+                <PageLoader />
+                <NavigationEvents />
+            </LoadingProvider>
+            <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -15,7 +15,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail, FileText, Megaphone, SearchCode, ReceiptText, Brush, ClipboardCheck, UsersRound, CalendarClock, CreditCard } from "lucide-react"
+import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail, FileText, Megaphone, SearchCode, ReceiptText, Brush, ClipboardCheck, UsersRound, CalendarClock, CreditCard, Download } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -103,6 +103,14 @@ export function DashboardNav() {
               <LoadingLink href="/dashboard/reviews">
                 <Star />
                 <span>Reviews</span>
+              </LoadingLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+           <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/export-data")}>
+              <LoadingLink href="/dashboard/export-data">
+                <Download />
+                <span>Export Data</span>
               </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
