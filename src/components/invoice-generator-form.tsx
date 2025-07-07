@@ -37,6 +37,7 @@ const FormSchema = z.object({
   lineItems: z.array(LineItemSchema).min(1, "At least one line item is required."),
   taxRate: z.coerce.number().optional().default(0),
   notes: z.string().optional(),
+  paymentLink: z.string().url().optional().or(z.literal('')),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -109,7 +110,8 @@ export function InvoiceGeneratorForm() {
         projectName: "",
         lineItems: [{ description: "", quantity: 1, price: 0 }],
         taxRate: 0,
-        notes: ""
+        notes: "",
+        paymentLink: ""
     });
   }
 
@@ -159,7 +161,7 @@ export function InvoiceGeneratorForm() {
       }
       setIsSubmitting(true);
       try {
-          const invoiceData = {
+          const invoiceData: Omit<Invoice, 'id' | 'createdAt'> & {createdAt: any} = {
               ...result,
               projectId: getValues('projectId'),
               status,
@@ -300,6 +302,12 @@ export function InvoiceGeneratorForm() {
             </div>
 
             <Separator />
+            
+            <div>
+              <Label htmlFor="paymentLink">Payment Link (Optional)</Label>
+              <Input id="paymentLink" {...register('paymentLink')} placeholder="https://buy.stripe.com/..." />
+               {errors.paymentLink && <p className="text-sm text-destructive mt-1">{errors.paymentLink.message}</p>}
+            </div>
 
             <div>
               <Label htmlFor="taxRate">Tax Rate (%)</Label>
@@ -399,6 +407,13 @@ export function InvoiceGeneratorForm() {
                         <p className="text-sm text-gray-500">{result.notes}</p>
                     </div>
                 )}
+                 {result.paymentLink && (
+                    <div className="text-center pt-4 mt-4 border-t">
+                        <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                            <a href={result.paymentLink} target="_blank" rel="noopener noreferrer">Pay Now Securely</a>
+                        </Button>
+                    </div>
+                )}
                 </div>
                 <div className="flex flex-wrap gap-2">
                     <Button onClick={handleDownloadPdf} variant="outline" disabled={isSubmitting}>
@@ -425,5 +440,3 @@ export function InvoiceGeneratorForm() {
     </div>
   );
 }
-
-    

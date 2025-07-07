@@ -11,6 +11,7 @@ export type PaymentStatus = 'Pending' | 'Approved' | 'Rejected';
 export interface Payment {
   id: string;
   projectId: string;
+  invoiceId: string;
   clientName: string;
   projectName: string;
   amount: number;
@@ -21,6 +22,7 @@ export interface Payment {
   reviewedBy?: string;
 }
 
+export type ProjectPaymentStatus = 'Unpaid' | 'Pending Confirmation' | 'Paid';
 export type ProjectStatus = 'Awaiting Brief' | 'Pending Approval' | 'In Progress' | 'Pending Feedback' | 'Completed' | 'Blocked' | 'Canceled' | 'Cancellation Requested' | 'Revision Requested';
 export type ProjectType = 'Branding' | 'Web Design' | 'UI/UX' | 'Marketing' | 'Other';
 export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
@@ -103,6 +105,7 @@ export interface Invoice {
   taxAmount: number;
   total: number;
   status: InvoiceStatus;
+  paymentLink?: string;
   createdAt: any;
 }
 
@@ -120,6 +123,7 @@ export interface Project {
   client: string;
   clientEmail?: string;
   status: ProjectStatus;
+  paymentStatus: ProjectPaymentStatus;
   dueDate: string;
   team: string[];
   description: string;

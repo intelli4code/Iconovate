@@ -36,7 +36,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { Project, ProjectStatus, ProjectType, TeamMember } from "@/types"
+import type { Project, ProjectStatus, ProjectType, TeamMember, ProjectPaymentStatus } from "@/types"
 import { ListFilter, PlusCircle, MoreHorizontal, Loader2 } from "lucide-react"
 import { LoadingLink } from "@/components/ui/loading-link"
 import { Label } from "@/components/ui/label"
@@ -144,6 +144,7 @@ export function ProjectList() {
       client: data.client,
       description: data.description || "No description provided.",
       status: "Awaiting Brief" as ProjectStatus,
+      paymentStatus: "Unpaid" as ProjectPaymentStatus,
       dueDate: format(futureDate, "yyyy-MM-dd"),
       team: data.team,
       feedback: [],

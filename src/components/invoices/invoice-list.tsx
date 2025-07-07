@@ -7,6 +7,7 @@ import { db } from "@/lib/firebase"
 import { LoadingLink } from "@/components/ui/loading-link"
 import { format } from 'date-fns'
 import { sendInvoiceReminder } from '@/app/actions/send-reminder-action';
+import { sendInvoiceByEmail } from '@/app/actions/send-invoice-action';
 
 import type { Invoice, InvoiceStatus } from "@/types"
 import { useToast } from "@/hooks/use-toast"
@@ -22,7 +23,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Loader2, PlusCircle, CheckCircle, Clock, Send } from "lucide-react"
+import { MoreHorizontal, Loader2, PlusCircle, CheckCircle, Clock, Send, Mail } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog"
 
 const statusStyles: { [key in InvoiceStatus]: string } = {
@@ -93,12 +94,18 @@ export function InvoiceList() {
      }
   }
 
-  const handleSendReminder = async (invoice: Invoice) => {
+  const handleSendEmail = async (invoice: Invoice) => {
     setIsSending(invoice.id);
-    const result = await sendInvoiceReminder(invoice);
+    let result;
+    if (invoice.status === 'Overdue') {
+        result = await sendInvoiceReminder(invoice);
+    } else {
+        result = await sendInvoiceByEmail(invoice);
+    }
+    
     if (result.success) {
       toast({
-        title: "Reminder Sent!",
+        title: "Email Sent!",
         description: result.message,
       });
     } else {
@@ -174,12 +181,16 @@ export function InvoiceList() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
+                          {isSending === invoice.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
                           <span className="sr-only">Toggle menu</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onSelect={() => handleSendEmail(invoice)} disabled={isSending === invoice.id}>
+                            <Mail className="mr-2 h-4 w-4"/> {invoice.status === 'Overdue' ? 'Send Reminder Email' : 'Send as Email'}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onSelect={() => handleUpdateStatus(invoice.id, 'Paid')} disabled={invoice.status === 'Paid'}>
                           Mark as Paid
                         </DropdownMenuItem>
@@ -190,11 +201,6 @@ export function InvoiceList() {
                           Mark as Overdue
                         </DropdownMenuItem>
                          <DropdownMenuSeparator />
-                          {invoice.status === 'Overdue' && (
-                            <DropdownMenuItem onSelect={() => handleSendReminder(invoice)} disabled={isSending === invoice.id}>
-                                {isSending === invoice.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4" />} Send Reminder
-                            </DropdownMenuItem>
-                          )}
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">Delete</DropdownMenuItem>

@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2, ReceiptText, CreditCard, Send } from "lucide-react"
+import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2, ReceiptText, CreditCard, Send, ShieldCheck } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -24,7 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNewMessage: (msg: string, file?: any) => void }) {
@@ -269,11 +269,8 @@ export default function ClientPortalPage() {
   const [email, setEmail] = useState("");
   const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-
-  // State for new payment submission
-  const [paymentAmount, setPaymentAmount] = useState<number | string>("");
+  const [isPaymentConfirmOpen, setIsPaymentConfirmOpen] = useState(false);
   const [paymentReference, setPaymentReference] = useState("");
-
 
   useEffect(() => {
     if (!params.id) return;
@@ -307,7 +304,6 @@ export default function ClientPortalPage() {
         setPayments(paymentsData);
     });
 
-
     return () => {
         unsubscribeProject();
         unsubscribeInvoices();
@@ -320,7 +316,6 @@ export default function ClientPortalPage() {
     
     const shouldShowPrompt = !project.clientEmail && localStorage.getItem(`hideEmailPrompt-${project.id}`) !== 'true';
     if (shouldShowPrompt) {
-        // Use a small delay to prevent layout shift from interrupting the user
         const timer = setTimeout(() => setIsEmailDialogOpen(true), 1500);
         return () => clearTimeout(timer);
     }
@@ -484,36 +479,19 @@ export default function ClientPortalPage() {
         description: "Your project brief has been sent to the designer for approval.",
     });
   };
-  
-  const handlePayInvoice = async (invoiceId: string) => {
-    if (!invoiceId) return;
 
-    const invoiceRef = doc(db, "invoices", invoiceId);
-    try {
-        await updateDoc(invoiceRef, { status: "Paid" });
-        toast({
-            title: "Payment Successful!",
-            description: "Thank you for your payment. The invoice has been marked as paid.",
-            action: <CheckCircle className="text-green-500" />
-        });
-        setIsInvoiceDialogOpen(false); // Close modal on success
-    } catch (e) {
-        toast({ variant: "destructive", title: "Payment Failed" });
-    }
-  };
-
-  const handlePaymentRequestSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!project || !paymentAmount || !paymentReference.trim()) {
-        toast({ variant: "destructive", title: "Missing Information", description: "Please provide both amount and a reference."});
+  const handlePaymentRequestSubmit = async () => {
+    if (!project || !selectedInvoice || !paymentReference.trim()) {
+        toast({ variant: "destructive", title: "Missing Information", description: "Please provide a reference."});
         return;
     }
 
     const newPayment: Omit<Payment, 'id'> = {
         projectId: project.id,
+        invoiceId: selectedInvoice.id,
         projectName: project.name,
         clientName: project.client,
-        amount: Number(paymentAmount),
+        amount: selectedInvoice.total,
         reference: paymentReference.trim(),
         status: 'Pending',
         requestedAt: serverTimestamp(),
@@ -521,12 +499,14 @@ export default function ClientPortalPage() {
 
     try {
         await addDoc(collection(db, "payments"), newPayment);
+        await updateDoc(doc(db, "projects", project.id), { paymentStatus: "Pending Confirmation" });
         toast({
             title: "Payment Submitted!",
             description: "Your payment notification has been sent for approval.",
         });
-        setPaymentAmount("");
         setPaymentReference("");
+        setIsPaymentConfirmOpen(false);
+        setIsInvoiceDialogOpen(false);
     } catch (error) {
          toast({ variant: "destructive", title: "Submission Failed" });
     }
@@ -534,11 +514,12 @@ export default function ClientPortalPage() {
 
 
   const visibleInvoices = invoices.filter(inv => inv.status !== 'Draft');
+  const outstandingInvoice = visibleInvoices.find(inv => ['Sent', 'Overdue'].includes(inv.status));
   const isFinalState = ['Completed', 'Canceled'].includes(project.status);
   const daysRemaining = differenceInDays(parseISO(project.dueDate), new Date());
   const revisionsRemaining = project.revisionLimit - project.revisionsUsed;
   const canRequestRevision = revisionsRemaining > 0 && !isFinalState && project.status !== 'Revision Requested';
-  const canCompleteProject = project.assets && project.assets.length > 0 && !isFinalState;
+  const canCompleteProject = project.assets && project.assets.length > 0 && !isFinalState && project.paymentStatus === 'Paid';
   const defaultTab = project.status === 'Awaiting Brief' ? 'brief' : 'deliverables';
 
   return (
@@ -551,6 +532,15 @@ export default function ClientPortalPage() {
       </header>
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        {outstandingInvoice && project.paymentStatus !== 'Paid' && (
+             <Alert className="mb-8 border-yellow-500">
+              <ReceiptText className="h-4 w-4" />
+              <AlertTitle>Action Required: Invoice Due</AlertTitle>
+              <AlertDescription>
+                An invoice for this project is due. Please visit the "Invoices" tab to view details and submit your payment confirmation.
+              </AlertDescription>
+            </Alert>
+        )}
         {project.status === 'Cancellation Requested' && (
              <Alert className="mb-8">
               <AlertTriangle className="h-4 w-4" />
@@ -604,12 +594,11 @@ export default function ClientPortalPage() {
             </Card>
 
             <Tabs defaultValue={defaultTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="brief" disabled={project.status !== 'Awaiting Brief'}>Project Brief</TabsTrigger>
                 <TabsTrigger value="deliverables">Deliverables</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
-                <TabsTrigger value="invoices">Invoices</TabsTrigger>
-                <TabsTrigger value="payments">Payments</TabsTrigger>
+                <TabsTrigger value="invoices">Invoices & Payment</TabsTrigger>
               </TabsList>
                <TabsContent value="brief" className="mt-4">
                  <Card>
@@ -651,6 +640,13 @@ export default function ClientPortalPage() {
                         <CardDescription>Download your final assets here.</CardDescription>
                     </CardHeader>
                     <CardContent>
+                        {project.paymentStatus !== 'Paid' && project.assets && project.assets.length > 0 && (
+                            <Alert variant="default" className="mb-4 border-primary">
+                                <ShieldCheck className="h-4 w-4"/>
+                                <AlertTitle>Payment Required</AlertTitle>
+                                <AlertDescription>Your deliverables are ready. Please complete the payment via the "Invoices & Payment" tab to enable downloads.</AlertDescription>
+                            </Alert>
+                        )}
                         {project.assets && project.assets.length > 0 ? (
                         <ul className="space-y-3">
                             {project.assets.map(asset => (
@@ -662,8 +658,8 @@ export default function ClientPortalPage() {
                                     <p className="text-sm text-muted-foreground">{asset.size}</p>
                                 </div>
                                 </div>
-                                <Button variant="outline" size="sm" asChild>
-                                <a href={asset.url} download><Download className="mr-2 h-4 w-4" />Download</a>
+                                <Button variant="outline" size="sm" asChild disabled={project.paymentStatus !== 'Paid'}>
+                                    <a href={asset.url} download><Download className="mr-2 h-4 w-4" />Download</a>
                                 </Button>
                             </li>
                             ))}
@@ -711,7 +707,7 @@ export default function ClientPortalPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Invoices</CardTitle>
-                        <CardDescription>View and pay invoices for this project.</CardDescription>
+                        <CardDescription>View invoices and submit payment confirmations.</CardDescription>
                     </CardHeader>
                     <CardContent>
                        {visibleInvoices.length > 0 ? (
@@ -727,7 +723,7 @@ export default function ClientPortalPage() {
                                         </div>
                                          <div className="flex items-center gap-2">
                                             <Badge variant="outline" className={invoiceStatusStyles[invoice.status]}>{invoice.status}</Badge>
-                                            <Button variant="outline" size="sm" onClick={() => { setSelectedInvoice(invoice); setIsInvoiceDialogOpen(true); }}>View</Button>
+                                            <Button variant="outline" size="sm" onClick={() => { setSelectedInvoice(invoice); setIsInvoiceDialogOpen(true); }}>View Details</Button>
                                          </div>
                                     </li>
                                 ))}
@@ -735,61 +731,6 @@ export default function ClientPortalPage() {
                         ) : (
                             <p className="text-center text-muted-foreground py-6">No invoices have been issued for this project.</p>
                         )}
-                    </CardContent>
-                </Card>
-              </TabsContent>
-               <TabsContent value="payments" className="mt-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Payment History</CardTitle>
-                        <CardDescription>Notify us of a new payment or view your payment history.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <Card className="bg-secondary/50">
-                            <CardHeader>
-                                <CardTitle className="text-lg">Submit a Payment</CardTitle>
-                            </CardHeader>
-                             <CardContent>
-                                <form onSubmit={handlePaymentRequestSubmit} className="grid sm:grid-cols-3 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="payment-amount">Amount Paid</Label>
-                                        <Input id="payment-amount" type="number" placeholder="100.00" value={paymentAmount} onChange={(e) => setPaymentAmount(e.target.value)} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="payment-ref">Reference / Transaction ID</Label>
-                                        <Input id="payment-ref" placeholder="e.g., Stripe ID, Bank Ref" value={paymentReference} onChange={(e) => setPaymentReference(e.target.value)} />
-                                    </div>
-                                    <div className="self-end">
-                                        <Button type="submit" className="w-full"><Send className="mr-2 h-4 w-4"/>Submit for Approval</Button>
-                                    </div>
-                                </form>
-                             </CardContent>
-                        </Card>
-                        <div>
-                             <h4 className="font-medium mb-2">Submitted Payments</h4>
-                             {payments.length > 0 ? (
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Amount</TableHead>
-                                            <TableHead>Reference</TableHead>
-                                            <TableHead>Status</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {payments.map(p => (
-                                            <TableRow key={p.id}>
-                                                <TableCell>{formatCurrency(p.amount)}</TableCell>
-                                                <TableCell className="font-mono text-xs">{p.reference}</TableCell>
-                                                <TableCell><Badge variant="outline" className={paymentStatusStyles[p.status]}>{p.status}</Badge></TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                             ) : (
-                                <p className="text-center text-muted-foreground py-6 border rounded-lg">No payments have been submitted for this project.</p>
-                             )}
-                        </div>
                     </CardContent>
                 </Card>
               </TabsContent>
@@ -853,8 +794,8 @@ export default function ClientPortalPage() {
                   ) : (
                     <Alert>
                         <Info className="h-4 w-4" />
-                        <AlertTitle>Awaiting Deliverables</AlertTitle>
-                        <AlertDescription>The completion button will appear here once your designer has uploaded the final assets.</AlertDescription>
+                        <AlertTitle>Awaiting Deliverables/Payment</AlertTitle>
+                        <AlertDescription>The completion button will appear here once assets are delivered and payment is confirmed.</AlertDescription>
                     </Alert>
                   )}
                   
@@ -1027,16 +968,53 @@ export default function ClientPortalPage() {
               )}
             </div>
           )}
-          <DialogFooter>
-            {selectedInvoice && ['Sent', 'Overdue'].includes(selectedInvoice.status) && (
-                <Button onClick={() => handlePayInvoice(selectedInvoice.id)}>
-                    <CreditCard className="mr-2 h-4 w-4" /> Pay with Stripe
-                </Button>
-            )}
-            <Button variant="outline" onClick={() => setIsInvoiceDialogOpen(false)}>Close</Button>
+          <DialogFooter className="gap-2 sm:justify-between w-full">
+            <div>
+              {selectedInvoice && ['Sent', 'Overdue'].includes(selectedInvoice.status) && (
+                  <DialogTrigger asChild>
+                    <Button onClick={() => setIsPaymentConfirmOpen(true)}>
+                      <ShieldCheck className="mr-2 h-4 w-4" /> Submit Payment Confirmation
+                    </Button>
+                  </DialogTrigger>
+              )}
+            </div>
+            <div className="flex gap-2">
+              {selectedInvoice?.paymentLink && (
+                  <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                      <a href={selectedInvoice.paymentLink} target="_blank" rel="noopener noreferrer"><CreditCard className="mr-2 h-4 w-4" /> Pay with Link</a>
+                  </Button>
+              )}
+              <Button variant="outline" onClick={() => setIsInvoiceDialogOpen(false)}>Close</Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+       <Dialog open={isPaymentConfirmOpen} onOpenChange={setIsPaymentConfirmOpen}>
+          <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Confirm Your Payment</DialogTitle>
+                <DialogDescription>
+                    Please provide a payment reference number (e.g., from Stripe, PayPal, or your bank) to help us verify your payment quickly.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+                <Label htmlFor="payment-reference">Payment Reference ID</Label>
+                <Input 
+                    id="payment-reference" 
+                    value={paymentReference} 
+                    onChange={(e) => setPaymentReference(e.target.value)} 
+                    placeholder="e.g., ch_123abc..."
+                />
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIsPaymentConfirmOpen(false)}>Cancel</Button>
+                <Button onClick={handlePaymentRequestSubmit} disabled={!paymentReference.trim()}>
+                    Submit Confirmation
+                </Button>
+            </DialogFooter>
+          </DialogContent>
+       </Dialog>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { collection, onSnapshot, query, orderBy, doc, updateDoc } from "firebase/firestore"
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, writeBatch } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { format } from 'date-fns'
 
@@ -33,6 +33,7 @@ const formatCurrency = (amount: number) => {
 export function PaymentList() {
   const [payments, setPayments] = React.useState<Payment[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [updatingId, setUpdatingId] = React.useState<string | null>(null);
   const { toast } = useToast()
 
   React.useEffect(() => {
@@ -60,18 +61,33 @@ export function PaymentList() {
     return () => unsubscribe()
   }, [toast])
   
-  const handleUpdateStatus = async (paymentId: string, status: PaymentStatus) => {
-    const paymentRef = doc(db, "payments", paymentId);
+  const handleUpdateStatus = async (payment: Payment, newStatus: PaymentStatus) => {
+    setUpdatingId(payment.id);
+    const batch = writeBatch(db);
+
+    const paymentRef = doc(db, "payments", payment.id);
+    batch.update(paymentRef, { status: newStatus, reviewedAt: new Date().toISOString() });
+
+    if (newStatus === 'Approved') {
+        const invoiceRef = doc(db, "invoices", payment.invoiceId);
+        batch.update(invoiceRef, { status: 'Paid' });
+
+        const projectRef = doc(db, "projects", payment.projectId);
+        batch.update(projectRef, { paymentStatus: 'Paid' });
+    }
+    
     try {
-        await updateDoc(paymentRef, { status: status, reviewedAt: new Date().toISOString() });
+        await batch.commit();
         toast({
-            title: `Payment ${status}`,
-            description: `The payment has been marked as ${status}.`,
+            title: `Payment ${newStatus}`,
+            description: `The payment has been marked as ${newStatus}.`,
             action: <CheckCircle className="text-green-500"/>
         });
     } catch (error) {
         console.error("Error updating payment status:", error);
         toast({ variant: "destructive", title: "Update Failed"});
+    } finally {
+        setUpdatingId(null);
     }
   }
 
@@ -122,12 +138,14 @@ export function PaymentList() {
                   <TableCell className="font-mono text-xs">{payment.reference}</TableCell>
                   <TableCell className="text-right">{formatCurrency(payment.amount)}</TableCell>
                   <TableCell className="text-right">
-                    {payment.status === 'Pending' ? (
+                    {updatingId === payment.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin ml-auto"/>
+                    ) : payment.status === 'Pending' ? (
                         <div className="flex gap-2 justify-end">
-                            <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(payment.id, 'Approved')}>
+                            <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(payment, 'Approved')}>
                                 <CheckCircle className="mr-2 h-4 w-4 text-green-500" />Approve
                             </Button>
-                             <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(payment.id, 'Rejected')}>
+                             <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(payment, 'Rejected')}>
                                 <XCircle className="mr-2 h-4 w-4 text-red-500" />Reject
                             </Button>
                         </div>

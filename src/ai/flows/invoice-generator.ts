@@ -25,6 +25,7 @@ const InvoiceGeneratorInputSchema = z.object({
   lineItems: z.array(LineItemSchema).describe('A list of billable items.'),
   taxRate: z.coerce.number().optional().default(0).describe('The tax rate as a percentage (e.g., 5 for 5%).'),
   notes: z.string().optional().describe('Any additional notes for the client.'),
+  paymentLink: z.string().url().optional().describe('An optional link for online payment.'),
 });
 export type InvoiceGeneratorInput = z.infer<typeof InvoiceGeneratorInputSchema>;
 
@@ -41,6 +42,7 @@ const InvoiceGeneratorOutputSchema = z.object({
   taxAmount: z.number().describe('The calculated tax amount.'),
   total: z.number().describe('The final total amount due.'),
   notes: z.string().optional().describe('Additional notes for the client.'),
+  paymentLink: z.string().url().optional().describe('An optional link for online payment.'),
 });
 export type InvoiceGeneratorOutput = z.infer<typeof InvoiceGeneratorOutputSchema>;
 
@@ -79,6 +81,7 @@ const invoiceGeneratorFlow = ai.defineFlow(
       taxAmount,
       total,
       notes: input.notes,
+      paymentLink: input.paymentLink,
     };
   }
 );
