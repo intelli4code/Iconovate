@@ -80,7 +80,13 @@ export default function ClientLoginPage() {
       <p className="mt-4 text-center text-sm text-muted-foreground">
         Are you an admin?{" "}
         <a href="/login" className="underline">
-          Login here
+          Admin Login
+        </a>
+      </p>
+      <p className="mt-2 text-center text-sm text-muted-foreground">
+        Are you a designer?{" "}
+        <a href="/designer/login" className="underline">
+          Designer Portal
         </a>
       </p>
     </div>

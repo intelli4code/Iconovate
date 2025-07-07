@@ -4,7 +4,7 @@ import * as React from "react" // Import React
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
-import { Bell, LogIn, Search } from "lucide-react"
+import { LogIn, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { GlobalSearch } from "@/components/global-search"
