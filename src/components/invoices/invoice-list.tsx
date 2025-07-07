@@ -6,6 +6,7 @@ import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } fro
 import { db } from "@/lib/firebase"
 import { LoadingLink } from "@/components/ui/loading-link"
 import { format } from 'date-fns'
+import { sendInvoiceReminder } from '@/app/actions/send-reminder-action';
 
 import type { Invoice, InvoiceStatus } from "@/types"
 import { useToast } from "@/hooks/use-toast"
@@ -38,6 +39,7 @@ const formatCurrency = (amount: number) => {
 export function InvoiceList() {
   const [invoices, setInvoices] = React.useState<Invoice[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [isSending, setIsSending] = React.useState<string | null>(null);
   const { toast } = useToast()
 
   React.useEffect(() => {
@@ -91,12 +93,23 @@ export function InvoiceList() {
      }
   }
 
-  const handleSendReminder = (invoice: Invoice) => {
-    toast({
+  const handleSendReminder = async (invoice: Invoice) => {
+    setIsSending(invoice.id);
+    const result = await sendInvoiceReminder(invoice);
+    if (result.success) {
+      toast({
         title: "Reminder Sent!",
-        description: `A payment reminder email has been sent to ${invoice.clientName}.`
-    });
-  }
+        description: result.message,
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Send Failed",
+        description: result.error,
+      });
+    }
+    setIsSending(null);
+  };
 
   return (
     <Card>
@@ -178,8 +191,8 @@ export function InvoiceList() {
                         </DropdownMenuItem>
                          <DropdownMenuSeparator />
                           {invoice.status === 'Overdue' && (
-                            <DropdownMenuItem onSelect={() => handleSendReminder(invoice)}>
-                                <Send className="mr-2 h-4 w-4" /> Send Reminder
+                            <DropdownMenuItem onSelect={() => handleSendReminder(invoice)} disabled={isSending === invoice.id}>
+                                {isSending === invoice.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4" />} Send Reminder
                             </DropdownMenuItem>
                           )}
                         <AlertDialog>
