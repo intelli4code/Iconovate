@@ -86,7 +86,7 @@ export default function HomePageContent() {
 
         {/* Main Content */}
         <div className="container mx-auto px-4 z-10 flex items-center justify-start h-full">
-            <div className="max-w-2xl">
+            <div className="max-w-3xl lg:w-1/2">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-headline leading-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/80">
                     Unlock Top Design Talent You Thought Was Out of Reach
                 </h1>
