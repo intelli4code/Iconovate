@@ -43,14 +43,14 @@ export default function HomePageContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative w-full h-screen flex flex-col justify-center overflow-hidden text-white z-0">
+      <section className="relative w-full h-screen flex flex-col justify-center text-white z-0 overflow-hidden">
 
         {/* Background & Orbits */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/30 to-black -z-20" />
         <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-yellow-400/10 rounded-full blur-[150px] -z-10" />
         <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-primary/10 rounded-full blur-[150px] -z-10" />
 
-        <div className="absolute inset-0 w-full h-full flex items-center justify-center -z-10">
+        <div className="absolute inset-0 w-full h-full flex items-center justify-end -z-10">
           <div className="relative w-[300px] h-[300px] md:w-[600px] md:h-[600px] lg:w-[800px] lg:h-[800px]">
             <div className="absolute inset-0 border border-white/10 rounded-full animate-spin [animation-duration:60s]" />
             <div className="absolute inset-[20%] border border-white/10 rounded-full animate-spin [animation-duration:40s] [animation-direction:reverse]" />
