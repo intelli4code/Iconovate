@@ -4,7 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { LoadingProvider } from '@/contexts/loading-context';
 import { ThemeProvider } from "@/contexts/theme-provider";
-import { PageLoader } from '@/components/ui/page-loader';
+import { TopLoader } from '@/components/ui/top-loader';
 import { NavigationEvents } from '@/components/navigation-events';
 
 export const metadata: Metadata = {
@@ -28,7 +28,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
             <LoadingProvider>
                 {children}
-                <PageLoader />
+                <TopLoader />
                 <NavigationEvents />
             </LoadingProvider>
             <Toaster />
