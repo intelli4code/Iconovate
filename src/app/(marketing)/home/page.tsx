@@ -43,20 +43,18 @@ export default function HomePageContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative w-full min-h-screen h-screen overflow-hidden flex flex-col justify-between text-white">
-        {/* Empty div to account for header height - assumes header is absolute */}
-        <div className="h-24" />
+      <section className="relative w-full h-screen flex flex-col justify-center text-white">
 
         {/* Background & Orbits */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#111] via-purple-950/50 to-black -z-20" />
-        <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-yellow-500/5 rounded-full blur-[150px] -z-10" />
-        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-purple-500/10 rounded-full blur-[150px] -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/30 to-black -z-20" />
+        <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-yellow-400/10 rounded-full blur-[150px] -z-10" />
+        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-primary/10 rounded-full blur-[150px] -z-10" />
 
         <div className="absolute inset-0 w-full h-full flex items-center justify-center -z-10">
           <div className="relative w-[300px] h-[300px] md:w-[600px] md:h-[600px] lg:w-[800px] lg:h-[800px]">
-            <div className="absolute inset-0 border border-white/5 rounded-full animate-spin [animation-duration:60s]" />
-            <div className="absolute inset-[20%] border border-white/5 rounded-full animate-spin [animation-duration:40s] [animation-direction:reverse]" />
-            <div className="absolute inset-[40%] border border-white/5 rounded-full animate-spin [animation-duration:25s]" />
+            <div className="absolute inset-0 border border-white/10 rounded-full animate-spin [animation-duration:60s]" />
+            <div className="absolute inset-[20%] border border-white/10 rounded-full animate-spin [animation-duration:40s] [animation-direction:reverse]" />
+            <div className="absolute inset-[40%] border border-white/10 rounded-full animate-spin [animation-duration:25s]" />
             
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
@@ -100,7 +98,7 @@ export default function HomePageContent() {
         </div>
         
         {/* Partners Bar */}
-        <div className="w-full z-10 pb-8">
+        <div className="absolute bottom-8 w-full z-10">
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap justify-center md:justify-between items-center gap-x-8 gap-y-4 text-white/40">
               {partners.map(p => (
