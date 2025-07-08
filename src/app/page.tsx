@@ -5,7 +5,7 @@ import HomePageContent from "./(marketing)/home/page";
 
 export default function RootPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-background font-body">
+    <div className="flex min-h-screen flex-col font-body">
       <MarketingHeader />
       <main className="flex-1">
         <HomePageContent />

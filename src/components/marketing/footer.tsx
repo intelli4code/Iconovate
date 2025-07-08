@@ -4,7 +4,7 @@ import { Rocket, Twitter, Linkedin, Github } from "lucide-react";
 
 export function MarketingFooter() {
   return (
-    <footer className="border-t">
+    <footer className="border-t bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-4">

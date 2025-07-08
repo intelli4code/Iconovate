@@ -43,7 +43,7 @@ export default function HomePageContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative w-full h-screen text-white z-0 overflow-hidden">
+      <section className="relative w-full h-screen text-white z-0">
 
         {/* Background & Orbits */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/30 to-black -z-20" />
@@ -115,7 +115,7 @@ export default function HomePageContent() {
       </section>
 
       {/* Services Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center">
             <h2 className="text-3xl md:text-4xl font-headline font-bold">A Smarter Way to Design</h2>
