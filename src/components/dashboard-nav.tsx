@@ -27,10 +27,10 @@ export function DashboardNav() {
   return (
     <Sidebar>
       <SidebarHeader>
-          <div className="flex items-center gap-2">
+          <LoadingLink href="/dashboard" className="flex items-center gap-2">
             <Rocket className="w-6 h-6 text-primary" />
             <span className="text-lg font-semibold font-headline">BrandBoost AI</span>
-          </div>
+          </LoadingLink>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>

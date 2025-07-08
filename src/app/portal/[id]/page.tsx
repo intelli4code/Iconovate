@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2, ReceiptText, CreditCard, Send, ShieldCheck } from "lucide-react"
+import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2, ReceiptText, CreditCard, Send, ShieldCheck, Rocket } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { LoadingLink } from "@/components/ui/loading-link"
 
 function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNewMessage: (msg: string, file?: any) => void }) {
   const [newMessage, setNewMessage] = useState("")
@@ -526,8 +527,11 @@ export default function ClientPortalPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="bg-card border-b">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold font-headline text-primary">{project.name}</h1>
-          <h2 className="text-muted-foreground text-sm">Client Portal</h2>
+          <LoadingLink href="/" className="flex items-center gap-2">
+            <Rocket className="w-6 h-6 text-primary" />
+            <h1 className="text-xl font-bold font-headline text-primary">BrandBoost AI</h1>
+          </LoadingLink>
+          <h2 className="text-muted-foreground text-sm hidden sm:block">Client Portal for: {project.name}</h2>
         </div>
       </header>
 
