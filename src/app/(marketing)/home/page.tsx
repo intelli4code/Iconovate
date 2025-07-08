@@ -43,7 +43,7 @@ export default function HomePageContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative w-full h-screen flex flex-col justify-center text-white z-0 overflow-hidden">
+      <section className="relative w-full h-screen text-white z-0 overflow-hidden">
 
         {/* Background & Orbits */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/30 to-black -z-20" />
@@ -85,16 +85,18 @@ export default function HomePageContent() {
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-4 z-10 flex flex-col items-start text-left max-w-7xl">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-headline max-w-3xl leading-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/80">
-                Unlock Top Design Talent You Thought Was Out of Reach
-            </h1>
-            <p className="mt-6 text-lg text-white/70 max-w-lg">
-              BrandBoost AI connects you with a curated network of elite designers and AI-powered tools to build unforgettable brands, faster than ever.
-            </p>
-            <Button asChild size="lg" className="mt-8 rounded-full bg-white text-black hover:bg-white/90 shadow-lg shadow-white/10">
-                <LoadingLink href="/contact">Start Project <ArrowRight /></LoadingLink>
-            </Button>
+        <div className="container mx-auto px-4 z-10 flex items-center h-full">
+            <div className="max-w-3xl">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-headline leading-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/80">
+                    Unlock Top Design Talent You Thought Was Out of Reach
+                </h1>
+                <p className="mt-6 text-lg text-white/70 max-w-2xl">
+                  BrandBoost AI connects you with a curated network of elite designers and AI-powered tools to build unforgettable brands, faster than ever.
+                </p>
+                <Button asChild size="lg" className="mt-8 rounded-full bg-white text-black hover:bg-white/90 shadow-lg shadow-white/10">
+                    <LoadingLink href="/contact">Start Project <ArrowRight /></LoadingLink>
+                </Button>
+            </div>
         </div>
         
         {/* Partners Bar */}
