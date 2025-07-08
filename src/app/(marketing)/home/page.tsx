@@ -46,15 +46,15 @@ export default function HomePageContent() {
       <section className="relative w-full h-screen text-white z-0">
 
         {/* Background & Orbits */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/30 to-black -z-20" />
-        <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-primary/10 rounded-full blur-[150px] -z-10" />
-        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-primary/10 rounded-full blur-[150px] -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-primary/30 to-black -z-20" />
+        <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-primary/20 rounded-full blur-[150px] -z-10" />
+        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-primary/20 rounded-full blur-[150px] -z-10" />
 
         <div className="absolute inset-0 w-full h-full flex items-center justify-end -z-10">
           <div className="relative w-[300px] h-[300px] md:w-[600px] md:h-[600px] lg:w-[800px] lg:h-[800px]">
-            <div className="absolute inset-0 border border-white/10 rounded-full animate-spin [animation-duration:60s]" />
-            <div className="absolute inset-[20%] border border-white/10 rounded-full animate-spin [animation-duration:40s] [animation-direction:reverse]" />
-            <div className="absolute inset-[40%] border border-white/10 rounded-full animate-spin [animation-duration:25s]" />
+            <div className="absolute inset-0 border border-white/20 rounded-full animate-spin [animation-duration:60s]" />
+            <div className="absolute inset-[20%] border border-white/20 rounded-full animate-spin [animation-duration:40s] [animation-direction:reverse]" />
+            <div className="absolute inset-[40%] border border-white/20 rounded-full animate-spin [animation-duration:25s]" />
             
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
@@ -86,7 +86,7 @@ export default function HomePageContent() {
 
         {/* Main Content */}
         <div className="container mx-auto px-4 z-10 flex items-center justify-start h-full">
-            <div className="max-w-lg md:max-w-2xl lg:w-1/2">
+            <div className="max-w-lg md:max-w-xl lg:w-1/2">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-headline leading-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/80">
                     Unlock Top Design Talent You Thought Was Out of Reach
                 </h1>
