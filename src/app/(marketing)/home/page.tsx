@@ -43,7 +43,7 @@ export default function HomePageContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative w-full h-screen flex flex-col justify-center text-white">
+      <section className="relative w-full h-screen flex flex-col justify-center overflow-hidden text-white z-0">
 
         {/* Background & Orbits */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/30 to-black -z-20" />
