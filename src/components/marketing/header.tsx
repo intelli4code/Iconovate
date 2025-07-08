@@ -41,7 +41,7 @@ export function MarketingHeader() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
-          <LoadingLink href="/" className="mr-6 flex items-center space-x-2">
+          <LoadingLink href="/home" className="mr-6 flex items-center space-x-2">
             <Rocket className="h-6 w-6 text-primary" />
             <span className="hidden font-bold sm:inline-block font-headline">
               BrandBoost AI
@@ -64,7 +64,7 @@ export function MarketingHeader() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="pr-0">
-             <LoadingLink href="/" className="flex items-center space-x-2">
+             <LoadingLink href="/home" className="flex items-center space-x-2">
               <Rocket className="h-6 w-6 text-primary" />
               <span className="font-bold font-headline">BrandBoost AI</span>
             </LoadingLink>
@@ -76,7 +76,7 @@ export function MarketingHeader() {
         </Sheet>
         
         {/* Mobile Logo */}
-        <LoadingLink href="/" className="flex items-center space-x-2 md:hidden">
+        <LoadingLink href="/home" className="flex items-center space-x-2 md:hidden">
             <Rocket className="h-6 w-6 text-primary" />
             <span className="font-bold font-headline">BrandBoost AI</span>
         </LoadingLink>
