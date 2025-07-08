@@ -41,7 +41,7 @@ export default function DashboardLayout({
           <div className="flex items-center gap-2">
             <NotificationCenter />
             <Button variant="outline" size="sm" asChild>
-                <LoadingLink href="/">
+                <LoadingLink href="/client-login">
                     <LogIn className="mr-2 h-4 w-4" /> Client Portal
                 </LoadingLink>
             </Button>

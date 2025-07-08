@@ -33,7 +33,6 @@ export default function LoginPage() {
 
       const teamRef = collection(db, "teamMembers");
 
-      // Handle first-run scenario where no team members exist
       const teamSnapshot = await getDocs(teamRef);
       if (teamSnapshot.empty) {
         router.push('/dashboard');
@@ -41,10 +40,9 @@ export default function LoginPage() {
           title: "Welcome, Admin!",
           description: "Please add yourself to the team in the Team Management page to complete setup.",
         });
-        return; // Grant access and stop further checks
+        return; 
       }
 
-      // Normal login: verify user exists in team and has Admin role
       const q = query(teamRef, where("email", "==", user.email));
       const querySnapshot = await getDocs(q);
 
@@ -66,7 +64,6 @@ export default function LoginPage() {
         title: "Login Failed",
         description: error.message || "Invalid email or password. Please try again.",
       });
-      // Sign out the user if they managed to log in but lack permissions
       if (auth.currentUser) {
         await auth.signOut();
       }
@@ -115,7 +112,7 @@ export default function LoginPage() {
       </Card>
        <p className="mt-4 text-center text-sm text-muted-foreground">
         Client?{" "}
-        <LoadingLink href="/" className="underline">
+        <LoadingLink href="/client-login" className="underline">
           Access the Client Portal
         </LoadingLink>
       </p>
