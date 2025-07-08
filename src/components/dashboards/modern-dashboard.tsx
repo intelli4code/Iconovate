@@ -15,7 +15,6 @@ import {
   RadialBarChart,
   PolarAngleAxis,
   Cell,
-  Defs,
 } from "recharts"
 import {
   Card,
@@ -184,11 +183,11 @@ export default function ModernDashboard({ projects, teamMembers }: ModernDashboa
           <CardContent className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={projectAnalytics} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                <Defs>
+                <defs>
                     <pattern id="pattern-stripe" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
                         <rect width="2" height="4" fill="#a3a3a3" fillOpacity="0.5"></rect>
                     </pattern>
-                </Defs>
+                </defs>
                 <XAxis dataKey="name" axisLine={false} tickLine={false} />
                 <YAxis axisLine={false} tickLine={false} />
                 <Tooltip
