@@ -8,7 +8,7 @@ export function MarketingFooter() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-4">
-            <LoadingLink href="/home" className="flex items-center space-x-2">
+            <LoadingLink href="/" className="flex items-center space-x-2">
               <Rocket className="h-6 w-6 text-primary" />
               <span className="font-bold font-headline text-lg">
                 BrandBoost AI
