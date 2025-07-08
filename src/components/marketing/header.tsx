@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react";
 import { LoadingLink } from "@/components/ui/loading-link";
 import { Button } from "@/components/ui/button";
 import { Rocket, Menu } from "lucide-react";
@@ -10,6 +11,21 @@ import { ThemeToggle } from "./theme-toggle";
 
 export function MarketingHeader() {
   const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
+
+    document.addEventListener("scroll", handleScroll);
+    return () => {
+      document.removeEventListener("scroll", handleScroll);
+    };
+  }, [scrolled]);
 
   const navLinks = [
     { href: "/services", label: "Services" },
@@ -38,7 +54,10 @@ export function MarketingHeader() {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className={cn(
+      "sticky top-0 z-50 w-full transition-all duration-300",
+      scrolled ? "border-b bg-background/80 backdrop-blur-sm" : "bg-transparent"
+    )}>
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
           <LoadingLink href="/" className="mr-6 flex items-center space-x-2">
