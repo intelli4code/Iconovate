@@ -38,6 +38,11 @@ const notificationsFormSchema = z.object({
 });
 type NotificationsFormValues = z.infer<typeof notificationsFormSchema>;
 
+const appearanceFormSchema = z.object({
+    dashboardLayout: z.enum(['classic', 'modern']),
+});
+type AppearanceFormValues = z.infer<typeof appearanceFormSchema>;
+
 export function SettingsForm() {
   const { toast } = useToast()
   const { theme, setTheme } = useTheme()
@@ -68,6 +73,15 @@ export function SettingsForm() {
       }
   });
 
+  const {
+    handleSubmit: handleAppearanceSubmit,
+    control: appearanceControl,
+    reset: resetAppearanceForm,
+    formState: { isSubmitting: isAppearanceSubmitting },
+  } = useForm<AppearanceFormValues>({
+      resolver: zodResolver(appearanceFormSchema),
+  });
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -81,6 +95,7 @@ export function SettingsForm() {
                     const userData = { id: userDoc.id, ...userDoc.data() } as TeamMember;
                     setCurrentUser(userData);
                     resetProfileForm({ fullName: userData.name, email: userData.email });
+                    resetAppearanceForm({ dashboardLayout: userData.dashboardLayout || 'classic' });
                     setPreview(userData.avatarUrl || null);
                 } else {
                     toast({ variant: "destructive", title: "Profile Not Found" });
@@ -95,7 +110,7 @@ export function SettingsForm() {
         }
     });
     return () => unsubscribe();
-  }, [resetProfileForm, toast]);
+  }, [resetProfileForm, resetAppearanceForm, toast]);
 
 
   const onProfileSubmit = async (data: ProfileFormValues) => {
@@ -127,11 +142,8 @@ export function SettingsForm() {
         
         const userDocRef = doc(db, "teamMembers", currentUser.id);
         
-        // Prevent changing the email of the main demo admin account
         const emailToUpdate = currentUser.email === 'infoathamza@gmail.com' ? currentUser.email : data.email;
         if(currentUser.email !== 'infoathamza@gmail.com' && currentUser.email !== data.email) {
-            // Note: In a real app, updating the email in Firebase Auth would require re-authentication.
-            // Here we only update it in our Firestore database.
             console.warn("User email change requested. Firestore will be updated, but Firebase Auth email is not changed in this demo.")
         }
 
@@ -143,7 +155,7 @@ export function SettingsForm() {
             description: "Your changes have been saved successfully.",
             action: <CheckCircle className="text-green-500" />,
         });
-        setSelectedFile(null); // Clear file after successful upload
+        setSelectedFile(null);
     } catch (error: any) {
         toast({
             variant: "destructive",
@@ -165,6 +177,25 @@ export function SettingsForm() {
         setPreview(currentUser?.avatarUrl || null);
     }
   };
+  
+  const onAppearanceSubmit = async (data: AppearanceFormValues) => {
+    if (!currentUser) {
+      toast({ variant: "destructive", title: "Update Failed", description: "User profile not loaded." });
+      return;
+    }
+    try {
+      const userDocRef = doc(db, "teamMembers", currentUser.id);
+      await updateDoc(userDocRef, { dashboardLayout: data.dashboardLayout });
+      toast({
+        title: "Appearance Updated!",
+        description: "Your dashboard layout preference has been saved.",
+        action: <CheckCircle className="text-green-500" />,
+      });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Update Failed", description: "Could not save your preference." });
+    }
+  };
+
 
   const onNotificationsSubmit = async (data: NotificationsFormValues) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -236,80 +267,98 @@ export function SettingsForm() {
       </TabsContent>
 
       <TabsContent value="appearance" className="mt-4">
-        <Card>
-            <CardHeader>
-                <CardTitle>Appearance</CardTitle>
-                <CardDescription>
-                Customize the look and feel of the app.
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div className="space-y-2">
-                    <Label>Theme</Label>
-                    <RadioGroup
-                        defaultValue={theme}
-                        onValueChange={(value) => setTheme(value as "light" | "dark" | "system")}
-                        className="grid max-w-md grid-cols-3 gap-8 pt-2"
-                    >
-                        <Label className="[&:has([data-state=checked])>div]:border-primary">
-                            <RadioGroupItem value="light" className="sr-only" />
-                            <div className="items-center rounded-md border-2 border-muted p-1 hover:border-accent">
-                                <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
-                                <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">
-                                    <div className="h-2 w-4/5 rounded-lg bg-[#ecedef]" />
-                                    <div className="h-2 w-full rounded-lg bg-[#ecedef]" />
+        <form onSubmit={handleAppearanceSubmit(onAppearanceSubmit)}>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Appearance</CardTitle>
+                    <CardDescription>
+                    Customize the look and feel of the app.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                        <Label>Theme</Label>
+                        <RadioGroup
+                            defaultValue={theme}
+                            onValueChange={(value) => setTheme(value as "light" | "dark" | "system")}
+                            className="grid max-w-md grid-cols-3 gap-8 pt-2"
+                        >
+                            <Label className="[&:has([data-state=checked])>div]:border-primary">
+                                <RadioGroupItem value="light" className="sr-only" />
+                                <div className="items-center rounded-md border-2 border-muted p-1 hover:border-accent">
+                                    <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
+                                    <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">
+                                        <div className="h-2 w-4/5 rounded-lg bg-[#ecedef]" />
+                                        <div className="h-2 w-full rounded-lg bg-[#ecedef]" />
+                                    </div>
+                                    <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
+                                        <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
+                                        <div className="h-2 w-full rounded-lg bg-[#ecedef]" />
+                                    </div>
+                                    <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
+                                        <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
+                                        <div className="h-2 w-full rounded-lg bg-[#ecedef]" />
+                                    </div>
+                                    </div>
                                 </div>
-                                <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
-                                    <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
-                                    <div className="h-2 w-full rounded-lg bg-[#ecedef]" />
+                                <div className="flex items-center justify-center p-2 gap-2">
+                                    <Sun className="h-4 w-4"/> Light
                                 </div>
-                                <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
-                                    <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
-                                    <div className="h-2 w-full rounded-lg bg-[#ecedef]" />
+                            </Label>
+                            <Label className="[&:has([data-state=checked])>div]:border-primary">
+                                <RadioGroupItem value="dark" className="sr-only" />
+                                <div className="items-center rounded-md border-2 border-muted bg-popover p-1 hover:border-accent">
+                                    <div className="space-y-2 rounded-sm bg-slate-950 p-2">
+                                    <div className="space-y-2 rounded-md bg-slate-800 p-2 shadow-sm">
+                                        <div className="h-2 w-4/5 rounded-lg bg-slate-400" />
+                                        <div className="h-2 w-full rounded-lg bg-slate-400" />
+                                    </div>
+                                    <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
+                                        <div className="h-4 w-4 rounded-full bg-slate-400" />
+                                        <div className="h-2 w-full rounded-lg bg-slate-400" />
+                                    </div>
+                                    <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
+                                        <div className="h-4 w-4 rounded-full bg-slate-400" />
+                                        <div className="h-2 w-full rounded-lg bg-slate-400" />
+                                    </div>
+                                    </div>
                                 </div>
+                                <div className="flex items-center justify-center p-2 gap-2">
+                                    <Moon className="h-4 w-4"/> Dark
                                 </div>
-                            </div>
-                            <div className="flex items-center justify-center p-2 gap-2">
-                                <Sun className="h-4 w-4"/> Light
-                            </div>
-                        </Label>
-                         <Label className="[&:has([data-state=checked])>div]:border-primary">
-                            <RadioGroupItem value="dark" className="sr-only" />
-                            <div className="items-center rounded-md border-2 border-muted bg-popover p-1 hover:border-accent">
-                                <div className="space-y-2 rounded-sm bg-slate-950 p-2">
-                                <div className="space-y-2 rounded-md bg-slate-800 p-2 shadow-sm">
-                                    <div className="h-2 w-4/5 rounded-lg bg-slate-400" />
-                                    <div className="h-2 w-full rounded-lg bg-slate-400" />
-                                </div>
-                                <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
-                                    <div className="h-4 w-4 rounded-full bg-slate-400" />
-                                    <div className="h-2 w-full rounded-lg bg-slate-400" />
-                                </div>
-                                <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
-                                    <div className="h-4 w-4 rounded-full bg-slate-400" />
-                                    <div className="h-2 w-full rounded-lg bg-slate-400" />
-                                </div>
-                                </div>
-                            </div>
-                             <div className="flex items-center justify-center p-2 gap-2">
-                                <Moon className="h-4 w-4"/> Dark
-                            </div>
-                        </Label>
-                         <Label className="[&:has([data-state=checked])>div]:border-primary">
-                            <RadioGroupItem value="system" className="sr-only" />
-                            <div className="items-center rounded-md border-2 border-muted bg-popover p-1 hover:border-accent">
-                               <div className="h-[96px] w-full bg-secondary rounded-sm flex items-center justify-center text-muted-foreground">
-                                    System
-                               </div>
-                            </div>
-                             <div className="flex items-center justify-center p-2 gap-2">
-                                System
-                            </div>
-                        </Label>
-                    </RadioGroup>
-                </div>
-            </CardContent>
-        </Card>
+                            </Label>
+                        </RadioGroup>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Dashboard Layout</Label>
+                        <Controller
+                            control={appearanceControl}
+                            name="dashboardLayout"
+                            render={({ field }) => (
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    value={field.value}
+                                    className="grid max-w-md grid-cols-2 gap-4 pt-2"
+                                >
+                                    <Label className="[&:has([data-state=checked])]:border-primary border-2 rounded-md p-2 text-center cursor-pointer">
+                                        <RadioGroupItem value="classic" className="sr-only" />
+                                        Classic
+                                    </Label>
+                                    <Label className="[&:has([data-state=checked])]:border-primary border-2 rounded-md p-2 text-center cursor-pointer">
+                                        <RadioGroupItem value="modern" className="sr-only" />
+                                        Modern
+                                    </Label>
+                                </RadioGroup>
+                            )}
+                        />
+                    </div>
+                </CardContent>
+            </Card>
+            <Button type="submit" className="mt-4" disabled={isAppearanceSubmitting || loadingUser}>
+                {isAppearanceSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Save Appearance Settings"}
+            </Button>
+        </form>
       </TabsContent>
 
       <TabsContent value="notifications" className="mt-4">

@@ -1,4 +1,5 @@
 
+
 export interface Expense {
   id: string;
   description: string;
@@ -38,6 +39,7 @@ export interface TeamMember {
   avatarUrl?: string;
   avatarPath?: string;
   createdAt?: any;
+  dashboardLayout?: 'classic' | 'modern';
 }
 
 export interface Notification {
