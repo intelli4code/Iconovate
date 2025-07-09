@@ -124,7 +124,7 @@ export default function HomePageContent() {
       </section>
 
       {/* Feature Section */}
-       <section className="py-16 md:py-24 bg-background">
+       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
             <div className="text-center max-w-2xl mx-auto">
                 <p className="font-semibold text-primary">FEATURED</p>
