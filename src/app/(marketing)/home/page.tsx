@@ -3,9 +3,10 @@
 
 import { Button } from "@/components/ui/button";
 import { LoadingLink } from "@/components/ui/loading-link";
-import { Card } from "@/components/ui/card";
-import { Star, ArrowRight, ShieldCheck } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Star, ArrowRight, ShieldCheck, Check, Zap } from "lucide-react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export default function HomePageContent() {
 
@@ -13,6 +14,43 @@ export default function HomePageContent() {
     { value: "110+", label: "Interactive Videos" },
     { value: "20+", label: "Hours of Content" },
     { value: "5+", label: "Years of Experience" },
+  ];
+
+  const portfolioItems = [
+    { title: "QuantumLeap Branding", category: "Brand Identity", src: "https://placehold.co/600x400.png", hint: "technology branding" },
+    { title: "Aether E-Commerce", category: "Web Design", src: "https://placehold.co/600x400.png", hint: "ecommerce website" },
+    { title: "Nova Financial App", category: "UI/UX Design", src: "https://placehold.co/600x400.png", hint: "fintech app" },
+  ];
+
+  const tiers = [
+    {
+      name: "Starter",
+      price: "Free",
+      priceDescription: "for individuals",
+      description: "Get started with our basic AI tools.",
+      features: [
+        "AI Slogan Generator",
+        "AI Color Palette Tool",
+        "1 Project Workspace",
+        "Limited AI Generations",
+      ],
+      isPopular: false,
+    },
+    {
+      name: "Pro",
+      price: "$49",
+      priceDescription: "/ month",
+      description: "Unlock the full suite of AI branding tools.",
+      features: [
+        "Everything in Starter, plus:",
+        "Full AI Tool Suite",
+        "Unlimited Project Workspaces",
+        "Brand Guidelines Generator",
+        "Logo Mockups & Variations",
+        "Priority Support",
+      ],
+      isPopular: true,
+    },
   ];
 
   return (
@@ -109,6 +147,46 @@ export default function HomePageContent() {
         </div>
        </section>
 
+      {/* Portfolio Section */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto">
+            <p className="font-semibold text-primary">OUR WORK</p>
+            <h2 className="text-3xl md:text-4xl font-bold mt-2">Crafting Brands That Stand Out</h2>
+            <p className="mt-4 text-muted-foreground">
+              Here’s a glimpse into the brands we’ve helped build. Each project is a testament to our passion for design and strategic thinking.
+            </p>
+          </div>
+          <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {portfolioItems.map((item, index) => (
+              <Card key={index} className="overflow-hidden group bg-card/50 border-border/50">
+                <CardContent className="p-0">
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <Image
+                      src={item.src}
+                      data-ai-hint={item.hint}
+                      alt={`Portfolio piece for ${item.title}`}
+                      width={600}
+                      height={400}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="p-6">
+                    <p className="text-sm text-primary font-semibold">{item.category}</p>
+                    <h3 className="mt-1 text-xl font-bold">{item.title}</h3>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <Button asChild size="lg" variant="outline" className="rounded-full">
+              <LoadingLink href="/portfolio">View All Work</LoadingLink>
+            </Button>
+          </div>
+        </div>
+      </section>
+
         {/* Pricing CTA Section */}
        <section className="py-16 md:py-24 text-center">
         <div className="container mx-auto px-4">
@@ -118,6 +196,44 @@ export default function HomePageContent() {
                 <p className="mt-4 text-muted-foreground">
                     The Continuing education is very important to improve your graphic design knowledge.
                 </p>
+            </div>
+            <div className="mt-16 grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
+              {tiers.map((tier) => (
+                <Card key={tier.name} className={cn(
+                  "flex flex-col h-full bg-card/50 rounded-2xl border-border/50 text-left",
+                  tier.isPopular && "border-primary/50 ring-2 ring-primary/50"
+                )}>
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-2xl">{tier.name}</CardTitle>
+                      {tier.isPopular && <Zap className="h-6 w-6 text-yellow-400 fill-yellow-400" />}
+                    </div>
+                    <div className="flex items-baseline gap-2 pt-4">
+                      <span className="text-5xl font-bold">{tier.price}</span>
+                      <span className="text-muted-foreground">{tier.priceDescription}</span>
+                    </div>
+                    <CardDescription>{tier.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-1 space-y-4">
+                    <ul className="space-y-3">
+                      {tier.features.map((feature, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <Check className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
+                          <span className="text-muted-foreground">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <div className="p-6 pt-0">
+                    <Button className={cn(
+                      "w-full rounded-lg",
+                      tier.isPopular ? "bg-gradient-to-r from-primary to-purple-600 text-white" : "bg-transparent border border-border/80 hover:bg-border/50"
+                    )}>
+                      Get Started
+                    </Button>
+                  </div>
+                </Card>
+              ))}
             </div>
         </div>
        </section>

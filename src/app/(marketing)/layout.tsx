@@ -12,8 +12,8 @@ export default function MarketingLayout({
         className="absolute inset-0 z-[-1] overflow-hidden" 
         aria-hidden="true"
       >
-        <div className="absolute left-[-20rem] top-[-15rem] h-[50rem] w-[50rem] bg-gradient-radial from-primary/25 to-transparent blur-3xl" />
-        <div className="absolute bottom-[-20rem] right-[-20rem] h-[60rem] w-[60rem] bg-gradient-radial from-fuchsia-500/15 to-transparent blur-3xl" />
+        <div className="absolute left-[-35rem] top-[-25rem] h-[70rem] w-[70rem] bg-gradient-radial from-primary/30 to-transparent blur-3xl" />
+        <div className="absolute bottom-[-30rem] right-[-35rem] h-[80rem] w-[80rem] bg-gradient-radial from-fuchsia-500/20 to-transparent blur-3xl" />
       </div>
       <MarketingHeader />
       <main className="flex-1">{children}</main>
