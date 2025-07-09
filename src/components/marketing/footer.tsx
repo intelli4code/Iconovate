@@ -1,27 +1,30 @@
 
 import { LoadingLink } from "@/components/ui/loading-link";
 import { Button } from "@/components/ui/button";
-import { Rocket, Twitter, Linkedin, Github } from "lucide-react";
+import { Rocket, Twitter, Linkedin, Github, Instagram, Facebook } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { getDoc, doc } from "firebase/firestore";
-import type { FooterColumn } from "@/types";
+import type { FooterContent } from "@/types";
+import * as LucideIcons from "lucide-react";
 
-async function getFooterData() {
+async function getFooterData(): Promise<FooterContent | null> {
     try {
         const contentDocRef = doc(db, "siteContent", "main");
         const docSnap = await getDoc(contentDocRef);
-        if (docSnap.exists() && docSnap.data().footerColumns) {
-            return docSnap.data().footerColumns.sort((a: FooterColumn, b: FooterColumn) => a.order - b.order) as FooterColumn[];
+        if (docSnap.exists() && docSnap.data().footer) {
+            const footerData = docSnap.data().footer as FooterContent;
+            footerData.columns.sort((a, b) => a.order - b.order);
+            return footerData;
         }
-        return [];
+        return null;
     } catch (error) {
         console.error("Failed to fetch footer data:", error);
-        return [];
+        return null;
     }
 }
 
 export async function MarketingFooter() {
-    const footerColumns = await getFooterData();
+    const footerData = await getFooterData();
 
   return (
     <footer className="border-t border-border/50">
@@ -35,11 +38,11 @@ export async function MarketingFooter() {
               </span>
             </LoadingLink>
             <p className="text-sm text-muted-foreground max-w-sm">
-              AI-Powered Brand Research, Automated Logo Presentations, and Instant Brand Guideline Generation.
+              {footerData?.description || "AI-Powered Brand Research, Automated Logo Presentations, and Instant Brand Guideline Generation."}
             </p>
           </div>
           
-          {footerColumns.map(column => (
+          {footerData?.columns.map(column => (
             <div key={column.id}>
                 <h3 className="font-semibold mb-4">{column.title}</h3>
                 <ul className="space-y-2 text-sm">
@@ -59,9 +62,14 @@ export async function MarketingFooter() {
         <div className="mt-12 pt-8 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} BrandBoost AI. All rights reserved.</p>
           <div className="flex items-center gap-4 mt-4 sm:mt-0">
-             <a href="#" className="hover:text-foreground"><Twitter className="h-5 w-5" /></a>
-             <a href="#" className="hover:text-foreground"><Github className="h-5 w-5" /></a>
-             <a href="#" className="hover:text-foreground"><Linkedin className="h-5 w-5" /></a>
+             {footerData?.socials.map(social => {
+                const Icon = (LucideIcons as any)[social.platform] || LucideIcons.Link;
+                return (
+                    <a key={social.id} href={social.url} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+                        <Icon className="h-5 w-5" />
+                    </a>
+                )
+             })}
           </div>
         </div>
       </div>

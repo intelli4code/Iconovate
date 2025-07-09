@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Star, ArrowRight, ShieldCheck, Check, Zap } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { PortfolioItem, PricingTier, SiteImage, SiteStat } from "@/types";
+import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent } from "@/types";
 import { PortfolioItemCard } from "@/components/marketing/portfolio-item-card";
 
 interface HomePageContentProps {
@@ -15,9 +15,10 @@ interface HomePageContentProps {
   pricingTiers: PricingTier[];
   stats: SiteStat[];
   images: { [key: string]: SiteImage };
+  pageContent: PageContent | null;
 }
 
-export default function HomePageContent({ portfolioItems, pricingTiers, stats, images }: HomePageContentProps) {
+export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent }: HomePageContentProps) {
 
   const sortedTiers = pricingTiers.sort((a, b) => a.order - b.order);
 
@@ -25,6 +26,8 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
   const heroImageHint = images?.homeHero?.imageHint || "app dashboard screenshot";
   const featureImage = images?.homeFeature?.imageUrl || "https://placehold.co/800x600.png";
   const featureImageHint = images?.homeFeature?.imageHint || "app interface design";
+  
+  const homeContent = pageContent?.home;
 
   return (
     <>
@@ -39,11 +42,13 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
                 </span>
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
-              Platform to build 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-500"> amazing brands</span> and designs
+              {homeContent?.heroTitle.replace(/(amazing brands|designs)/g, '<span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-500">$1</span>')
+               ? <span dangerouslySetInnerHTML={{ __html: homeContent.heroTitle.replace(/(amazing brands|designs)/g, '<span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-500">$1</span>') }} />
+               : <>Platform to build <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-500"> amazing brands</span> and designs</>
+              }
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-lg">
-              Learn from mentors who are experienced in their fields and get official certificates to build future careers.
+              {homeContent?.heroSubtitle || "Learn from mentors who are experienced in their fields and get official certificates to build future careers."}
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
               <Button asChild size="lg" className="rounded-full bg-gradient-to-r from-primary to-fuchsia-600 text-white shadow-lg hover:shadow-primary/50 transition-shadow">
@@ -87,9 +92,9 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
         <div className="container mx-auto px-4">
             <div className="text-center max-w-2xl mx-auto">
                 <p className="font-semibold text-primary">FEATURED</p>
-                <h2 className="text-3xl md:text-4xl font-bold mt-2">Intelligent Design on a New Scale</h2>
+                <h2 className="text-3xl md:text-4xl font-bold mt-2">{homeContent?.featureTitle || "Intelligent Design on a New Scale"}</h2>
                 <p className="mt-4 text-muted-foreground">
-                    Risus rutrum nisi, mi sed aliquam. Sit enim, id at viverra. Aliquam tortor.
+                    {homeContent?.featureSubtitle || "Risus rutrum nisi, mi sed aliquam. Sit enim, id at viverra. Aliquam tortor."}
                 </p>
             </div>
             <div className="mt-16 grid lg:grid-cols-2 gap-16 items-center">
@@ -109,8 +114,8 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
                           <ShieldCheck className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold">Stay focused on your creative vision</h3>
-                            <p className="mt-2 text-muted-foreground">Our AI handles the tedious parts of brand research and asset generation, letting you focus on high-impact creative work that drives results.</p>
+                            <h3 className="text-xl font-bold">{homeContent?.featurePoint1Title || "Stay focused on your creative vision"}</h3>
+                            <p className="mt-2 text-muted-foreground">{homeContent?.featurePoint1Text || "Our AI handles the tedious parts of brand research and asset generation, letting you focus on high-impact creative work that drives results."}</p>
                              <Button asChild variant="link" className="px-0 mt-2">
                                 <LoadingLink href="/services">Learn more</LoadingLink>
                             </Button>

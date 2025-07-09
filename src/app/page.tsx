@@ -4,7 +4,7 @@ import { MarketingFooter } from "@/components/marketing/footer";
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, limit, getDocs, doc } from "firebase/firestore";
-import type { PortfolioItem, PricingTier, SiteImage, SiteStat } from "@/types";
+import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent } from "@/types";
 
 async function getHomepageData() {
     try {
@@ -16,25 +16,28 @@ async function getHomepageData() {
         const pricingSnapshot = await getDocs(pricingQuery);
         const pricingTiers = pricingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PricingTier[];
         
-        const contentDoc = await getDocs(collection(db, "siteContent"));
+        const contentDocRef = doc(db, "siteContent", "main");
+        const contentDoc = await getDoc(contentDocRef);
         let stats: SiteStat[] = [];
         let images: { [key: string]: SiteImage } = {};
+        let pageContent: PageContent | null = null;
 
-        if (!contentDoc.empty) {
-            const contentData = contentDoc.docs[0].data();
+        if (contentDoc.exists()) {
+            const contentData = contentDoc.data();
             stats = contentData.stats || [];
             images = contentData.images || {};
+            pageContent = contentData.pageContent || null;
         }
 
-        return { portfolioItems, pricingTiers, stats, images };
+        return { portfolioItems, pricingTiers, stats, images, pageContent };
     } catch (error) {
         console.error("Failed to fetch homepage data:", error);
-        return { portfolioItems: [], pricingTiers: [], stats: [], images: {} };
+        return { portfolioItems: [], pricingTiers: [], stats: [], images: {}, pageContent: null };
     }
 }
 
 export default async function RootPage() {
-  const { portfolioItems, pricingTiers, stats, images } = await getHomepageData();
+  const { portfolioItems, pricingTiers, stats, images, pageContent } = await getHomepageData();
 
   return (
     <div className="relative isolate flex min-h-screen flex-col bg-[#0d1222] font-body text-foreground">
@@ -49,7 +52,7 @@ export default async function RootPage() {
       </div>
       <MarketingHeader />
       <main className="flex-1">
-        <HomePageContent portfolioItems={portfolioItems} pricingTiers={pricingTiers} stats={stats} images={images} />
+        <HomePageContent portfolioItems={portfolioItems} pricingTiers={pricingTiers} stats={stats} images={images} pageContent={pageContent} />
       </main>
       <MarketingFooter />
     </div>

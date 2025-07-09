@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import type { Service } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import * as LucideIcons from "lucide-react";
@@ -17,25 +17,25 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle, Trash2, Loader2, Edit } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const serviceSchema = z.object({
   title: z.string().min(3, "Title is required"),
   description: z.string().min(10, "Description is required"),
-  icon: z.string().min(1, "An icon is required"),
+  icon: z.string().min(1, "An icon name from lucide-react is required"),
 });
 
 type ServiceFormValues = z.infer<typeof serviceSchema>;
 
-const iconNames = [
-    'Palette', 'PenTool', 'BrainCircuit', 'Briefcase', 'BookText',
-    'ShieldCheck', 'Zap', 'Star', 'Megaphone', 'Presentation',
-    'Brush', 'Code', 'Globe', 'Camera', 'Video', 'MessageSquare',
-    'Users', 'Settings', 'BarChart', 'Layers'
+const initialServices: Omit<Service, 'id'>[] = [
+    { title: "Logo & Brand Identity", description: "Craft a memorable brand with a unique logo, color palette, and typography that tells your story.", icon: 'Palette', order: 1 },
+    { title: "Web & UI/UX Design", description: "Create intuitive, beautiful, and user-friendly websites and applications that convert.", icon: 'PenTool', order: 2 },
+    { title: "AI-Powered Brand Research", description: "Leverage AI for deep market insights, competitor analysis, and strategic brand positioning.", icon: 'BrainCircuit', order: 3 },
+    { title: "Marketing Materials", description: "Design compelling brochures, flyers, social media graphics, and presentations that capture attention.", icon: 'Megaphone', order: 4 },
+    { title: "Packaging Design", description: "Develop eye-catching packaging that stands out on the shelves and reflects your brand's quality.", icon: 'Box', order: 5 },
+    { title: "Presentation Design", description: "Transform your ideas into stunning presentations that captivate and persuade your audience.", icon: 'Presentation', order: 6 },
 ];
-
 
 export function ServicesManager() {
   const { toast } = useToast();
@@ -44,19 +44,33 @@ export function ServicesManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
 
-  const { register, handleSubmit, reset, setValue, control, formState: { errors, isSubmitting } } = useForm<ServiceFormValues>({
+  const { register, handleSubmit, reset, watch, formState: { errors, isSubmitting } } = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceSchema),
   });
+
+  const iconName = watch("icon");
+  const IconPreview = (LucideIcons as any)[iconName] || null;
 
   useEffect(() => {
     setLoading(true);
     const q = query(collection(db, "services"), orderBy("order", "asc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setServices(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service)));
-      setLoading(false);
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+        if (snapshot.empty) {
+            // Seed the database if it's empty
+            const batch = writeBatch(db);
+            initialServices.forEach(service => {
+                const docRef = doc(collection(db, "services"));
+                batch.set(docRef, service);
+            });
+            await batch.commit();
+            // The listener will pick up the new data automatically.
+        } else {
+            setServices(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service)));
+        }
+        setLoading(false);
     }, () => {
-      toast({ variant: "destructive", title: "Failed to load services." });
-      setLoading(false);
+        toast({ variant: "destructive", title: "Failed to load services." });
+        setLoading(false);
     });
     return () => unsubscribe();
   }, [toast]);
@@ -73,12 +87,16 @@ export function ServicesManager() {
   };
 
   const onSubmit = async (data: ServiceFormValues) => {
+    if (!(LucideIcons as any)[data.icon]) {
+        toast({ variant: "destructive", title: "Invalid Icon", description: "Please provide a valid icon name from the Lucide React library." });
+        return;
+    }
     try {
       if (editingService) {
         await updateDoc(doc(db, "services", editingService.id), data);
         toast({ title: "Service Updated" });
       } else {
-        await addDoc(collection(db, "services"), { ...data, order: services.length + 1, createdAt: serverTimestamp() });
+        await addDoc(collection(db, "services"), { ...data, order: services.length + 1 });
         toast({ title: "Service Added" });
       }
       setIsDialogOpen(false);
@@ -157,13 +175,14 @@ export function ServicesManager() {
               {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label>Icon</Label>
-              <Select onValueChange={(value) => setValue("icon", value, { shouldValidate: true })} defaultValue={editingService?.icon}>
-                <SelectTrigger><SelectValue placeholder="Select an icon" /></SelectTrigger>
-                <SelectContent>
-                  {iconNames.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="icon">Icon Name</Label>
+              <div className="flex items-center gap-2">
+                <Input id="icon" {...register("icon")} placeholder="e.g., Palette, PenTool" />
+                <div className="p-2 border rounded-md">
+                    {IconPreview ? <IconPreview className="h-5 w-5" /> : <LucideIcons.HelpCircle className="h-5 w-5 text-muted-foreground"/>}
+                </div>
+              </div>
+               <p className="text-xs text-muted-foreground">Provide a valid icon name from the <a href="https://lucide.dev/icons/" target="_blank" rel="noopener noreferrer" className="underline">Lucide React</a> library.</p>
               {errors.icon && <p className="text-sm text-destructive">{errors.icon.message}</p>}
             </div>
             <DialogFooter>

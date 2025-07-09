@@ -5,8 +5,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { db } from "@/lib/firebase";
-import { supabase } from "@/lib/supabase";
+import { db, supabase } from "@/lib/firebase";
 import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import type { PortfolioItem } from "@/types";
@@ -81,9 +80,13 @@ export function PortfolioManager() {
     const file = e.target.files?.[0];
     if (file) {
       setValue('image', file);
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result as string);
-      reader.readAsDataURL(file);
+      if(file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => setPreview(reader.result as string);
+        reader.readAsDataURL(file);
+      } else {
+        setPreview(null); // No preview for non-image files like PDFs
+      }
     }
   };
 
@@ -92,25 +95,34 @@ export function PortfolioManager() {
     try {
       let imageUrl = editingItem?.imageUrl || "";
       let imagePath = editingItem?.imagePath || "";
+      let fileType: 'image' | 'pdf' = editingItem?.fileType || 'image';
 
-      if (data.image instanceof File) {
-        if (!supabase) throw new Error("Supabase not configured for image uploads.");
+      const file = data.image as File;
+
+      if (file instanceof File) {
+        if (!supabase) throw new Error("Supabase not configured for file uploads.");
         
-        const newImagePath = `portfolio/${uuidv4()}-${data.image.name}`;
-        const { error: uploadError } = await supabase.storage.from('data-storage').upload(newImagePath, data.image);
+        const newImagePath = `portfolio/${uuidv4()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage.from('data-storage').upload(newImagePath, file);
         if (uploadError) throw uploadError;
 
         imagePath = newImagePath;
         imageUrl = supabase.storage.from('data-storage').getPublicUrl(newImagePath).data.publicUrl;
+        fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
+
       } else if (!editingItem) {
-        throw new Error("An image is required for new portfolio items.");
+        throw new Error("A file (image or PDF) is required for new portfolio items.");
       }
 
       const itemData = {
-        ...data,
+        title: data.title,
+        category: data.category,
+        description: data.description,
+        content: data.content,
+        imageHint: data.imageHint,
         imageUrl,
         imagePath,
-        image: undefined, // remove file object before saving to firestore
+        fileType,
       };
 
       if (editingItem) {
@@ -216,12 +228,12 @@ export function PortfolioManager() {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label>Image</Label>
+              <Label>Image or PDF File</Label>
               <div className="flex items-center gap-4">
                   <div className="w-24 h-24 border rounded-md flex items-center justify-center bg-secondary/50 flex-shrink-0">
                       {preview ? ( <Image src={preview} alt="Preview" width={96} height={96} className="object-contain" /> ) : ( <UploadCloud className="h-8 w-8 text-muted-foreground" /> )}
                   </div>
-                  <Input id="image-upload" type="file" onChange={handleFileChange} accept="image/*" />
+                  <Input id="image-upload" type="file" onChange={handleFileChange} accept="image/*,application/pdf" />
               </div>
               {errors.image && <p className="text-sm text-destructive mt-1">{errors.image.message as string}</p>}
             </div>

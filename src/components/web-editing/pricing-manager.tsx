@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, orderBy, doc, updateDoc } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, writeBatch } from "firebase/firestore";
 import type { PricingTier } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,6 +29,12 @@ const pricingSchema = z.object({
 
 type PricingFormValues = z.infer<typeof pricingSchema>;
 
+const initialPricingTiers: Omit<PricingTier, 'id'>[] = [
+    { name: 'Starter', price: '$99', priceDescription: '/project', description: 'For small projects and startups.', features: ['1 Logo Concept', 'Brand Color Palette', 'Basic Brand Guidelines', '2 Revisions'], isPopular: false, order: 1 },
+    { name: 'Pro', price: '$299', priceDescription: '/project', description: 'For growing businesses that need more.', features: ['3 Logo Concepts', 'Full Brand Identity', 'Comprehensive Guidelines', '5 Revisions', 'Social Media Kit'], isPopular: true, order: 2 },
+    { name: 'Enterprise', price: 'Custom', priceDescription: '', description: 'For large organizations with custom needs.', features: ['Unlimited Concepts', 'Dedicated Brand Strategist', 'Full Team Access', '24/7 Support', 'Custom Integrations'], isPopular: false, order: 3 },
+];
+
 export function PricingManager() {
   const { toast } = useToast();
   const [tiers, setTiers] = useState<PricingTier[]>([]);
@@ -43,9 +49,18 @@ export function PricingManager() {
   useEffect(() => {
     setLoading(true);
     const q = query(collection(db, "pricingTiers"), orderBy("order", "asc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setTiers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PricingTier)));
-      setLoading(false);
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+        if (snapshot.empty) {
+            const batch = writeBatch(db);
+            initialPricingTiers.forEach(tier => {
+                const docRef = doc(collection(db, "pricingTiers"));
+                batch.set(docRef, tier);
+            });
+            await batch.commit();
+        } else {
+            setTiers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PricingTier)));
+        }
+        setLoading(false);
     }, (error) => {
       toast({ variant: "destructive", title: "Failed to load pricing tiers." });
       setLoading(false);

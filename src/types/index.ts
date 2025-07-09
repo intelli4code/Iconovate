@@ -156,6 +156,7 @@ export interface PortfolioItem {
   imageHint: string;
   description: string; // for the card
   content: string; // for the dialog, can be markdown/html
+  fileType?: 'image' | 'pdf';
   createdAt: any;
 }
 
@@ -209,6 +210,32 @@ export interface FooterColumn {
     links: FooterLink[];
     order: number;
 }
+
+export interface SocialLink {
+    id: string;
+    platform: string;
+    url: string;
+}
+
+export interface FooterContent {
+    description: string;
+    columns: FooterColumn[];
+    socials: SocialLink[];
+}
+
+export interface HomePageContent {
+    heroTitle: string;
+    heroSubtitle: string;
+    featureTitle: string;
+    featureSubtitle: string;
+    featurePoint1Title: string;
+    featurePoint1Text: string;
+}
+
+export interface PageContent {
+    home: HomePageContent;
+}
+
 
 export interface SiteStat {
     id: string;

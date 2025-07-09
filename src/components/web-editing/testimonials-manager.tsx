@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import type { Testimonial } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,6 +29,12 @@ const testimonialSchema = z.object({
 
 type TestimonialFormValues = z.infer<typeof testimonialSchema>;
 
+const initialTestimonials: Omit<Testimonial, 'id'>[] = [
+    { name: 'Sarah L.', rating: 5, review: 'BrandBoost AI revolutionized our branding process. What used to take months now takes days. Incredibly powerful!', src: 'https://placehold.co/40x40.png', hint: 'person portrait', order: 1 },
+    { name: 'Michael B.', rating: 5, review: 'The AI-generated mood boards and competitor analysis gave us a strategic edge we never expected. Highly recommended.', src: 'https://placehold.co/40x40.png', hint: 'person portrait', order: 2 },
+    { name: 'Jessica T.', rating: 5, review: 'As a solo founder, this platform gave me access to world-class design tools I could only dream of. A total game-changer.', src: 'https://placehold.co/40x40.png', hint: 'person portrait', order: 3 },
+];
+
 export function TestimonialsManager() {
   const { toast } = useToast();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -43,8 +49,17 @@ export function TestimonialsManager() {
   useEffect(() => {
     setLoading(true);
     const q = query(collection(db, "testimonials"), orderBy("order", "asc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setTestimonials(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Testimonial)));
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      if (snapshot.empty) {
+        const batch = writeBatch(db);
+        initialTestimonials.forEach(item => {
+            const docRef = doc(collection(db, "testimonials"));
+            batch.set(docRef, item);
+        });
+        await batch.commit();
+      } else {
+        setTestimonials(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Testimonial)));
+      }
       setLoading(false);
     }, () => {
       toast({ variant: "destructive", title: "Failed to load testimonials." });
@@ -67,16 +82,15 @@ export function TestimonialsManager() {
   const onSubmit = async (data: TestimonialFormValues) => {
     const itemData = {
         ...data,
-        // Using placeholder for image as we don't have a way to upload it here
-        src: 'https://placehold.co/40x40.png',
-        hint: 'person portrait',
+        src: editingItem?.src || 'https://placehold.co/40x40.png',
+        hint: editingItem?.hint || 'person portrait',
     };
     try {
       if (editingItem) {
         await updateDoc(doc(db, "testimonials", editingItem.id), itemData);
         toast({ title: "Testimonial Updated" });
       } else {
-        await addDoc(collection(db, "testimonials"), { ...itemData, order: testimonials.length + 1, createdAt: serverTimestamp() });
+        await addDoc(collection(db, "testimonials"), { ...itemData, order: testimonials.length + 1 });
         toast({ title: "Testimonial Added" });
       }
       setIsDialogOpen(false);
