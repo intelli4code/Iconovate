@@ -7,66 +7,24 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Star, ArrowRight, ShieldCheck, Check, Zap } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { PortfolioItem } from "@/types";
+import type { PortfolioItem, PricingTier, SiteImage, SiteStat } from "@/types";
 import { PortfolioItemCard } from "@/components/marketing/portfolio-item-card";
 
 interface HomePageContentProps {
   portfolioItems: PortfolioItem[];
+  pricingTiers: PricingTier[];
+  stats: SiteStat[];
+  images: { [key: string]: SiteImage };
 }
 
-export default function HomePageContent({ portfolioItems }: HomePageContentProps) {
+export default function HomePageContent({ portfolioItems, pricingTiers, stats, images }: HomePageContentProps) {
 
-  const stats = [
-    { value: "110+", label: "Interactive Videos" },
-    { value: "20+", label: "Hours of Content" },
-    { value: "5+", label: "Years of Experience" },
-  ];
+  const sortedTiers = pricingTiers.sort((a, b) => a.order - b.order);
 
-  const tiers = [
-    {
-      name: "Starter",
-      price: "Free",
-      priceDescription: "for individuals",
-      description: "Get started with our basic AI tools.",
-      features: [
-        "AI Slogan Generator",
-        "AI Color Palette Tool",
-        "1 Project Workspace",
-        "Limited AI Generations",
-      ],
-      isPopular: false,
-    },
-    {
-      name: "Pro",
-      price: "$49",
-      priceDescription: "/ month",
-      description: "Unlock the full suite of AI branding tools.",
-      features: [
-        "Everything in Starter, plus:",
-        "Full AI Tool Suite",
-        "Unlimited Project Workspaces",
-        "Brand Guidelines Generator",
-        "Logo Mockups & Variations",
-        "Priority Support",
-      ],
-      isPopular: true,
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      priceDescription: "for large teams",
-      description: "For large-scale needs with dedicated support.",
-      features: [
-        "Everything in Pro, plus:",
-        "Dedicated Account Manager",
-        "Custom Integrations & API",
-        "On-premise Deployment Options",
-        "Advanced Security & Compliance",
-        "Personalized Onboarding",
-      ],
-      isPopular: false,
-    },
-  ];
+  const heroImage = images?.homeHero?.imageUrl || "https://placehold.co/800x600.png";
+  const heroImageHint = images?.homeHero?.imageHint || "app dashboard screenshot";
+  const featureImage = images?.homeFeature?.imageUrl || "https://placehold.co/800x600.png";
+  const featureImageHint = images?.homeFeature?.imageHint || "app interface design";
 
   return (
     <>
@@ -98,8 +56,8 @@ export default function HomePageContent({ portfolioItems }: HomePageContentProps
           </div>
           <div className="relative hidden lg:block">
             <Image
-              src="https://placehold.co/800x600.png"
-              data-ai-hint="app dashboard screenshot"
+              src={heroImage}
+              data-ai-hint={heroImageHint}
               alt="App dashboard and mobile screenshots"
               width={800}
               height={600}
@@ -114,11 +72,12 @@ export default function HomePageContent({ portfolioItems }: HomePageContentProps
         <div className="container mx-auto px-4">
           <div className="grid sm:grid-cols-3 gap-8 text-center max-w-4xl mx-auto">
             {stats.map((stat) => (
-              <Card key={stat.label} className="bg-white/5 border-white/10 p-6 rounded-2xl backdrop-blur-sm">
+              <Card key={stat.id} className="bg-white/5 border-white/10 p-6 rounded-2xl backdrop-blur-sm">
                 <h3 className="text-4xl md:text-5xl font-bold">{stat.value}</h3>
                 <p className="mt-2 text-muted-foreground">{stat.label}</p>
               </Card>
             ))}
+             {stats.length === 0 && <p className="col-span-full text-muted-foreground">Stats will be displayed here.</p>}
           </div>
         </div>
       </section>
@@ -136,8 +95,8 @@ export default function HomePageContent({ portfolioItems }: HomePageContentProps
             <div className="mt-16 grid lg:grid-cols-2 gap-16 items-center">
                 <div className="relative">
                      <Image
-                        src="https://placehold.co/800x600.png"
-                        data-ai-hint="app interface design"
+                        src={featureImage}
+                        data-ai-hint={featureImageHint}
                         alt="App interface showing financial data"
                         width={800}
                         height={600}
@@ -176,6 +135,7 @@ export default function HomePageContent({ portfolioItems }: HomePageContentProps
             {portfolioItems.map((item) => (
               <PortfolioItemCard key={item.id} item={item} />
             ))}
+             {portfolioItems.length === 0 && <p className="col-span-full text-center text-muted-foreground">Portfolio items will be displayed here.</p>}
           </div>
           <div className="text-center mt-12">
             <Button asChild size="lg" variant="outline" className="rounded-full">
@@ -196,7 +156,7 @@ export default function HomePageContent({ portfolioItems }: HomePageContentProps
                 </p>
             </div>
             <div className="mt-16 grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-start">
-              {tiers.map((tier) => (
+              {sortedTiers.map((tier) => (
                 <Card key={tier.name} className={cn(
                   "flex flex-col h-full bg-card/50 rounded-2xl border-border/50 text-left",
                   tier.isPopular && "border-primary/50 ring-2 ring-primary/50"
@@ -235,6 +195,7 @@ export default function HomePageContent({ portfolioItems }: HomePageContentProps
                 </Card>
               ))}
             </div>
+             {sortedTiers.length === 0 && <p className="col-span-full text-center text-muted-foreground mt-8">Pricing plans will be displayed here.</p>}
         </div>
        </section>
     </>

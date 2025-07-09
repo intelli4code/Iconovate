@@ -3,20 +3,38 @@ import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
-import type { PortfolioItem } from "@/types";
+import { collection, query, orderBy, limit, getDocs, doc } from "firebase/firestore";
+import type { PortfolioItem, PricingTier, SiteImage, SiteStat } from "@/types";
+
+async function getHomepageData() {
+    try {
+        const portfolioQuery = query(collection(db, "portfolioItems"), orderBy("createdAt", "desc"), limit(3));
+        const portfolioSnapshot = await getDocs(portfolioQuery);
+        const portfolioItems = portfolioSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PortfolioItem[];
+
+        const pricingQuery = query(collection(db, "pricingTiers"), orderBy("order", "asc"));
+        const pricingSnapshot = await getDocs(pricingQuery);
+        const pricingTiers = pricingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PricingTier[];
+        
+        const contentDoc = await getDocs(collection(db, "siteContent"));
+        let stats: SiteStat[] = [];
+        let images: { [key: string]: SiteImage } = {};
+
+        if (!contentDoc.empty) {
+            const contentData = contentDoc.docs[0].data();
+            stats = contentData.stats || [];
+            images = contentData.images || {};
+        }
+
+        return { portfolioItems, pricingTiers, stats, images };
+    } catch (error) {
+        console.error("Failed to fetch homepage data:", error);
+        return { portfolioItems: [], pricingTiers: [], stats: [], images: {} };
+    }
+}
 
 export default async function RootPage() {
-  const portfolioItems = await (async () => {
-    try {
-      const q = query(collection(db, "portfolioItems"), orderBy("createdAt", "desc"), limit(3));
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PortfolioItem[];
-    } catch (error) {
-      console.error("Failed to fetch portfolio items for homepage:", error);
-      return [];
-    }
-  })();
+  const { portfolioItems, pricingTiers, stats, images } = await getHomepageData();
 
   return (
     <div className="relative isolate flex min-h-screen flex-col bg-[#0d1222] font-body text-foreground">
@@ -31,7 +49,7 @@ export default async function RootPage() {
       </div>
       <MarketingHeader />
       <main className="flex-1">
-        <HomePageContent portfolioItems={portfolioItems} />
+        <HomePageContent portfolioItems={portfolioItems} pricingTiers={pricingTiers} stats={stats} images={images} />
       </main>
       <MarketingFooter />
     </div>

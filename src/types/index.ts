@@ -1,6 +1,4 @@
 
-
-
 export interface Expense {
   id: string;
   description: string;
@@ -41,6 +39,7 @@ export interface TeamMember {
   avatarPath?: string;
   createdAt?: any;
   dashboardLayout?: 'classic' | 'modern';
+  showOnWebsite?: boolean;
 }
 
 export interface Notification {
@@ -158,4 +157,62 @@ export interface PortfolioItem {
   description: string; // for the card
   content: string; // for the dialog, can be markdown/html
   createdAt: any;
+}
+
+export interface PricingTier {
+  id: string;
+  name: "Starter" | "Pro" | "Enterprise";
+  price: string;
+  priceDescription: string;
+  description: string;
+  features: string[];
+  isPopular: boolean;
+  order: number;
+}
+
+export interface Service {
+  id: string;
+  icon: string; // lucide icon name
+  title: string;
+  description: string;
+  order: number;
+}
+
+export interface Testimonial {
+    id: string;
+    name: string;
+    rating: number;
+    review: string;
+    src: string;
+    hint: string;
+    order: number;
+}
+
+export interface SiteImage {
+    id: string; 
+    name: string;
+    description: string;
+    imageUrl: string;
+    imagePath: string;
+    imageHint: string;
+}
+
+export interface FooterLink {
+    id: string;
+    text: string;
+    href: string;
+}
+
+export interface FooterColumn {
+    id: string;
+    title: string;
+    links: FooterLink[];
+    order: number;
+}
+
+export interface SiteStat {
+    id: string;
+    label: string;
+    value: string;
+    order: number;
 }

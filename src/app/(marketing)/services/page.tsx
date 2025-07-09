@@ -1,40 +1,25 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PenTool, Brush, Palette, Code, Megaphone, Package } from "lucide-react";
-import Image from "next/image";
 
-export default function ServicesPage() {
-  const services = [
-    {
-      icon: <PenTool className="h-8 w-8 text-primary" />,
-      title: "Brand Identity & Logo Design",
-      description: "We craft memorable logos and comprehensive brand guidelines that tell your unique story and establish a strong market presence.",
-    },
-    {
-      icon: <Brush className="h-8 w-8 text-primary" />,
-      title: "Website Design & Development",
-      description: "From sleek landing pages to complex e-commerce platforms, we build beautiful, high-performance websites that convert visitors into customers.",
-    },
-    {
-      icon: <Palette className="h-8 w-8 text-primary" />,
-      title: "UI/UX Design for Apps & Software",
-      description: "Our user-centric approach ensures your digital products are not only visually stunning but also intuitive, accessible, and a joy to use.",
-    },
-    {
-      icon: <Code className="h-8 w-8 text-primary" />,
-      title: "AI-Powered Design Automation",
-      description: "Leverage our cutting-edge AI tools to generate mood boards, color palettes, mockups, and more, accelerating the creative process.",
-    },
-    {
-      icon: <Megaphone className="h-8 w-8 text-primary" />,
-      title: "Marketing & Advertising Creatives",
-      description: "Capture attention with compelling ad creatives, social media graphics, and marketing materials designed to drive engagement and results.",
-    },
-    {
-      icon: <Package className="h-8 w-8 text-primary" />,
-      title: "Packaging Design",
-      description: "Make your product stand out on the shelves with eye-catching and practical packaging design that reflects your brand's quality.",
-    },
-  ];
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
+import { db } from "@/lib/firebase";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import type { Service } from "@/types";
+import * as LucideIcons from "lucide-react";
+
+async function getServices() {
+    try {
+        const servicesQuery = query(collection(db, "services"), orderBy("order", "asc"));
+        const servicesSnapshot = await getDocs(servicesQuery);
+        return servicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Service[];
+    } catch (error) {
+        console.error("Failed to fetch services:", error);
+        return [];
+    }
+}
+
+
+export default async function ServicesPage() {
+    const services = await getServices();
 
   return (
     <div className="container mx-auto px-4 py-16 md:py-24">
@@ -47,17 +32,21 @@ export default function ServicesPage() {
 
       <section className="mt-16">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
-            <Card key={index} className="bg-card/50">
-              <CardHeader>
-                <div className="mb-4">{service.icon}</div>
-                <CardTitle>{service.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>{service.description}</CardDescription>
-              </CardContent>
-            </Card>
-          ))}
+          {services.map((service, index) => {
+            const Icon = (LucideIcons as any)[service.icon] || LucideIcons.HelpCircle;
+            return (
+              <Card key={index} className="bg-card/50">
+                <CardHeader>
+                  <div className="mb-4"><Icon className="h-8 w-8 text-primary" /></div>
+                  <CardTitle>{service.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>{service.description}</CardDescription>
+                </CardContent>
+              </Card>
+            )
+          })}
+          {services.length === 0 && <p className="col-span-full text-center text-muted-foreground">Services will be displayed here.</p>}
         </div>
       </section>
 

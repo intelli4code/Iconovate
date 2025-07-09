@@ -1,16 +1,24 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LoadingLink } from "@/components/ui/loading-link";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import type { TeamMember } from "@/types";
 
-export default function TeamPage() {
-  const teamMembers = [
-    { name: "Alex Rivera", role: "Founder & Lead Strategist", src: "https://placehold.co/400x400.png", hint: "professional man" },
-    { name: "Casey Jordan", role: "Creative Director", src: "https://placehold.co/400x400.png", hint: "creative woman" },
-    { name: "Morgan Lee", role: "Lead UI/UX Designer", src: "https://placehold.co/400x400.png", hint: "designer portrait" },
-    { name: "Taylor Smith", role: "Head of Web Development", src: "https://placehold.co/400x400.png", hint: "developer" },
-    { name: "Jamie Chen", role: "AI & Automation Specialist", src: "https://placehold.co/400x400.png", hint: "tech professional" },
-    { name: "Drew Patel", role: "Senior Brand Consultant", src: "https://placehold.co/400x400.png", hint: "consultant portrait" },
-  ];
+async function getTeamData() {
+    try {
+        const teamQuery = query(collection(db, "teamMembers"), where("showOnWebsite", "==", true));
+        const teamSnapshot = await getDocs(teamQuery);
+        return teamSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as TeamMember[];
+    } catch (error) {
+        console.error("Failed to fetch team data:", error);
+        return [];
+    }
+}
+
+export default async function TeamPage() {
+  const teamMembers = await getTeamData();
 
   return (
     <div className="container mx-auto px-4 py-16 md:py-24">
@@ -23,10 +31,10 @@ export default function TeamPage() {
 
       <section className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {teamMembers.map((member) => (
-          <div key={member.name} className="bg-card/50 p-6 rounded-lg text-center flex flex-col items-center">
+          <div key={member.id} className="bg-card/50 p-6 rounded-lg text-center flex flex-col items-center">
              <div className="p-1 bg-gradient-to-tr from-primary to-pink-500 rounded-full">
                 <Avatar className="w-28 h-28 border-4 border-background">
-                    <AvatarImage src={member.src} data-ai-hint={member.hint} />
+                    <AvatarImage src={member.avatarUrl} data-ai-hint="person portrait" />
                     <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                 </Avatar>
              </div>
@@ -34,6 +42,7 @@ export default function TeamPage() {
               <p className="text-primary">{member.role}</p>
           </div>
         ))}
+         {teamMembers.length === 0 && <p className="col-span-full text-center text-muted-foreground mt-8">Team members will be displayed here.</p>}
       </section>
 
       <section className="mt-24 text-center bg-card/50 rounded-lg p-10">

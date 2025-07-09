@@ -1,80 +1,34 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, Star, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingLink } from "@/components/ui/loading-link";
+import { db } from "@/lib/firebase";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import type { PricingTier, Testimonial } from "@/types";
 
-export default function PricingPage() {
-  const tiers = [
-    {
-      name: "Starter",
-      price: "Free",
-      priceDescription: "for individuals",
-      description: "Get started with our basic AI tools.",
-      features: [
-        "AI Slogan Generator",
-        "AI Color Palette Tool",
-        "1 Project Workspace",
-        "Limited AI Generations",
-      ],
-      isPopular: false,
-    },
-    {
-      name: "Pro",
-      price: "$49",
-      priceDescription: "/ month",
-      description: "Unlock the full suite of AI branding tools.",
-      features: [
-        "Everything in Starter, plus:",
-        "Full AI Tool Suite",
-        "Unlimited Project Workspaces",
-        "Brand Guidelines Generator",
-        "Logo Mockups & Variations",
-        "Priority Support",
-      ],
-      isPopular: true,
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      priceDescription: "for large teams",
-      description: "For large-scale needs with dedicated support.",
-      features: [
-        "Everything in Pro, plus:",
-        "Dedicated Account Manager",
-        "Custom Integrations & API",
-        "On-premise Deployment Options",
-        "Advanced Security & Compliance",
-        "Personalized Onboarding",
-      ],
-      isPopular: false,
-    },
-  ];
+async function getPageData() {
+    try {
+        const pricingQuery = query(collection(db, "pricingTiers"), orderBy("order", "asc"));
+        const pricingSnapshot = await getDocs(pricingQuery);
+        const pricingTiers = pricingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PricingTier[];
 
-  const testimonials = [
-    {
-      name: "Callum Bailey",
-      rating: 5,
-      review: "I've been in and out of learning/wanting to learn about forex for about a year or 2 now. But only since buying this course have I been able to fully understand for... See all",
-      src: "https://placehold.co/40x40.png",
-      hint: "woman portrait"
-    },
-    {
-      name: "Brayan Ponce",
-      rating: 5,
-      review: "Course has changed my life, helped me for the better. Really satisfied with Chris, truly feel like God wanted to deliver a message through him for my life. Grateful 🙏",
-      src: "https://placehold.co/40x40.png",
-      hint: "man portrait"
-    },
-    {
-      name: "Francisco Santana",
-      rating: 5,
-      review: "Amazing! Words can not describe how grateful I am for finding you. I plan to take my time learning this and hopefully someday it really pays off. The course is the best th... See all",
-      src: "https://placehold.co/40x40.png",
-      hint: "person portrait"
-    },
-  ];
+        const testimonialQuery = query(collection(db, "testimonials"), orderBy("order", "asc"));
+        const testimonialSnapshot = await getDocs(testimonialQuery);
+        const testimonials = testimonialSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Testimonial[];
+
+        return { pricingTiers, testimonials };
+    } catch (error) {
+        console.error("Failed to fetch pricing page data:", error);
+        return { pricingTiers: [], testimonials: [] };
+    }
+}
+
+
+export default async function PricingPage() {
+  const { pricingTiers, testimonials } = await getPageData();
 
   return (
     <div className="py-16 md:py-24">
@@ -87,8 +41,8 @@ export default function PricingPage() {
 
       <section className="container mx-auto px-4 mt-16">
         <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-start">
-          {tiers.map((tier) => (
-            <Card key={tier.name} className={cn(
+          {pricingTiers.map((tier) => (
+            <Card key={tier.id} className={cn(
               "flex flex-col h-full bg-card/50 rounded-2xl border-border/50",
               tier.isPopular && "border-primary/50 ring-2 ring-primary/50"
             )}>
@@ -125,6 +79,7 @@ export default function PricingPage() {
               </div>
             </Card>
           ))}
+           {pricingTiers.length === 0 && <p className="col-span-full text-center text-muted-foreground">Pricing plans will be displayed here.</p>}
         </div>
       </section>
 
@@ -141,7 +96,7 @@ export default function PricingPage() {
         </div>
         <div className="mt-12 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {testimonials.map((testimonial) => (
-            <Card key={testimonial.name} className="bg-card/50 p-6 rounded-2xl border-border/50">
+            <Card key={testimonial.id} className="bg-card/50 p-6 rounded-2xl border-border/50">
               <div className="flex items-center gap-4">
                 <Avatar className="h-12 w-12">
                   <AvatarImage src={testimonial.src} data-ai-hint={testimonial.hint} />
@@ -159,6 +114,7 @@ export default function PricingPage() {
               <p className="mt-4 text-muted-foreground text-sm">{testimonial.review}</p>
             </Card>
           ))}
+          {testimonials.length === 0 && <p className="col-span-full text-center text-muted-foreground">Testimonials will be displayed here.</p>}
         </div>
         <div className="text-center mt-12">
           <Button size="lg" className="rounded-full bg-gradient-to-r from-primary to-purple-600 text-white">Register Now</Button>
