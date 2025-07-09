@@ -15,9 +15,9 @@ export default function PortfolioPage() {
 
   return (
     <div className="container mx-auto px-4 py-16 md:py-24">
-      <section className="text-center">
-        <h1 className="text-4xl md:text-6xl font-headline font-bold">Our Portfolio</h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+      <section className="text-center max-w-3xl mx-auto">
+        <h1 className="text-4xl md:text-6xl font-bold">Our Work</h1>
+        <p className="mt-4 text-lg text-muted-foreground">
           We take pride in our work. Here’s a selection of projects that showcase our passion for design and strategic thinking.
         </p>
       </section>
@@ -25,7 +25,7 @@ export default function PortfolioPage() {
       <section className="mt-16">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {portfolioItems.map((item, index) => (
-            <Card key={index} className="overflow-hidden group">
+            <Card key={index} className="overflow-hidden group bg-card/50 border-border/50">
               <CardContent className="p-0">
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <Image
@@ -39,7 +39,7 @@ export default function PortfolioPage() {
                 </div>
                 <div className="p-6">
                   <p className="text-sm text-primary font-semibold">{item.category}</p>
-                  <h3 className="mt-1 text-xl font-headline font-bold">{item.title}</h3>
+                  <h3 className="mt-1 text-xl font-bold">{item.title}</h3>
                 </div>
               </CardContent>
             </Card>

@@ -12,21 +12,6 @@ import { ThemeToggle } from "./theme-toggle";
 
 export function MarketingHeader() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 10;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
-      }
-    };
-
-    document.addEventListener("scroll", handleScroll);
-    return () => {
-      document.removeEventListener("scroll", handleScroll);
-    };
-  }, [scrolled]);
 
   const navLinks = [
     { href: "/services", label: "Services" },
@@ -44,8 +29,8 @@ export function MarketingHeader() {
           key={link.href}
           href={link.href}
           className={cn(
-            "transition-colors hover:text-foreground/80",
-            pathname === link.href ? "text-foreground" : "text-foreground/60"
+            "transition-colors hover:text-primary",
+            pathname === link.href ? "text-primary" : "text-foreground/80"
           )}
         >
           {link.label}
@@ -55,15 +40,12 @@ export function MarketingHeader() {
   );
 
   return (
-    <header className={cn(
-      "sticky top-0 z-50 w-full transition-all duration-300",
-      scrolled ? "border-b bg-background/80 backdrop-blur-sm" : "bg-transparent"
-    )}>
-      <div className="container flex h-14 items-center">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-sm">
+      <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <LoadingLink href="/" className="mr-6 flex items-center space-x-2">
             <Rocket className="h-6 w-6 text-primary" />
-            <span className="hidden font-bold sm:inline-block font-headline">
+            <span className="hidden font-bold sm:inline-block">
               BrandBoost AI
             </span>
           </LoadingLink>
@@ -86,7 +68,7 @@ export function MarketingHeader() {
           <SheetContent side="left" className="pr-0">
              <LoadingLink href="/" className="flex items-center space-x-2">
               <Rocket className="h-6 w-6 text-primary" />
-              <span className="font-bold font-headline">BrandBoost AI</span>
+              <span className="font-bold">BrandBoost AI</span>
             </LoadingLink>
             <div className="my-4 h-px w-full bg-border" />
             <div className="flex flex-col space-y-4">
@@ -98,13 +80,13 @@ export function MarketingHeader() {
         {/* Mobile Logo */}
         <LoadingLink href="/" className="flex items-center space-x-2 md:hidden">
             <Rocket className="h-6 w-6 text-primary" />
-            <span className="font-bold font-headline">BrandBoost AI</span>
+            <span className="font-bold">BrandBoost AI</span>
         </LoadingLink>
 
 
         <div className="flex flex-1 items-center justify-end space-x-2">
           <ThemeToggle />
-          <Button asChild>
+          <Button asChild variant="outline" className="rounded-full">
             <LoadingLink href="/client-login">Client Portal</LoadingLink>
           </Button>
         </div>

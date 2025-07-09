@@ -7,17 +7,17 @@ import { Mail, Phone, MapPin } from "lucide-react";
 export default function ContactPage() {
   return (
     <div className="container mx-auto px-4 py-16 md:py-24">
-      <section className="text-center">
-        <h1 className="text-4xl md:text-6xl font-headline font-bold">Get In Touch</h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-          We'd love to hear about your project. Fill out the form below or reach out to us through our channels.
+      <section className="text-center max-w-3xl mx-auto">
+        <h1 className="text-4xl md:text-6xl font-bold">Get In Touch</h1>
+        <p className="mt-4 text-lg text-muted-foreground">
+          We'd love to hear about your project. Fill out the form below or reach out to us through our channels. Let's build something amazing together.
         </p>
       </section>
 
       <div className="mt-16 grid lg:grid-cols-5 gap-12">
         <div className="lg:col-span-3">
-          <div className="p-8 rounded-lg border bg-card shadow-sm">
-            <h2 className="text-2xl font-headline font-bold mb-6">Send us a message</h2>
+          <div className="p-8 rounded-lg bg-card/50">
+            <h2 className="text-2xl font-bold mb-6">Send us a message</h2>
             <form className="space-y-6">
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -37,13 +37,13 @@ export default function ContactPage() {
                 <Label htmlFor="message">Your Message</Label>
                 <Textarea id="message" rows={6} placeholder="Tell us about your project, goals, and timeline." />
               </div>
-              <Button type="submit" className="w-full">Send Message</Button>
+              <Button type="submit" className="w-full rounded-full">Send Message</Button>
             </form>
           </div>
         </div>
 
         <div className="lg:col-span-2 space-y-8">
-          <h3 className="text-2xl font-headline font-bold">Contact Information</h3>
+          <h3 className="text-2xl font-bold">Contact Information</h3>
           <div className="space-y-6 text-lg">
             <div className="flex items-center gap-4">
               <Mail className="h-6 w-6 text-primary" />

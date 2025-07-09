@@ -14,9 +14,9 @@ export default function ShopPage() {
 
   return (
     <div className="container mx-auto px-4 py-16 md:py-24">
-      <section className="text-center">
-        <h1 className="text-4xl md:text-6xl font-headline font-bold">Digital Goods</h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+      <section className="text-center max-w-3xl mx-auto">
+        <h1 className="text-4xl md:text-6xl font-bold">Digital Goods</h1>
+        <p className="mt-4 text-lg text-muted-foreground">
           High-quality design assets and templates to kickstart your creative projects.
         </p>
       </section>
@@ -24,7 +24,7 @@ export default function ShopPage() {
       <section className="mt-16">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((product, index) => (
-            <Card key={index} className="overflow-hidden group">
+            <Card key={index} className="overflow-hidden group bg-card/50">
               <CardHeader className="p-0">
                  <div className="relative aspect-[4/3] overflow-hidden">
                   <Image
@@ -38,11 +38,11 @@ export default function ShopPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-6">
-                <CardTitle className="font-headline text-xl">{product.name}</CardTitle>
+                <CardTitle className="text-xl">{product.name}</CardTitle>
                 <CardDescription className="text-primary font-bold text-lg mt-2">{product.price}</CardDescription>
               </CardContent>
               <CardFooter>
-                 <Button className="w-full">Add to Cart</Button>
+                 <Button className="w-full rounded-full">Add to Cart</Button>
               </CardFooter>
             </Card>
           ))}

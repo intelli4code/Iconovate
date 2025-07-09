@@ -46,9 +46,9 @@ export default function PricingPage() {
 
   return (
     <div className="container mx-auto px-4 py-16 md:py-24">
-      <section className="text-center">
-        <h1 className="text-4xl md:text-6xl font-headline font-bold">Flexible Pricing</h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+      <section className="text-center max-w-3xl mx-auto">
+        <h1 className="text-4xl md:text-6xl font-bold">Flexible Pricing</h1>
+        <p className="mt-4 text-lg text-muted-foreground">
           Choose a plan that fits your needs. We offer transparent pricing to help you get started.
         </p>
       </section>
@@ -56,10 +56,10 @@ export default function PricingPage() {
       <section className="mt-16">
         <div className="grid lg:grid-cols-3 gap-8 items-start">
           {tiers.map((tier) => (
-            <Card key={tier.name} className={tier.isPopular ? "border-primary border-2 shadow-lg" : ""}>
+            <Card key={tier.name} className={tier.isPopular ? "border-primary bg-card/50" : "bg-card/50"}>
               <CardHeader className="text-center">
                 {tier.isPopular && <p className="text-sm font-semibold text-primary mb-2">MOST POPULAR</p>}
-                <CardTitle className="text-3xl font-headline">{tier.name}</CardTitle>
+                <CardTitle className="text-3xl">{tier.name}</CardTitle>
                 <CardDescription>{tier.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -77,7 +77,7 @@ export default function PricingPage() {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full" variant={tier.isPopular ? "default" : "outline"}>
+                <Button className="w-full rounded-full" variant={tier.isPopular ? "default" : "outline"}>
                   Get Started
                 </Button>
               </CardFooter>

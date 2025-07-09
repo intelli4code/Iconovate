@@ -4,9 +4,8 @@
 import { Button } from "@/components/ui/button";
 import { LoadingLink } from "@/components/ui/loading-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BrainCircuit, Brush, Palette, ArrowRight, MessageSquare, Users, Volume2, Triangle, Shield, Globe, Zap, Gem } from "lucide-react";
+import { BrainCircuit, Brush, Palette, ArrowRight } from "lucide-react";
 import Image from "next/image";
-import { motion } from "framer-motion";
 
 export default function HomePageContent() {
   const services = [
@@ -14,121 +13,53 @@ export default function HomePageContent() {
     { icon: <Brush className="h-8 w-8 text-primary" />, title: "Logo & Identity Design", description: "Craft memorable logos and comprehensive brand guidelines." },
     { icon: <Palette className="h-8 w-8 text-primary" />, title: "AI Asset Generation", description: "Instantly create mood boards, color palettes, and mockups." },
   ];
-
-  const portfolioItems = [
-    { title: "QuantumLeap Branding", src: "https://placehold.co/600x400.png", hint: "technology branding" },
-    { title: "Aether E-Commerce", src: "https://placehold.co/600x400.png", hint: "ecommerce website" },
-    { title: "Nova Financial App", src: "https://placehold.co/600x400.png", hint: "fintech app" },
-  ];
-
-  const partners = [
-    { name: "Dreamure", icon: <Triangle className="h-4 w-4" /> },
-    { name: "SWITCH.WIN", icon: <Shield className="h-4 w-4" /> },
-    { name: "GlowSphere", icon: <Globe className="h-4 w-4" /> },
-    { name: "PinSpace", icon: <Zap className="h-4 w-4" /> },
-    { name: "Visionix", icon: <Gem className="h-4 w-4" /> },
-  ];
-
-  const floatingItems = [
-    { type: 'avatar', src: 'https://placehold.co/80x80.png', hint: 'woman smiling', position: 'top-[20%] left-[25%]', size: 'h-12 w-12 md:h-16 md:w-16' },
-    { type: 'avatar', src: 'https://placehold.co/80x80.png', hint: 'man professional', position: 'top-[10%] right-[33%]', size: 'h-10 w-10 md:h-12 md:w-12' },
-    { type: 'avatar', src: 'https://placehold.co/80x80.png', hint: 'man smiling', position: 'bottom-[25%] right-[10%]', size: 'h-16 w-16 md:h-20 md:w-20' },
-    { type: 'avatar', src: 'https://placehold.co/80x80.png', hint: 'woman professional', position: 'bottom-1/2 left-[20%]', size: 'h-10 w-10 md:h-12 md:w-12' },
-    { type: 'avatar', src: 'https://placehold.co/80x80.png', hint: 'woman portrait', position: 'bottom-[10%] left-[33%]', size: 'h-12 w-12 md:h-14 md:w-14' },
-    { type: 'icon', icon: <Users className="h-6 w-6" />, position: 'top-[33%] right-[25%]', glow: 'shadow-[0_0_20px_hsl(var(--primary))]' },
-    { type: 'icon', icon: <MessageSquare className="h-6 w-6" />, position: 'bottom-[30%] right-[55%]', glow: 'shadow-[0_0_20px_hsl(var(--accent))]' },
-    { type: 'icon', icon: <Volume2 className="h-6 w-6" />, position: 'bottom-[40%] left-[5%]', glow: 'shadow-[0_0_20px_hsl(var(--accent))]' },
+  
+  const numbers = [
+    { value: "95%", label: "Faster Turnaround" },
+    { value: "70%", label: "Cost Reduction" },
+    { value: "2k+", label: "Brands Launched" },
+    { value: "4.9/5", label: "Client Rating" },
   ];
 
   return (
     <>
       {/* Hero Section */}
-      <section className="relative w-full h-screen text-white z-0">
-
-        {/* Background & Orbits */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-primary/30 to-black -z-20" />
-        <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-primary/20 rounded-full blur-[150px] -z-10" />
-        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-primary/20 rounded-full blur-[150px] -z-10" />
-
-        <div className="absolute inset-0 w-full h-full flex items-center justify-end -z-10">
-          <div className="relative w-[300px] h-[300px] md:w-[600px] md:h-[600px] lg:w-[800px] lg:h-[800px]">
-            <div className="absolute inset-0 border border-white/20 rounded-full animate-spin [animation-duration:60s]" />
-            <div className="absolute inset-[20%] border border-white/20 rounded-full animate-spin [animation-duration:40s] [animation-direction:reverse]" />
-            <div className="absolute inset-[40%] border border-white/20 rounded-full animate-spin [animation-duration:25s]" />
-            
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                  <p className="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70">20k+</p>
-                  <p className="text-sm md:text-base text-white/50 tracking-[0.2em] uppercase">Specialists</p>
-              </div>
-            </div>
-
-            {floatingItems.map((item, index) => (
-               <motion.div
-                key={index}
-                className={`absolute ${item.position}`}
-                initial={{ y: 0, scale: 1 }}
-                animate={{ y: [-5, 5, -5] }}
-                transition={{ duration: 4 + index * 0.5, repeat: Infinity, ease: "easeInOut" }}
-                whileHover={{ scale: 1.1 }}
-              >
-                {item.type === 'avatar' ? (
-                  <Image src={item.src!} data-ai-hint={item.hint!} alt="Specialist" width={80} height={80} className={`${item.size} rounded-full border-2 border-white/20 object-cover shadow-lg`} />
-                ) : (
-                  <div className={`flex items-center justify-center h-14 w-14 md:h-16 md:w-16 bg-black/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 ${item.glow}`}>
-                    {item.icon}
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="container mx-auto px-4 z-10 flex items-center justify-start h-full">
-            <div className="max-w-lg md:max-w-xl lg:w-1/2">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-headline leading-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/80">
-                    Unlock Top Design Talent You Thought Was Out of Reach
+      <section className="py-20 md:py-32 text-center">
+        <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                    Build an Unforgettable Brand, <span className="text-primary">Intelligently</span>.
                 </h1>
-                <p className="mt-6 text-lg text-white/70 max-w-2xl">
-                  BrandBoost AI connects you with a curated network of elite designers and AI-powered tools to build unforgettable brands, faster than ever.
+                <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
+                  BrandBoost AI combines expert creativity with powerful AI to deliver high-end branding, websites, and assets at unparalleled speed.
                 </p>
-                <Button asChild size="lg" className="mt-8 rounded-full bg-white text-black hover:bg-white/90 shadow-lg shadow-white/10">
-                    <LoadingLink href="/contact">Start Project <ArrowRight /></LoadingLink>
-                </Button>
-            </div>
-        </div>
-        
-        {/* Partners Bar */}
-        <div className="absolute bottom-8 w-full z-10">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-wrap justify-center md:justify-between items-center gap-x-8 gap-y-4 text-white/40">
-              {partners.map(p => (
-                <div key={p.name} className="flex items-center gap-2 text-sm font-semibold hover:text-white/80 transition-colors">
-                  {p.icon}
-                  <span>{p.name}</span>
+                <div className="mt-8 flex justify-center gap-4">
+                    <Button asChild size="lg" className="rounded-full">
+                        <LoadingLink href="/contact">Start Your Project <ArrowRight /></LoadingLink>
+                    </Button>
+                    <Button asChild size="lg" variant="outline" className="rounded-full">
+                        <LoadingLink href="/services">Our Services</LoadingLink>
+                    </Button>
                 </div>
-              ))}
             </div>
-          </div>
         </div>
       </section>
 
       {/* Services Section */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="text-center">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold">A Smarter Way to Design</h2>
-            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-              From initial research to final delivery, our AI-powered tools accelerate every step of your creative process.
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold">A Smarter Way to Design</h2>
+            <p className="mt-4 text-muted-foreground">
+              From initial research to final delivery, our AI-powered tools accelerate every step of your creative process, delivering higher quality work, faster.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 mt-12">
             {services.map((service, index) => (
-              <Card key={index} className="text-center">
+              <Card key={index} className="text-center bg-card/50 border-border/50">
                 <CardHeader>
                   <div className="flex justify-center mb-4">{service.icon}</div>
-                  <CardTitle className="font-headline">{service.title}</CardTitle>
+                  <CardTitle className="text-xl">{service.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">{service.description}</p>
@@ -139,43 +70,62 @@ export default function HomePageContent() {
         </div>
       </section>
       
-      {/* Portfolio Highlight */}
-      <section className="py-16 md:py-24 bg-secondary/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold">Featured Work</h2>
-            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-              A glimpse into the brands we've helped build and elevate.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-            {portfolioItems.map((item, index) => (
-              <Card key={index} className="overflow-hidden group">
-                <CardContent className="p-0">
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <Image
-                      src={item.src}
-                      data-ai-hint={item.hint}
-                      alt={`Portfolio piece for ${item.title}`}
-                      width={600}
-                      height={400}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-headline font-bold">{item.title}</h3>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <div className="text-center mt-12">
-             <Button asChild variant="outline">
-                <LoadingLink href="/portfolio">View Full Portfolio <ArrowRight className="ml-2"/></LoadingLink>
-             </Button>
-          </div>
+      {/* Numbers Section */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold">The BrandBoost Difference</h2>
+             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
+                {numbers.map((stat) => (
+                    <div key={stat.label}>
+                    <h3 className="text-5xl md:text-6xl font-bold text-primary">{stat.value}</h3>
+                    <p className="mt-2 text-muted-foreground">{stat.label}</p>
+                    </div>
+                ))}
+            </div>
         </div>
       </section>
+
+       {/* How it Works Section */}
+       <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div className="max-w-lg">
+                    <h2 className="text-3xl font-bold">How We Get Started</h2>
+                    <p className="mt-4 text-muted-foreground">
+                        We start the journey by posting our videos on YouTube.
+                    </p>
+                     <p className="mt-4 text-muted-foreground">
+                        Praesentium et, praesentium inceptos. In, proin inceptos? Odio cras, vel. Erat, quisque. Maecenas sed, hac? Mus, nascetur? Quam quis, mus? Justo. Maecenas. Proin.
+                    </p>
+                </div>
+                <div className="relative flex justify-center">
+                    <Image
+                        src="https://placehold.co/600x400.png"
+                        data-ai-hint="youtube channel"
+                        alt="Youtube channel screenshot"
+                        width={600}
+                        height={400}
+                        className="rounded-lg object-cover"
+                    />
+                </div>
+            </div>
+        </div>
+       </section>
+
+       {/* CTA Section */}
+       <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4 text-center">
+            <div className="bg-card/50 rounded-lg p-10 max-w-4xl mx-auto">
+                <h2 className="text-3xl md:text-4xl font-bold">Ready to Elevate Your Brand?</h2>
+                <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
+                    Let's create something unforgettable together. Get in touch to discuss your project and see how BrandBoost AI can help you achieve your goals.
+                </p>
+                <Button asChild size="lg" className="mt-8 rounded-full">
+                    <LoadingLink href="/contact">Get Started Today</LoadingLink>
+                </Button>
+            </div>
+        </div>
+       </section>
     </>
   );
 }

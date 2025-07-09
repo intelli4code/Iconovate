@@ -38,9 +38,9 @@ export default function ServicesPage() {
 
   return (
     <div className="container mx-auto px-4 py-16 md:py-24">
-      <section className="text-center">
-        <h1 className="text-4xl md:text-6xl font-headline font-bold">Our Services</h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+      <section className="text-center max-w-3xl mx-auto">
+        <h1 className="text-4xl md:text-6xl font-bold">Our Services</h1>
+        <p className="mt-4 text-lg text-muted-foreground">
           We provide a full spectrum of design services, supercharged by AI, to bring your vision to life.
         </p>
       </section>
@@ -48,10 +48,10 @@ export default function ServicesPage() {
       <section className="mt-16">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (
-            <Card key={index}>
+            <Card key={index} className="bg-card/50">
               <CardHeader>
                 <div className="mb-4">{service.icon}</div>
-                <CardTitle className="font-headline">{service.title}</CardTitle>
+                <CardTitle>{service.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription>{service.description}</CardDescription>
@@ -61,10 +61,10 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <section className="mt-24 bg-secondary/30 rounded-lg p-12">
+      <section className="mt-24 rounded-lg p-12 bg-card/50">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
-             <h2 className="text-3xl font-headline font-bold">Our Creative Process</h2>
+             <h2 className="text-3xl font-bold">Our Creative Process</h2>
              <p className="mt-4 text-muted-foreground">We follow a structured, collaborative process to ensure success. From initial discovery and AI-powered research to iterative design and flawless delivery, we keep you in the loop every step of the way.</p>
              <ol className="mt-6 space-y-4">
               <li className="flex items-center gap-3"><span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold">1</span><span>Discovery & Strategy</span></li>
@@ -80,7 +80,7 @@ export default function ServicesPage() {
               alt="Diagram of a creative process"
               width={600}
               height={400}
-              className="rounded-lg shadow-lg"
+              className="rounded-lg"
             />
           </div>
         </div>
