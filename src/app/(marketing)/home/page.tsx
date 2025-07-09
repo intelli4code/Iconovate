@@ -4,7 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { LoadingLink } from "@/components/ui/loading-link";
 import { Card } from "@/components/ui/card";
-import { Star, ArrowRight } from "lucide-react";
+import { Star, ArrowRight, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 
 export default function HomePageContent() {
@@ -93,8 +93,8 @@ export default function HomePageContent() {
                 </div>
                 <div className="space-y-6">
                     <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 text-2xl">
-                          <Image src="https://placehold.co/40x40" data-ai-hint="shield icon" width={40} height={40} alt="shield icon" />
+                        <div className="flex-shrink-0 text-primary bg-primary/10 p-3 rounded-full">
+                          <ShieldCheck className="w-6 h-6" />
                         </div>
                         <div>
                             <h3 className="text-xl font-bold">Stay focused on your creative vision</h3>

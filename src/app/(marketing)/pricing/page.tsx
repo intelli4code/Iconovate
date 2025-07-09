@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, Star, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -7,28 +7,30 @@ import { cn } from "@/lib/utils";
 export default function PricingPage() {
   const tiers = [
     {
-      name: "Free",
-      price: "$0",
-      description: "Unlimited access for free courses",
+      name: "Starter",
+      price: "Free",
+      priceDescription: "for individuals",
+      description: "Get started with our basic AI tools.",
       features: [
-        "Access free courses and lessons",
-        "Semper sit rhoncus eget viverra",
-        "Proin quis felis, tellus tempor",
-        "Sed sagittis risus fringilla varius",
-        "Lorem ac interdum tincidunt in",
+        "AI Slogan Generator",
+        "AI Color Palette Tool",
+        "1 Project Workspace",
+        "Limited AI Generations",
       ],
       isPopular: false,
     },
     {
       name: "Pro",
-      price: "$499",
-      description: "Unlimited access for paid courses",
+      price: "$49",
+      priceDescription: "/ month",
+      description: "Unlock the full suite of AI branding tools.",
       features: [
-        "Everything FOREX",
-        "110+ Videos, PDF's + Quizzes",
-        "No Monthly Fees",
-        "Early YouTube Videos",
-        "Completion Package",
+        "Everything in Starter, plus:",
+        "Full AI Tool Suite",
+        "Unlimited Project Workspaces",
+        "Brand Guidelines Generator",
+        "Logo Mockups & Variations",
+        "Priority Support",
       ],
       isPopular: true,
     },
@@ -64,15 +66,15 @@ export default function PricingPage() {
       <section className="container mx-auto px-4 text-center max-w-4xl">
         <p className="text-primary font-bold tracking-widest uppercase">PRODUCTS</p>
         <h1 className="text-4xl md:text-6xl font-bold mt-2">Plans & Pricing</h1>
-        <p className="mt-4 text-lg text-muted-foreground">The Continuing education is very important to improve your forex knowledge.</p>
+        <p className="mt-4 text-lg text-muted-foreground">The Continuing education is very important to improve your graphic design knowledge.</p>
       </section>
 
       <section className="container mx-auto px-4 mt-16">
         <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
           {tiers.map((tier) => (
             <Card key={tier.name} className={cn(
-              "bg-card/50 rounded-2xl border-border/50 p-4",
-              tier.isPopular && "border-primary/50"
+              "flex flex-col h-full bg-card/50 rounded-2xl border-border/50",
+              tier.isPopular && "border-primary/50 ring-2 ring-primary/50"
             )}>
               <CardHeader className="text-left">
                 <div className="flex justify-between items-center">
@@ -81,27 +83,28 @@ export default function PricingPage() {
                 </div>
                 <div className="flex items-baseline gap-2 pt-4">
                   <span className="text-5xl font-bold">{tier.price}</span>
-                  <span className="text-muted-foreground">USD</span>
+                  <span className="text-muted-foreground">{tier.priceDescription}</span>
                 </div>
-                <p className="text-muted-foreground">{tier.description}</p>
+                <CardDescription>{tier.description}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="flex-1 space-y-4">
+                <ul className="space-y-3 text-left">
+                  {tier.features.map((feature, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
+                      <span className="text-muted-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+              <div className="p-6 pt-0">
                 <Button className={cn(
                   "w-full rounded-lg",
                   tier.isPopular ? "bg-gradient-to-r from-primary to-purple-600 text-white" : "bg-transparent border border-border/80 hover:bg-border/50"
                 )}>
                   Get Started
                 </Button>
-                <ul className="space-y-3 text-left">
-                  {tier.features.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-3">
-                      <Check className="h-5 w-5 text-primary" />
-                      <span className="text-muted-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                {tier.isPopular && <a href="#" className="text-sm text-primary hover:underline">Learn more about feature pro</a>}
-              </CardContent>
+              </div>
             </Card>
           ))}
         </div>
