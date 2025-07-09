@@ -3,7 +3,7 @@ import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, getDocs, doc } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
 import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent } from "@/types";
 
 async function getHomepageData() {
