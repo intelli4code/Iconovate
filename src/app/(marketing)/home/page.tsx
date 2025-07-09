@@ -21,9 +21,11 @@ export default function HomePageContent() {
       <section className="py-20 md:py-32">
         <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-4">
-              <Star className="h-4 w-4 fill-primary" />
-              <span>BEST GRAPHIC DESIGN AGENCY</span>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-gradient-to-r from-white/20 to-white/10 px-4 py-1.5 text-sm font-medium mb-4 backdrop-blur-sm">
+                <Star className="h-4 w-4 text-purple-400 fill-purple-400" />
+                <span className="font-bold bg-gradient-to-r from-purple-400 to-fuchsia-500 bg-clip-text text-transparent">
+                    BEST GRAPHIC DESIGN AGENCY
+                </span>
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
               Platform to build 
