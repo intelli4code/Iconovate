@@ -13,13 +13,13 @@ import * as LucideIcons from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle, Trash2, Loader2, Edit } from "lucide-react";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const serviceSchema = z.object({
   title: z.string().min(3, "Title is required"),
@@ -29,7 +29,13 @@ const serviceSchema = z.object({
 
 type ServiceFormValues = z.infer<typeof serviceSchema>;
 
-const iconNames = Object.keys(LucideIcons).filter(key => key !== 'createReactComponent' && key !== 'LucideIcon');
+const iconNames = [
+    'Palette', 'PenTool', 'BrainCircuit', 'Briefcase', 'BookText',
+    'ShieldCheck', 'Zap', 'Star', 'Megaphone', 'Presentation',
+    'Brush', 'Code', 'Globe', 'Camera', 'Video', 'MessageSquare',
+    'Users', 'Settings', 'BarChart', 'Layers'
+];
+
 
 export function ServicesManager() {
   const { toast } = useToast();
