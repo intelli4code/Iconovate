@@ -1,16 +1,28 @@
 import { Button } from "@/components/ui/button";
 import { LoadingLink } from "@/components/ui/loading-link";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function AboutPage() {
+    const teamMembers = [
+        { name: "Alex Rivera", role: "Founder & Lead Strategist", src: "https://placehold.co/400x400.png", hint: "professional man" },
+        { name: "Casey Jordan", role: "Creative Director", src: "https://placehold.co/400x400.png", hint: "creative woman" },
+        { name: "Morgan Lee", role: "Lead UI/UX Designer", src: "https://placehold.co/400x400.png", hint: "designer portrait" },
+        { name: "Taylor Smith", role: "Head of Web Development", src: "https://placehold.co/400x400.png", hint: "developer" },
+        { name: "Jamie Chen", role: "AI & Automation Specialist", src: "https://placehold.co/400x400.png", hint: "tech professional" },
+        { name: "Drew Patel", role: "Senior Brand Consultant", src: "https://placehold.co/400x400.png", hint: "consultant portrait" },
+    ];
+    
     const stats = [
         { value: '300k+', label: 'Lessons Completed' },
         { value: '140+', label: 'Countries Learning' },
         { value: '2k+', label: 'Certificates Issued' },
         { value: '10k+', label: 'Brands Boosted' },
     ];
+
   return (
     <div className="py-16 md:py-24">
+      {/* Hero Section */}
       <section className="container mx-auto px-4 text-center">
         <p className="text-primary font-semibold">ABOUT US</p>
         <h1 className="text-4xl md:text-6xl font-bold mt-2">Hello, we're BrandBoost AI.</h1>
@@ -20,6 +32,7 @@ export default function AboutPage() {
         </p>
       </section>
 
+      {/* Our Story Section */}
       <section className="container mx-auto px-4 mt-20">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="relative flex justify-center">
@@ -47,6 +60,29 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Our Team Section */}
+      <section className="container mx-auto px-4 mt-24 text-center">
+        <h2 className="text-3xl font-bold">Our Team</h2>
+        <p className="mt-2 text-muted-foreground max-w-xl mx-auto">
+            Meet the creative minds and technical wizards behind BrandBoost AI. We're a blend of designers, developers, and strategists passionate about building brands.
+        </p>
+        <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {teamMembers.map((member) => (
+            <div key={member.name} className="bg-card/50 p-6 rounded-lg text-center flex flex-col items-center">
+                <div className="p-1 bg-gradient-to-tr from-primary to-pink-500 rounded-full">
+                    <Avatar className="w-28 h-28 border-4 border-background">
+                        <AvatarImage src={member.src} data-ai-hint={member.hint} />
+                        <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                </div>
+                <h3 className="mt-4 text-xl font-bold">{member.name}</h3>
+                <p className="text-primary">{member.role}</p>
+            </div>
+            ))}
+        </div>
+      </section>
+
+      {/* Truth in Numbers Section */}
        <section className="container mx-auto px-4 mt-24 text-center">
         <h2 className="text-3xl font-bold">Truth in Numbers</h2>
         <p className="mt-2 text-muted-foreground max-w-xl mx-auto">Our track record speaks for itself. We're proud of the impact we've made for our clients worldwide.</p>
