@@ -1,8 +1,23 @@
+
 import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
 import HomePageContent from "./(marketing)/home/page";
+import { db } from "@/lib/firebase";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import type { PortfolioItem } from "@/types";
 
-export default function RootPage() {
+export default async function RootPage() {
+  const portfolioItems = await (async () => {
+    try {
+      const q = query(collection(db, "portfolioItems"), orderBy("createdAt", "desc"), limit(3));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PortfolioItem[];
+    } catch (error) {
+      console.error("Failed to fetch portfolio items for homepage:", error);
+      return [];
+    }
+  })();
+
   return (
     <div className="relative isolate flex min-h-screen flex-col bg-[#0d1222] font-body text-foreground">
        <div
@@ -16,7 +31,7 @@ export default function RootPage() {
       </div>
       <MarketingHeader />
       <main className="flex-1">
-        <HomePageContent />
+        <HomePageContent portfolioItems={portfolioItems} />
       </main>
       <MarketingFooter />
     </div>

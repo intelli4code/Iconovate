@@ -1,5 +1,6 @@
 
 
+
 export interface Expense {
   id: string;
   description: string;
@@ -145,4 +146,16 @@ export interface Project {
   briefLinks?: string;
   revisionRequestDetails?: string;
   revisionRequestTimestamp?: string;
+}
+
+export interface PortfolioItem {
+  id: string; // doc id
+  title: string;
+  category: string;
+  imageUrl: string;
+  imagePath: string; // for supabase deletion
+  imageHint: string;
+  description: string; // for the card
+  content: string; // for the dialog, can be markdown/html
+  createdAt: any;
 }

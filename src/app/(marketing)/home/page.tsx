@@ -7,19 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Star, ArrowRight, ShieldCheck, Check, Zap } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import type { PortfolioItem } from "@/types";
+import { PortfolioItemCard } from "@/components/marketing/portfolio-item-card";
 
-export default function HomePageContent() {
+interface HomePageContentProps {
+  portfolioItems: PortfolioItem[];
+}
+
+export default function HomePageContent({ portfolioItems }: HomePageContentProps) {
 
   const stats = [
     { value: "110+", label: "Interactive Videos" },
     { value: "20+", label: "Hours of Content" },
     { value: "5+", label: "Years of Experience" },
-  ];
-
-  const portfolioItems = [
-    { title: "QuantumLeap Branding", category: "Brand Identity", src: "https://placehold.co/600x400.png", hint: "technology branding" },
-    { title: "Aether E-Commerce", category: "Web Design", src: "https://placehold.co/600x400.png", hint: "ecommerce website" },
-    { title: "Nova Financial App", category: "UI/UX Design", src: "https://placehold.co/600x400.png", hint: "fintech app" },
   ];
 
   const tiers = [
@@ -173,25 +173,8 @@ export default function HomePageContent() {
             </p>
           </div>
           <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {portfolioItems.map((item, index) => (
-              <Card key={index} className="overflow-hidden group bg-card/50 border-border/50">
-                <CardContent className="p-0">
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <Image
-                      src={item.src}
-                      data-ai-hint={item.hint}
-                      alt={`Portfolio piece for ${item.title}`}
-                      width={600}
-                      height={400}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <p className="text-sm text-primary font-semibold">{item.category}</p>
-                    <h3 className="mt-1 text-xl font-bold">{item.title}</h3>
-                  </div>
-                </CardContent>
-              </Card>
+            {portfolioItems.map((item) => (
+              <PortfolioItemCard key={item.id} item={item} />
             ))}
           </div>
           <div className="text-center mt-12">
