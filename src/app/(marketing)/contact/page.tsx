@@ -16,7 +16,7 @@ export default function ContactPage() {
 
       <div className="mt-16 grid lg:grid-cols-5 gap-12">
         <div className="lg:col-span-3">
-          <div className="p-8 rounded-lg bg-card/50">
+          <div className="p-8 rounded-lg bg-card/50 h-full">
             <h2 className="text-2xl font-bold mb-6">Send us a message</h2>
             <form className="space-y-6">
               <div className="grid sm:grid-cols-2 gap-6">
@@ -42,22 +42,24 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-2 space-y-8">
-          <h3 className="text-2xl font-bold">Contact Information</h3>
-          <div className="space-y-6 text-lg">
-            <div className="flex items-center gap-4">
-              <Mail className="h-6 w-6 text-primary" />
-              <span className="text-muted-foreground">hello@brandboostai.com</span>
+        <div className="lg:col-span-2">
+           <div className="p-8 rounded-lg bg-card/50 h-full">
+                <h3 className="text-2xl font-bold mb-6">Contact Information</h3>
+                <div className="space-y-6 text-lg">
+                    <div className="flex items-center gap-4">
+                    <Mail className="h-6 w-6 text-primary" />
+                    <span className="text-muted-foreground">hello@brandboostai.com</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                    <Phone className="h-6 w-6 text-primary" />
+                    <span className="text-muted-foreground">(555) 123-4567</span>
+                    </div>
+                    <div className="flex items-start gap-4">
+                    <MapPin className="h-6 w-6 text-primary mt-1" />
+                    <span className="text-muted-foreground">123 Design Lane<br />Creativity City, DC 12345</span>
+                    </div>
+                </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Phone className="h-6 w-6 text-primary" />
-              <span className="text-muted-foreground">(555) 123-4567</span>
-            </div>
-            <div className="flex items-start gap-4">
-              <MapPin className="h-6 w-6 text-primary mt-1" />
-              <span className="text-muted-foreground">123 Design Lane<br />Creativity City, DC 12345</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
