@@ -51,6 +51,21 @@ export default function HomePageContent() {
       ],
       isPopular: true,
     },
+    {
+      name: "Enterprise",
+      price: "Custom",
+      priceDescription: "for large teams",
+      description: "For large-scale needs with dedicated support.",
+      features: [
+        "Everything in Pro, plus:",
+        "Dedicated Account Manager",
+        "Custom Integrations & API",
+        "On-premise Deployment Options",
+        "Advanced Security & Compliance",
+        "Personalized Onboarding",
+      ],
+      isPopular: false,
+    },
   ];
 
   return (
@@ -109,7 +124,7 @@ export default function HomePageContent() {
       </section>
 
       {/* Feature Section */}
-       <section className="py-16 md:py-24">
+       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
             <div className="text-center max-w-2xl mx-auto">
                 <p className="font-semibold text-primary">FEATURED</p>
@@ -197,7 +212,7 @@ export default function HomePageContent() {
                     The Continuing education is very important to improve your graphic design knowledge.
                 </p>
             </div>
-            <div className="mt-16 grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
+            <div className="mt-16 grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-start">
               {tiers.map((tier) => (
                 <Card key={tier.name} className={cn(
                   "flex flex-col h-full bg-card/50 rounded-2xl border-border/50 text-left",
@@ -225,11 +240,13 @@ export default function HomePageContent() {
                     </ul>
                   </CardContent>
                   <div className="p-6 pt-0">
-                    <Button className={cn(
+                     <Button asChild className={cn(
                       "w-full rounded-lg",
                       tier.isPopular ? "bg-gradient-to-r from-primary to-purple-600 text-white" : "bg-transparent border border-border/80 hover:bg-border/50"
                     )}>
-                      Get Started
+                       <LoadingLink href={tier.name === 'Enterprise' ? '/contact' : '/login'}>
+                         {tier.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
+                       </LoadingLink>
                     </Button>
                   </div>
                 </Card>

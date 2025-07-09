@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, Star, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LoadingLink } from "@/components/ui/loading-link";
 
 export default function PricingPage() {
   const tiers = [
@@ -33,6 +34,21 @@ export default function PricingPage() {
         "Priority Support",
       ],
       isPopular: true,
+    },
+    {
+      name: "Enterprise",
+      price: "Custom",
+      priceDescription: "for large teams",
+      description: "For large-scale needs with dedicated support.",
+      features: [
+        "Everything in Pro, plus:",
+        "Dedicated Account Manager",
+        "Custom Integrations & API",
+        "On-premise Deployment Options",
+        "Advanced Security & Compliance",
+        "Personalized Onboarding",
+      ],
+      isPopular: false,
     },
   ];
 
@@ -70,7 +86,7 @@ export default function PricingPage() {
       </section>
 
       <section className="container mx-auto px-4 mt-16">
-        <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
+        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-start">
           {tiers.map((tier) => (
             <Card key={tier.name} className={cn(
               "flex flex-col h-full bg-card/50 rounded-2xl border-border/50",
@@ -98,11 +114,13 @@ export default function PricingPage() {
                 </ul>
               </CardContent>
               <div className="p-6 pt-0">
-                <Button className={cn(
+                <Button asChild className={cn(
                   "w-full rounded-lg",
                   tier.isPopular ? "bg-gradient-to-r from-primary to-purple-600 text-white" : "bg-transparent border border-border/80 hover:bg-border/50"
                 )}>
-                  Get Started
+                   <LoadingLink href={tier.name === 'Enterprise' ? '/contact' : '/login'}>
+                     {tier.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
+                   </LoadingLink>
                 </Button>
               </div>
             </Card>
