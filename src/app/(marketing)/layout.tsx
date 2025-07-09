@@ -13,6 +13,7 @@ export default function MarketingLayout({
         aria-hidden="true"
       >
         <div className="absolute left-[-10rem] top-[-10rem] h-[40rem] w-[40rem] bg-gradient-radial from-primary/20 to-transparent blur-3xl" />
+        <div className="absolute bottom-[-15rem] right-[-15rem] h-[50rem] w-[50rem] bg-gradient-radial from-fuchsia-500/10 to-transparent blur-3xl" />
       </div>
       <MarketingHeader />
       <main className="flex-1">{children}</main>
