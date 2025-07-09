@@ -12,6 +12,15 @@ import { ThemeToggle } from "./theme-toggle";
 
 export function MarketingHeader() {
   const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
     { href: "/services", label: "Services" },
@@ -40,7 +49,12 @@ export function MarketingHeader() {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-sm">
+    <header className={cn(
+      "sticky top-0 z-50 w-full border-b transition-colors duration-300",
+      isScrolled 
+        ? "border-border/50 bg-background/80 backdrop-blur-sm" 
+        : "border-transparent bg-transparent"
+    )}>
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <LoadingLink href="/" className="mr-6 flex items-center space-x-2">
