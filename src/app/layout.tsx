@@ -6,6 +6,7 @@ import { LoadingProvider } from '@/contexts/loading-context';
 import { ThemeProvider } from "@/contexts/theme-provider";
 import { TopLoader } from '@/components/ui/top-loader';
 import { NavigationEvents } from '@/components/navigation-events';
+import CustomCursor from '@/components/custom-cursor';
 
 export const metadata: Metadata = {
   title: 'BrandBoost AI',
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
             <LoadingProvider>
+                <CustomCursor />
                 {children}
                 <TopLoader />
                 <NavigationEvents />
