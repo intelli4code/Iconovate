@@ -3,7 +3,7 @@ import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, doc } from "firebase/firestore";
 import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent } from "@/types";
 
 async function getHomepageData() {
@@ -45,10 +45,10 @@ export default async function RootPage() {
         className="absolute inset-0 z-[-1] overflow-hidden"
         aria-hidden="true"
       >
-        <div className="absolute right-[-40rem] top-[-30rem] h-[80rem] w-[80rem] bg-gradient-radial from-purple-500/15 to-transparent blur-3xl" />
-        <div className="absolute left-[-30rem] top-[30rem] h-[70rem] w-[70rem] bg-gradient-radial from-primary/20 to-transparent blur-3xl" />
-        <div className="absolute right-[-35rem] top-[70rem] h-[80rem] w-[80rem] bg-gradient-radial from-fuchsia-500/15 to-transparent blur-3xl" />
-        <div className="absolute left-[-20rem] bottom-[-20rem] h-[70rem] w-[70rem] bg-gradient-radial from-indigo-500/15 to-transparent blur-3xl" />
+        <div className="absolute right-[-40rem] top-[-30rem] h-[80rem] w-[80rem] bg-gradient-radial from-primary/15 to-transparent blur-3xl" />
+        <div className="absolute left-[-30rem] top-[30rem] h-[70rem] w-[70rem] bg-gradient-radial from-secondary/15 to-transparent blur-3xl" />
+        <div className="absolute right-[-35rem] top-[70rem] h-[80rem] w-[80rem] bg-gradient-radial from-accent/15 to-transparent blur-3xl" />
+        <div className="absolute left-[-20rem] bottom-[-20rem] h-[70rem] w-[70rem] bg-gradient-radial from-primary/10 to-transparent blur-3xl" />
       </div>
       <MarketingHeader />
       <main className="flex-1">
