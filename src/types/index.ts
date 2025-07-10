@@ -236,10 +236,17 @@ export interface PageContent {
     home: HomePageContent;
 }
 
-
 export interface SiteStat {
     id: string;
     label: string;
     value: string;
     order: number;
+}
+
+export interface SiteContent {
+    footer: FooterContent;
+    images: { [key: string]: SiteImage };
+    pageContent: PageContent;
+    stats: SiteStat[];
+    theme: string;
 }

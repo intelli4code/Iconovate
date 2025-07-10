@@ -2,12 +2,13 @@
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingLink } from "@/components/ui/loading-link";
-import { Brush, Image as ImageIcon, MessageSquareText, FileText, PencilRuler, Tags, Users, Link as LinkIcon, CaseUpper } from "lucide-react";
+import { Brush, Image as ImageIcon, MessageSquareText, FileText, PencilRuler, Tags, Users, Link as LinkIcon, CaseUpper, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function WebEditingHubPage() {
   const editingSections = [
     { title: "Manage Site Text", description: "Edit headlines and text on your website.", href: "/dashboard/web-editing/site-text", icon: <CaseUpper /> },
+    { title: "Manage Theme", description: "Change the color palette of your website.", href: "/dashboard/web-editing/theme", icon: <Palette /> },
     { title: "Manage Portfolio", description: "Add, edit, or delete portfolio projects.", href: "/dashboard/web-editing/portfolio", icon: <Brush /> },
     { title: "Manage Team Display", description: "Choose which team members appear on the site.", href: "/dashboard/web-editing/team", icon: <Users /> },
     { title: "Manage Pricing", description: "Update your service tiers and prices.", href: "/dashboard/web-editing/pricing", icon: <Tags /> },

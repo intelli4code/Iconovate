@@ -16,7 +16,7 @@
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 300 100% 50%; /* Default Fuchsia Accent */
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -52,7 +52,7 @@
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 300 100% 50%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -72,6 +72,54 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-ring: 271 76% 53%;
+  }
+
+  /* Theme: Default */
+  .theme-default {
+    --primary: 262 84% 59%; /* Deep Indigo */
+    --accent: 300 100% 50%; /* Fuchsia */
+    --background: 210 40% 96.1%;
+  }
+  .dark.theme-default {
+      --primary: 262 84% 59%; /* Deep Indigo */
+      --accent: 300 100% 50%; /* Fuchsia */
+      --background: 224 71.4% 11%;
+  }
+
+  /* Theme: Moonstone */
+  .theme-moonstone {
+    --primary: 186 65% 40%; /* Moonstone */
+    --accent: 186 70% 80%; /* Robin Egg Blue */
+    --background: 210 40% 98%;
+  }
+  .dark.theme-moonstone {
+    --primary: 186 65% 40%; /* Moonstone */
+    --accent: 186 70% 80%; /* Robin Egg Blue */
+    --background: 195 35% 10%;
+  }
+  
+  /* Theme: Verdant */
+  .theme-verdant {
+    --primary: 136 65% 30%; /* Castleton Green */
+    --accent: 140 50% 60%; /* Dark Spring Green */
+    --background: 210 40% 98%;
+  }
+  .dark.theme-verdant {
+    --primary: 136 65% 30%; /* Castleton Green */
+    --accent: 140 50% 60%; /* Dark Spring Green */
+    --background: 140 20% 10%;
+  }
+
+  /* Theme: Fiery */
+  .theme-fiery {
+    --primary: 0 72% 45%;   /* Fire Engine Red */
+    --accent: 25 93% 58%; /* Carrot Orange */
+    --background: 20 50% 98%;
+  }
+  .dark.theme-fiery {
+    --primary: 0 72% 45%; /* Fire Engine Red */
+    --accent: 25 93% 58%; /* Carrot Orange */
+    --background: 15 25% 10%;
   }
 }
 

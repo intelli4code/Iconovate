@@ -7,19 +7,37 @@ import { ThemeProvider } from "@/contexts/theme-provider";
 import { TopLoader } from '@/components/ui/top-loader';
 import { NavigationEvents } from '@/components/navigation-events';
 import CustomCursor from '@/components/custom-cursor';
+import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 export const metadata: Metadata = {
   title: 'BrandBoost AI',
   description: 'AI-Powered Brand Design Automation Platform',
 };
 
-export default function RootLayout({
+async function getSiteTheme() {
+    try {
+        const contentDocRef = doc(db, "siteContent", "main");
+        const docSnap = await getDoc(contentDocRef);
+        if (docSnap.exists() && docSnap.data().theme) {
+            return docSnap.data().theme;
+        }
+        return "theme-default"; // Default theme
+    } catch (error) {
+        console.error("Failed to fetch site theme, using default.", error);
+        return "theme-default";
+    }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const siteTheme = await getSiteTheme();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={siteTheme}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
