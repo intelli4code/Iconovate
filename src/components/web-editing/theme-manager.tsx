@@ -12,26 +12,20 @@ import { Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const themes = [
-    {
-        name: "Default",
-        id: "theme-default",
-        colors: ["#7C3AED", "#1E1B4B", "#EC4899"],
-    },
-    {
-        name: "Moonstone",
-        id: "theme-moonstone",
-        colors: ["#239EAB", "#0B2C24", "#74DEEE"],
-    },
-    {
-        name: "Verdant",
-        id: "theme-verdant",
-        colors: ["#1C603F", "#0B2C24", "#247A4D"],
-    },
-    {
-        name: "Fiery",
-        id: "theme-fiery",
-        colors: ["#CD1818", "#4A0404", "#F89B29"],
-    },
+    { name: "Default", id: "theme-default", colors: ["#7C3AED", "#1E1B4B", "#EC4899"] },
+    { name: "Moonstone", id: "theme-moonstone", colors: ["#239EAB", "#0B2C24", "#74DEEE"] },
+    { name: "Verdant", id: "theme-verdant", colors: ["#1C603F", "#0B2C24", "#247A4D"] },
+    { name: "Fiery", id: "theme-fiery", colors: ["#CD1818", "#4A0404", "#F89B29"] },
+    { name: "Oceanic", id: "theme-oceanic", colors: ["#0077B6", "#023E8A", "#48CAE4"] },
+    { name: "Sunset", id: "theme-sunset", colors: ["#F77F00", "#D62828", "#FCBF49"] },
+    { name: "Minty", id: "theme-minty", colors: ["#48B59C", "#004D40", "#A6EAD5"] },
+    { name: "Royal", id: "theme-royal", colors: ["#415A77", "#0D1B2A", "#FFC300"] },
+    { name: "Earthy", id: "theme-earthy", colors: ["#6F4E37", "#3D2B1F", "#A87C67"] },
+    { name: "Rose", id: "theme-rose", colors: ["#D81159", "#218380", "#FFBC42"] },
+    { name: "Slate", id: "theme-slate", colors: ["#526779", "#273646", "#ACB8C2"] },
+    { name: "Gold", id: "theme-gold", colors: ["#D4AF37", "#443A18", "#FFD700"] },
+    { name: "Lavender", id: "theme-lavender", colors: ["#947BD3", "#4A3A6B", "#C8B6E2"] },
+    { name: "Crimson", id: "theme-crimson", colors: ["#DC143C", "#5C0012", "#FF6B6B"] },
 ];
 
 export function ThemeManager() {
