@@ -9,6 +9,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent } from "@/types";
 import { PortfolioItemCard } from "@/components/marketing/portfolio-item-card";
+import { motion } from "framer-motion";
 
 interface HomePageContentProps {
   portfolioItems: PortfolioItem[];
@@ -17,6 +18,26 @@ interface HomePageContentProps {
   images: { [key: string]: SiteImage };
   pageContent: PageContent | null;
 }
+
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2
+    }
+  }
+};
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
 
 export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent }: HomePageContentProps) {
 
@@ -38,61 +59,97 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
       {/* Hero Section */}
       <section className="py-20 md:py-32">
         <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-gradient-to-r from-white/20 to-white/10 px-4 py-1.5 text-sm font-medium mb-4 backdrop-blur-sm">
+          <motion.div 
+            initial="hidden"
+            animate="show"
+            variants={staggerContainer}
+            className="flex flex-col items-center lg:items-start text-center lg:text-left"
+          >
+            <motion.div variants={staggerItem} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-gradient-to-r from-white/20 to-white/10 px-4 py-1.5 text-sm font-medium mb-4 backdrop-blur-sm">
                 <Star className="h-4 w-4 text-primary fill-primary" />
                 <span className="font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                     BEST GRAPHIC DESIGN AGENCY
                 </span>
-            </div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
+            </motion.div>
+            <motion.h1 variants={staggerItem} className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
               {homeContent?.heroTitle
                ? <span dangerouslySetInnerHTML={{ __html: dynamicGradientText(homeContent.heroTitle, 'from-primary to-accent') }} />
                : <>Platform to build <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent"> amazing brands</span> and designs</>
               }
-            </h1>
-            <p className="mt-6 text-lg text-muted-foreground max-w-lg">
+            </motion.h1>
+            <motion.p variants={staggerItem} className="mt-6 text-lg text-muted-foreground max-w-lg">
               {homeContent?.heroSubtitle || "Learn from mentors who are experienced in their fields and get official certificates to build future careers."}
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
+            </motion.p>
+            <motion.div variants={staggerItem} className="mt-8 flex flex-col sm:flex-row items-center gap-4">
               <Button asChild size="lg" className="rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg hover:shadow-primary/50 transition-shadow">
                 <LoadingLink href="/contact">Start Now <ArrowRight /></LoadingLink>
               </Button>
               <Button asChild size="lg" variant="outline" className="rounded-full">
                 <LoadingLink href="/contact">Contact Sales</LoadingLink>
               </Button>
-            </div>
-          </div>
-          <div className="relative hidden lg:block">
-            <Image
-              src={heroImage}
-              data-ai-hint={heroImageHint}
-              alt="App dashboard and mobile screenshots"
-              width={800}
-              height={600}
-              className="rounded-lg object-contain"
-            />
-          </div>
+            </motion.div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="relative hidden lg:block"
+          >
+             <motion.div
+                animate={{
+                    y: [0, -10, 0],
+                }}
+                transition={{
+                    duration: 5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                }}
+            >
+                <Image
+                src={heroImage}
+                data-ai-hint={heroImageHint}
+                alt="App dashboard and mobile screenshots"
+                width={800}
+                height={600}
+                className="rounded-lg object-contain"
+                />
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 md:py-24">
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={staggerContainer}
+        className="py-16 md:py-24"
+      >
         <div className="container mx-auto px-4">
           <div className="grid sm:grid-cols-3 gap-8 text-center max-w-4xl mx-auto">
             {stats.map((stat) => (
-              <Card key={stat.id} className="bg-white/5 border-white/10 p-6 rounded-2xl backdrop-blur-sm">
-                <h3 className="text-4xl md:text-5xl font-bold">{stat.value}</h3>
-                <p className="mt-2 text-muted-foreground">{stat.label}</p>
-              </Card>
+              <motion.div key={stat.id} variants={staggerItem}>
+                <Card className="bg-white/5 border-white/10 p-6 rounded-2xl backdrop-blur-sm">
+                  <h3 className="text-4xl md:text-5xl font-bold">{stat.value}</h3>
+                  <p className="mt-2 text-muted-foreground">{stat.label}</p>
+                </Card>
+              </motion.div>
             ))}
              {stats.length === 0 && <p className="col-span-full text-muted-foreground">Stats will be displayed here.</p>}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Feature Section */}
-       <section className="py-16 md:py-24">
+       <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={fadeIn}
+        transition={{ duration: 0.5 }}
+        className="py-16 md:py-24"
+       >
         <div className="container mx-auto px-4">
             <div className="text-center max-w-2xl mx-auto">
                 <p className="font-semibold text-primary">FEATURED</p>
@@ -128,10 +185,17 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
                 </div>
             </div>
         </div>
-       </section>
+       </motion.section>
 
       {/* Portfolio Section */}
-      <section className="py-16 md:py-24">
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={fadeIn}
+        transition={{ duration: 0.5 }}
+        className="py-16 md:py-24"
+      >
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto">
             <p className="font-semibold text-primary">OUR WORK</p>
@@ -140,22 +204,37 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
               Here’s a glimpse into the brands we’ve helped build. Each project is a testament to our passion for design and strategic thinking.
             </p>
           </div>
-          <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.1 }}
+            className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
             {portfolioItems.map((item) => (
-              <PortfolioItemCard key={item.id} item={item} />
+              <motion.div key={item.id} variants={staggerItem}>
+                <PortfolioItemCard item={item} />
+              </motion.div>
             ))}
              {portfolioItems.length === 0 && <p className="col-span-full text-center text-muted-foreground">Portfolio items will be displayed here.</p>}
-          </div>
+          </motion.div>
           <div className="text-center mt-12">
             <Button asChild size="lg" variant="outline" className="rounded-full">
               <LoadingLink href="/portfolio">View All Work</LoadingLink>
             </Button>
           </div>
         </div>
-      </section>
+      </motion.section>
 
         {/* Pricing CTA Section */}
-       <section className="py-16 md:py-24 text-center">
+       <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={fadeIn}
+        transition={{ duration: 0.5 }}
+        className="py-16 md:py-24 text-center"
+       >
         <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto">
                  <p className="font-semibold text-primary">PRODUCTS</p>
@@ -164,49 +243,61 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
                     The Continuing education is very important to improve your graphic design knowledge.
                 </p>
             </div>
-            <div className="mt-16 grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-start">
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.1 }}
+              className="mt-16 grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-start"
+            >
               {sortedTiers.map((tier) => (
-                <Card key={tier.name} className={cn(
-                  "flex flex-col h-full bg-card/50 rounded-2xl border-border/50 text-left",
-                  tier.isPopular && "border-primary/50 ring-2 ring-primary/50"
-                )}>
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-2xl">{tier.name}</CardTitle>
-                      {tier.isPopular && <Zap className="h-6 w-6 text-yellow-400 fill-yellow-400" />}
+                <motion.div
+                  key={tier.name}
+                  variants={staggerItem}
+                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                >
+                  <Card className={cn(
+                    "flex flex-col h-full bg-card/50 rounded-2xl border-border/50 text-left",
+                    tier.isPopular && "border-primary/50 ring-2 ring-primary/50"
+                  )}>
+                    <CardHeader>
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-2xl">{tier.name}</CardTitle>
+                        {tier.isPopular && <Zap className="h-6 w-6 text-yellow-400 fill-yellow-400" />}
+                      </div>
+                      <div className="flex items-baseline gap-2 pt-4">
+                        <span className="text-5xl font-bold">{tier.price}</span>
+                        <span className="text-muted-foreground">{tier.priceDescription}</span>
+                      </div>
+                      <CardDescription>{tier.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-1 space-y-4">
+                      <ul className="space-y-3">
+                        {tier.features.map((feature, index) => (
+                          <li key={index} className="flex items-start gap-3">
+                            <Check className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
+                            <span className="text-muted-foreground">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                    <div className="p-6 pt-0">
+                       <Button asChild className={cn(
+                        "w-full rounded-lg",
+                        tier.isPopular ? "bg-gradient-to-r from-primary to-accent text-white" : "bg-transparent border border-border/80 hover:bg-border/50"
+                      )}>
+                         <LoadingLink href={tier.name === 'Enterprise' ? '/contact' : '/login'}>
+                           {tier.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
+                         </LoadingLink>
+                      </Button>
                     </div>
-                    <div className="flex items-baseline gap-2 pt-4">
-                      <span className="text-5xl font-bold">{tier.price}</span>
-                      <span className="text-muted-foreground">{tier.priceDescription}</span>
-                    </div>
-                    <CardDescription>{tier.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-1 space-y-4">
-                    <ul className="space-y-3">
-                      {tier.features.map((feature, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <Check className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
-                          <span className="text-muted-foreground">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <div className="p-6 pt-0">
-                     <Button asChild className={cn(
-                      "w-full rounded-lg",
-                      tier.isPopular ? "bg-gradient-to-r from-primary to-accent text-white" : "bg-transparent border border-border/80 hover:bg-border/50"
-                    )}>
-                       <LoadingLink href={tier.name === 'Enterprise' ? '/contact' : '/login'}>
-                         {tier.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
-                       </LoadingLink>
-                    </Button>
-                  </div>
-                </Card>
+                  </Card>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
              {sortedTiers.length === 0 && <p className="col-span-full text-center text-muted-foreground mt-8">Pricing plans will be displayed here.</p>}
         </div>
-       </section>
+       </motion.section>
     </>
   );
 }

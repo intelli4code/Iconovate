@@ -1,20 +1,46 @@
+
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin } from "lucide-react";
+import { motion } from "framer-motion";
+
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 }
+};
 
 export default function ContactPage() {
   return (
-    <div className="container mx-auto px-4 py-16 md:py-24">
-      <section className="text-center max-w-3xl mx-auto">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="container mx-auto px-4 py-16 md:py-24"
+    >
+      <motion.section
+        variants={fadeIn}
+        initial="initial"
+        animate="animate"
+        className="text-center max-w-3xl mx-auto"
+      >
         <h1 className="text-4xl md:text-6xl font-bold">Get In Touch</h1>
         <p className="mt-4 text-lg text-muted-foreground">
           We'd love to hear about your project. Fill out the form below or reach out to us through our channels. Let's build something amazing together.
         </p>
-      </section>
+      </motion.section>
 
-      <div className="mt-16 grid lg:grid-cols-5 gap-12">
+      <motion.div
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={fadeIn}
+        className="mt-16 grid lg:grid-cols-5 gap-12"
+      >
         <div className="lg:col-span-3">
           <div className="p-8 rounded-lg bg-card/50 h-full">
             <h2 className="text-2xl font-bold mb-6">Send us a message</h2>
@@ -61,7 +87,7 @@ export default function ContactPage() {
                 </div>
             </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
