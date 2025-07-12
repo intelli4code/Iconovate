@@ -64,7 +64,7 @@ export default function MarketingLayout({
           return (
             <motion.div
               key={index}
-              className={`absolute h-[70rem] w-[70rem] bg-gradient-to-tr ${colors} to-transparent bg-no-repeat [background-image:radial-gradient(circle_at_center,var(--tw-gradient-stops))] [background-size:25%_25%] opacity-15 blur-3xl`}
+              className={`absolute h-[70rem] w-[70rem] bg-no-repeat [background-image:radial-gradient(circle_at_center,var(--tw-gradient-from)_0,transparent_50%)] from-[hsl(var(${index % 2 === 0 ? '--primary' : '--accent'}))] opacity-15 blur-3xl`}
               style={{ ...position }}
               {...animation}
             />
