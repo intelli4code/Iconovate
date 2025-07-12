@@ -100,9 +100,17 @@ export function MarketingHeader() {
 
         <div className="flex flex-1 items-center justify-end space-x-2">
           <ThemeToggle />
-          <Button asChild variant="outline" className="rounded-full">
-            <LoadingLink href="/client-login">Client Portal</LoadingLink>
-          </Button>
+           <div className="hidden sm:flex items-center gap-2">
+                <Button asChild variant="ghost" className="rounded-full">
+                    <LoadingLink href="/designer/login">Designer Portal</LoadingLink>
+                </Button>
+                <Button asChild variant="outline" className="rounded-full">
+                    <LoadingLink href="/client-login">Client Portal</LoadingLink>
+                </Button>
+                <Button asChild className="rounded-full">
+                    <LoadingLink href="/dashboard/projects">Start Project</LoadingLink>
+                </Button>
+           </div>
         </div>
       </div>
     </header>
