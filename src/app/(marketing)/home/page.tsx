@@ -39,6 +39,10 @@ const staggerItem = {
   show: { opacity: 1, y: 0 }
 };
 
+const dynamicGradientText = (text: string) => {
+  return text.replace(/(amazing brands|designs)/g, `<span class="text-transparent bg-clip-text bg-gradient-to-r from-[--primary] to-[--accent]">$1</span>`);
+};
+
 export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent }: HomePageContentProps) {
 
   const sortedTiers = pricingTiers.sort((a, b) => a.order - b.order);
@@ -49,10 +53,6 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
   const featureImageHint = images?.homeFeature?.imageHint || "app interface design";
   
   const homeContent = pageContent?.home;
-
-  const dynamicGradientText = (text: string) => {
-    return text.replace(/(amazing brands|designs)/g, `<span class="text-transparent bg-clip-text bg-gradient-to-r from-[--primary] to-[--accent]">$1</span>`);
-  }
 
   return (
     <>
