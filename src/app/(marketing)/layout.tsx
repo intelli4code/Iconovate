@@ -42,8 +42,8 @@ export default function MarketingLayout({
         {Array.from({ length: bgEffects.count }).map((_, index) => {
           const position = gradientPositions[index % gradientPositions.length];
            const colors = index % 2 === 0
-            ? "from-[--primary_2] to-transparent"
-            : "from-[--accent_2] to-transparent";
+            ? "from-[--primary_2]"
+            : "from-[--accent_2]";
 
           const animation = bgEffects.animate
             ? {
@@ -64,7 +64,7 @@ export default function MarketingLayout({
           return (
             <motion.div
               key={index}
-              className={`absolute h-[70rem] w-[70rem] bg-gradient-radial ${colors} opacity-15 blur-3xl`}
+              className={`absolute h-[70rem] w-[70rem] bg-gradient-to-tr ${colors} to-transparent bg-no-repeat [background-image:radial-gradient(circle_at_center,var(--tw-gradient-stops))] [background-size:25%_25%] opacity-15 blur-3xl`}
               style={{ ...position }}
               {...animation}
             />
