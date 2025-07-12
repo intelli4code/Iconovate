@@ -5,7 +5,7 @@ import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, doc } from "firebase/firestore";
 import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, BackgroundEffects } from "@/types";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -87,8 +87,8 @@ export default function RootPage() {
         {Array.from({ length: backgroundEffects.count }).map((_, index) => {
           const position = gradientPositions[index % gradientPositions.length];
           const colors = index % 2 === 0
-            ? "from-[hsl(var(--primary_2))] to-transparent"
-            : "from-[hsl(var(--accent_2))] to-transparent";
+            ? "from-[--primary_2] to-transparent"
+            : "from-[--accent_2] to-transparent";
           
           const animation = backgroundEffects.animate
             ? {

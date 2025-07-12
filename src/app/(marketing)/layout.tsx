@@ -41,8 +41,8 @@ export default function MarketingLayout({
         {Array.from({ length: bgEffects.count }).map((_, index) => {
           const position = gradientPositions[index % gradientPositions.length];
            const colors = index % 2 === 0
-            ? "from-[hsl(var(--primary_2))] to-transparent"
-            : "from-[hsl(var(--accent_2))] to-transparent";
+            ? "from-[--primary_2] to-transparent"
+            : "from-[--accent_2] to-transparent";
 
           const animation = bgEffects.animate
             ? {
