@@ -36,11 +36,11 @@ export default function MarketingLayout({
   }, []);
 
   return (
-    <div className="relative isolate flex min-h-screen flex-col bg-[#0d1222] font-body text-foreground">
+    <div className="relative isolate flex min-h-screen flex-col bg-background font-body text-foreground">
       <div className="absolute inset-0 z-[-1] overflow-hidden" aria-hidden="true">
         {Array.from({ length: bgEffects.count }).map((_, index) => {
           const position = gradientPositions[index % gradientPositions.length];
-          const colors = index % 2 === 0
+           const colors = index % 2 === 0
             ? "from-[hsl(var(--primary_2))] to-transparent"
             : "from-[hsl(var(--accent_2))] to-transparent";
 
