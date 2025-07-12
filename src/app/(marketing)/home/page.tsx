@@ -72,10 +72,11 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
                 </span>
             </motion.div>
             <motion.h1 variants={staggerItem} className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
-              {homeContent?.heroTitle
-               ? <span dangerouslySetInnerHTML={{ __html: dynamicGradientText(homeContent.heroTitle) }} />
-               : <>Platform to build <span className="text-transparent bg-clip-text bg-gradient-to-r from-[--primary] to-[--accent]"> amazing brands</span> and designs</>
-              }
+              {homeContent?.heroTitle ? (
+                <span dangerouslySetInnerHTML={{ __html: dynamicGradientText(homeContent.heroTitle) }} />
+              ) : (
+                <>Platform to build <span className="text-transparent bg-clip-text bg-gradient-to-r from-[--primary] to-[--accent]"> amazing brands</span> and designs</>
+              )}
             </motion.h1>
             <motion.p variants={staggerItem} className="mt-6 text-lg text-muted-foreground max-w-lg">
               {homeContent?.heroSubtitle || "Learn from mentors who are experienced in their fields and get official certificates to build future careers."}
