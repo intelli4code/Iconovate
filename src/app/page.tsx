@@ -3,9 +3,8 @@ import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, doc } from "firebase/firestore";
 import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, BackgroundEffects } from "@/types";
-import { motion } from "framer-motion";
 
 async function getHomepageData() {
     try {
@@ -63,26 +62,16 @@ export default async function RootPage() {
 
           const animationProps = backgroundEffects.animate
             ? {
-                animate: {
-                  x: [0, 100, 0, -100, 0],
-                  y: [0, -100, 100, 0, 100],
-                  rotate: [0, 45, -45, 0],
-                  scale: [1, 1.1, 1, 0.9, 1],
-                },
-                transition: {
-                  duration: 40 + index * 10,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                },
+                // Framer Motion props are passed, but the component itself is inside the client component
               }
             : {};
           
           return (
-            <motion.div
+            <div
               key={index}
               className={`absolute h-[70rem] w-[70rem] bg-gradient-radial ${colors} blur-3xl`}
               style={{ ...position }}
-              {...animationProps}
+              // Framer Motion animation is handled in client components
             />
           );
         })}
