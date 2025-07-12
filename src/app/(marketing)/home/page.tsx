@@ -50,8 +50,8 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
   
   const homeContent = pageContent?.home;
 
-  const dynamicGradientText = (text: string, gradient: string) => {
-    return text.replace(/(amazing brands|designs)/g, `<span class="text-transparent bg-clip-text bg-gradient-to-r ${gradient}">$1</span>`);
+  const dynamicGradientText = (text: string) => {
+    return text.replace(/(amazing brands|designs)/g, `<span class="text-transparent bg-clip-text bg-gradient-to-r from-[--primary] to-[--accent]">$1</span>`);
   }
 
   return (
@@ -67,21 +67,21 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
           >
             <motion.div variants={staggerItem} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-gradient-to-r from-white/20 to-white/10 px-4 py-1.5 text-sm font-medium mb-4 backdrop-blur-sm">
                 <Star className="h-4 w-4 text-primary fill-primary" />
-                <span className="font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                <span className="font-bold bg-gradient-to-r from-[--primary] to-[--accent] bg-clip-text text-transparent">
                     BEST GRAPHIC DESIGN AGENCY
                 </span>
             </motion.div>
             <motion.h1 variants={staggerItem} className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
               {homeContent?.heroTitle
-               ? <span dangerouslySetInnerHTML={{ __html: dynamicGradientText(homeContent.heroTitle, 'from-primary to-accent') }} />
-               : <>Platform to build <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent"> amazing brands</span> and designs</>
+               ? <span dangerouslySetInnerHTML={{ __html: dynamicGradientText(homeContent.heroTitle) }} />
+               : <>Platform to build <span className="text-transparent bg-clip-text bg-gradient-to-r from-[--primary] to-[--accent]"> amazing brands</span> and designs</>
               }
             </motion.h1>
             <motion.p variants={staggerItem} className="mt-6 text-lg text-muted-foreground max-w-lg">
               {homeContent?.heroSubtitle || "Learn from mentors who are experienced in their fields and get official certificates to build future careers."}
             </motion.p>
             <motion.div variants={staggerItem} className="mt-8 flex flex-col sm:flex-row items-center gap-4">
-              <Button asChild size="lg" className="rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg hover:shadow-primary/50 transition-shadow">
+              <Button asChild size="lg" className="rounded-full bg-gradient-to-r from-[--primary] to-[--accent] text-white shadow-lg hover:shadow-primary/50 transition-shadow">
                 <LoadingLink href="/contact">Start Now <ArrowRight /></LoadingLink>
               </Button>
               <Button asChild size="lg" variant="outline" className="rounded-full">
@@ -139,7 +139,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
              {stats.length === 0 && <p className="col-span-full text-muted-foreground">Stats will be displayed here.</p>}
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Feature Section */}
        <motion.section
@@ -222,7 +222,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
             </Button>
           </motion.div>
         </div>
-      </motion.section>
+      </section>
 
         {/* Pricing CTA Section */}
        <motion.section
@@ -281,7 +281,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
                     <div className="p-6 pt-0">
                        <Button asChild className={cn(
                         "w-full rounded-lg",
-                        tier.isPopular ? "bg-gradient-to-r from-primary to-accent text-white" : "bg-transparent border border-border/80 hover:bg-border/50"
+                        tier.isPopular ? "bg-gradient-to-r from-[--primary] to-[--accent] text-white" : "bg-transparent border border-border/80 hover:bg-border/50"
                       )}>
                          <LoadingLink href={tier.name === 'Enterprise' ? '/contact' : '/login'}>
                            {tier.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
