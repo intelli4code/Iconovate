@@ -37,13 +37,13 @@ export default function MarketingLayout({
   }, []);
 
   return (
-    <div className="relative isolate flex min-h-screen flex-col bg-gray-50 font-body text-foreground">
+    <div className="relative isolate flex min-h-screen flex-col font-body text-foreground bg-background">
       <div className="absolute inset-0 z-[-1] overflow-hidden" aria-hidden="true">
         {Array.from({ length: bgEffects.count }).map((_, index) => {
           const position = gradientPositions[index % gradientPositions.length];
-           const colors = index % 2 === 0
-            ? "from-blue-200"
-            : "from-pink-200";
+          const colors = index % 2 === 0
+            ? "from-[--primary_2]"
+            : "from-[--accent_2]";
 
           const animation = bgEffects.animate
             ? {
@@ -64,7 +64,7 @@ export default function MarketingLayout({
           return (
             <motion.div
               key={index}
-              className={`absolute h-[50rem] w-[50rem] bg-no-repeat [background-image:radial-gradient(circle_at_center,var(--tw-gradient-from)_0,transparent_40%)] ${colors} opacity-50 blur-3xl`}
+              className={`absolute h-[50rem] w-[50rem] bg-no-repeat [background-image:radial-gradient(circle_at_center,var(--tw-gradient-from)_0,transparent_40%)] ${colors} opacity-20 blur-3xl`}
               style={{ ...position }}
               {...animation}
             />
