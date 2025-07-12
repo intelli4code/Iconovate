@@ -3,7 +3,7 @@ import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, getDocs, doc } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
 import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, BackgroundEffects } from "@/types";
 
 async function getHomepageData() {
@@ -52,26 +52,19 @@ export default async function RootPage() {
   const { portfolioItems, pricingTiers, stats, images, pageContent, backgroundEffects } = await getHomepageData();
 
   return (
-    <div className="relative isolate flex min-h-screen flex-col bg-[#0d1222] font-body text-foreground">
+    <div className="relative isolate flex min-h-screen flex-col bg-background font-body text-foreground">
        <div className="absolute inset-0 z-[-1] overflow-hidden" aria-hidden="true">
         {Array.from({ length: backgroundEffects.count }).map((_, index) => {
           const position = gradientPositions[index % gradientPositions.length];
           const colors = index % 2 === 0
             ? "from-primary/15 to-transparent"
             : "from-accent/10 to-transparent";
-
-          const animationProps = backgroundEffects.animate
-            ? {
-                // Framer Motion props are passed, but the component itself is inside the client component
-              }
-            : {};
           
           return (
             <div
               key={index}
               className={`absolute h-[70rem] w-[70rem] bg-gradient-radial ${colors} blur-3xl`}
               style={{ ...position }}
-              // Framer Motion animation is handled in client components
             />
           );
         })}
