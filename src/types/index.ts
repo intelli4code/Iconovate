@@ -243,10 +243,16 @@ export interface SiteStat {
     order: number;
 }
 
+export interface BackgroundEffects {
+    animate: boolean;
+    count: number;
+}
+
 export interface SiteContent {
     footer: FooterContent;
     images: { [key: string]: SiteImage };
     pageContent: PageContent;
     stats: SiteStat[];
     theme: string;
+    backgroundEffects: BackgroundEffects;
 }

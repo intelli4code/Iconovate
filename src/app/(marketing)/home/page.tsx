@@ -146,20 +146,19 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.2 }}
-        variants={fadeIn}
-        transition={{ duration: 0.5 }}
+        variants={staggerContainer}
         className="py-16 md:py-24"
        >
         <div className="container mx-auto px-4">
-            <div className="text-center max-w-2xl mx-auto">
+            <motion.div variants={staggerItem} className="text-center max-w-2xl mx-auto">
                 <p className="font-semibold text-primary">FEATURED</p>
                 <h2 className="text-3xl md:text-4xl font-bold mt-2">{homeContent?.featureTitle || "Intelligent Design on a New Scale"}</h2>
                 <p className="mt-4 text-muted-foreground">
                     {homeContent?.featureSubtitle || "Risus rutrum nisi, mi sed aliquam. Sit enim, id at viverra. Aliquam tortor."}
                 </p>
-            </div>
+            </motion.div>
             <div className="mt-16 grid lg:grid-cols-2 gap-16 items-center">
-                <div className="relative">
+                <motion.div variants={staggerItem} className="relative">
                      <Image
                         src={featureImage}
                         data-ai-hint={featureImageHint}
@@ -168,9 +167,9 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
                         height={600}
                         className="rounded-lg"
                     />
-                </div>
-                <div className="space-y-6">
-                    <div className="flex items-start gap-4">
+                </motion.div>
+                <motion.div variants={staggerContainer} className="space-y-6">
+                    <motion.div variants={staggerItem} className="flex items-start gap-4">
                         <div className="flex-shrink-0 text-primary bg-primary/10 p-3 rounded-full">
                           <ShieldCheck className="w-6 h-6" />
                         </div>
@@ -181,8 +180,8 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
                                 <LoadingLink href="/services">Learn more</LoadingLink>
                             </Button>
                         </div>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             </div>
         </div>
        </motion.section>
@@ -192,18 +191,17 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.1 }}
-        variants={fadeIn}
-        transition={{ duration: 0.5 }}
+        variants={staggerContainer}
         className="py-16 md:py-24"
       >
         <div className="container mx-auto px-4">
-          <div className="text-center max-w-2xl mx-auto">
+          <motion.div variants={staggerItem} className="text-center max-w-2xl mx-auto">
             <p className="font-semibold text-primary">OUR WORK</p>
             <h2 className="text-3xl md:text-4xl font-bold mt-2">Crafting Brands That Stand Out</h2>
             <p className="mt-4 text-muted-foreground">
               Here’s a glimpse into the brands we’ve helped build. Each project is a testament to our passion for design and strategic thinking.
             </p>
-          </div>
+          </motion.div>
           <motion.div
             variants={staggerContainer}
             initial="hidden"
@@ -218,11 +216,11 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
             ))}
              {portfolioItems.length === 0 && <p className="col-span-full text-center text-muted-foreground">Portfolio items will be displayed here.</p>}
           </motion.div>
-          <div className="text-center mt-12">
+          <motion.div variants={staggerItem} className="text-center mt-12">
             <Button asChild size="lg" variant="outline" className="rounded-full">
               <LoadingLink href="/portfolio">View All Work</LoadingLink>
             </Button>
-          </div>
+          </motion.div>
         </div>
       </motion.section>
 
@@ -231,18 +229,17 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.1 }}
-        variants={fadeIn}
-        transition={{ duration: 0.5 }}
+        variants={staggerContainer}
         className="py-16 md:py-24 text-center"
        >
         <div className="container mx-auto px-4">
-            <div className="max-w-2xl mx-auto">
+            <motion.div variants={staggerItem} className="max-w-2xl mx-auto">
                  <p className="font-semibold text-primary">PRODUCTS</p>
                 <h2 className="text-3xl md:text-4xl font-bold mt-2">Plans & Pricing</h2>
                 <p className="mt-4 text-muted-foreground">
                     The Continuing education is very important to improve your graphic design knowledge.
                 </p>
-            </div>
+            </motion.div>
             <motion.div
               variants={staggerContainer}
               initial="hidden"
