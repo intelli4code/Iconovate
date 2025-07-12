@@ -11,12 +11,14 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
     --primary: 262 84% 59%;
+    --primary_2: 262 84% 59%;
     --primary-foreground: 210 20% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 300 100% 50%; /* Default Fuchsia Accent */
+    --accent_2: 300 100% 50%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -47,12 +49,14 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
     --primary: 262 84% 59%;
+    --primary_2: 262 84% 59%;
     --primary-foreground: 210 20% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 300 100% 50%;
+    --accent_2: 300 100% 50%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -75,60 +79,60 @@
   }
 
   /* Theme: Default */
-  .theme-default { --primary: 262 84% 59%; --accent: 300 100% 50%; --background: 210 40% 96.1%; }
-  .dark.theme-default { --primary: 262 84% 59%; --accent: 300 100% 50%; --background: 224 71.4% 11%; }
+  .theme-default { --primary_2: 262 84% 59%; --accent_2: 300 100% 50%; --primary: 262 84% 59%; --accent: 300 100% 50%; --background: 210 40% 96.1%; }
+  .dark.theme-default { --primary_2: 262 84% 59%; --accent_2: 300 100% 50%; --primary: 262 84% 59%; --accent: 300 100% 50%; --background: 224 71.4% 11%; }
 
   /* Theme: Moonstone */
-  .theme-moonstone { --primary: 186 65% 40%; --accent: 186 70% 80%; --background: 210 40% 98%; }
-  .dark.theme-moonstone { --primary: 186 65% 40%; --accent: 186 70% 80%; --background: 195 35% 10%; }
+  .theme-moonstone { --primary_2: 186 70% 80%; --accent_2: 186 65% 40%; --primary: 186 65% 40%; --accent: 186 70% 80%; --background: 210 40% 98%; }
+  .dark.theme-moonstone { --primary_2: 186 70% 80%; --accent_2: 186 65% 40%; --primary: 186 65% 40%; --accent: 186 70% 80%; --background: 195 35% 10%; }
   
   /* Theme: Verdant */
-  .theme-verdant { --primary: 136 65% 30%; --accent: 140 50% 60%; --background: 210 40% 98%; }
-  .dark.theme-verdant { --primary: 136 65% 30%; --accent: 140 50% 60%; --background: 140 20% 10%; }
+  .theme-verdant { --primary_2: 140 50% 60%; --accent_2: 136 65% 30%; --primary: 136 65% 30%; --accent: 140 50% 60%; --background: 210 40% 98%; }
+  .dark.theme-verdant { --primary_2: 140 50% 60%; --accent_2: 136 65% 30%; --primary: 136 65% 30%; --accent: 140 50% 60%; --background: 140 20% 10%; }
 
   /* Theme: Fiery */
-  .theme-fiery { --primary: 0 72% 45%; --accent: 25 93% 58%; --background: 20 50% 98%; }
-  .dark.theme-fiery { --primary: 0 72% 45%; --accent: 25 93% 58%; --background: 15 25% 10%; }
+  .theme-fiery { --primary_2: 25 93% 58%; --accent_2: 0 72% 45%; --primary: 0 72% 45%; --accent: 25 93% 58%; --background: 20 50% 98%; }
+  .dark.theme-fiery { --primary_2: 25 93% 58%; --accent_2: 0 72% 45%; --primary: 0 72% 45%; --accent: 25 93% 58%; --background: 15 25% 10%; }
 
   /* Theme: Oceanic */
-  .theme-oceanic { --primary: 210 80% 45%; --accent: 180 75% 60%; --background: 210 30% 98%; }
-  .dark.theme-oceanic { --primary: 210 80% 55%; --accent: 180 75% 70%; --background: 220 40% 10%; }
+  .theme-oceanic { --primary_2: 180 75% 60%; --accent_2: 210 80% 45%; --primary: 210 80% 45%; --accent: 180 75% 60%; --background: 210 30% 98%; }
+  .dark.theme-oceanic { --primary_2: 180 75% 70%; --accent_2: 210 80% 55%; --primary: 210 80% 55%; --accent: 180 75% 70%; --background: 220 40% 10%; }
 
   /* Theme: Sunset */
-  .theme-sunset { --primary: 25 95% 55%; --accent: 340 90% 65%; --background: 30 100% 97%; }
-  .dark.theme-sunset { --primary: 25 95% 60%; --accent: 340 90% 70%; --background: 20 30% 8%; }
+  .theme-sunset { --primary_2: 340 90% 65%; --accent_2: 25 95% 55%; --primary: 25 95% 55%; --accent: 340 90% 65%; --background: 30 100% 97%; }
+  .dark.theme-sunset { --primary_2: 340 90% 70%; --accent_2: 25 95% 60%; --primary: 25 95% 60%; --accent: 340 90% 70%; --background: 20 30% 8%; }
 
   /* Theme: Minty */
-  .theme-minty { --primary: 160 50% 45%; --accent: 140 55% 75%; --background: 150 20% 98%; }
-  .dark.theme-minty { --primary: 160 50% 55%; --accent: 140 55% 80%; --background: 160 20% 10%; }
+  .theme-minty { --primary_2: 140 55% 75%; --accent_2: 160 50% 45%; --primary: 160 50% 45%; --accent: 140 55% 75%; --background: 150 20% 98%; }
+  .dark.theme-minty { --primary_2: 140 55% 80%; --accent_2: 160 50% 55%; --primary: 160 50% 55%; --accent: 140 55% 80%; --background: 160 20% 10%; }
 
   /* Theme: Royal */
-  .theme-royal { --primary: 240 60% 50%; --accent: 45 100% 50%; --background: 220 20% 97%; }
-  .dark.theme-royal { --primary: 240 60% 60%; --accent: 45 100% 55%; --background: 240 20% 8%; }
+  .theme-royal { --primary_2: 45 100% 50%; --accent_2: 240 60% 50%; --primary: 240 60% 50%; --accent: 45 100% 50%; --background: 220 20% 97%; }
+  .dark.theme-royal { --primary_2: 45 100% 55%; --accent_2: 240 60% 60%; --primary: 240 60% 60%; --accent: 45 100% 55%; --background: 240 20% 8%; }
 
   /* Theme: Earthy */
-  .theme-earthy { --primary: 35 40% 40%; --accent: 100 25% 55%; --background: 40 20% 95%; }
-  .dark.theme-earthy { --primary: 35 40% 50%; --accent: 100 25% 65%; --background: 30 15% 10%; }
+  .theme-earthy { --primary_2: 100 25% 55%; --accent_2: 35 40% 40%; --primary: 35 40% 40%; --accent: 100 25% 55%; --background: 40 20% 95%; }
+  .dark.theme-earthy { --primary_2: 100 25% 65%; --accent_2: 35 40% 50%; --primary: 35 40% 50%; --accent: 100 25% 65%; --background: 30 15% 10%; }
 
   /* Theme: Rose */
-  .theme-rose { --primary: 340 70% 60%; --accent: 280 60% 80%; --background: 330 40% 98%; }
-  .dark.theme-rose { --primary: 340 70% 65%; --accent: 280 60% 85%; --background: 340 15% 10%; }
+  .theme-rose { --primary_2: 280 60% 80%; --accent_2: 340 70% 60%; --primary: 340 70% 60%; --accent: 280 60% 80%; --background: 330 40% 98%; }
+  .dark.theme-rose { --primary_2: 280 60% 85%; --accent_2: 340 70% 65%; --primary: 340 70% 65%; --accent: 280 60% 85%; --background: 340 15% 10%; }
 
   /* Theme: Slate */
-  .theme-slate { --primary: 220 15% 45%; --accent: 210 20% 65%; --background: 220 10% 97%; }
-  .dark.theme-slate { --primary: 220 15% 55%; --accent: 210 20% 70%; --background: 220 20% 9%; }
+  .theme-slate { --primary_2: 210 20% 65%; --accent_2: 220 15% 45%; --primary: 220 15% 45%; --accent: 210 20% 65%; --background: 220 10% 97%; }
+  .dark.theme-slate { --primary_2: 210 20% 70%; --accent_2: 220 15% 55%; --primary: 220 15% 55%; --accent: 210 20% 70%; --background: 220 20% 9%; }
 
   /* Theme: Gold */
-  .theme-gold { --primary: 40 80% 50%; --accent: 50 90% 60%; --background: 45 50% 98%; }
-  .dark.theme-gold { --primary: 40 80% 55%; --accent: 50 90% 65%; --background: 35 25% 8%; }
+  .theme-gold { --primary_2: 50 90% 60%; --accent_2: 40 80% 50%; --primary: 40 80% 50%; --accent: 50 90% 60%; --background: 45 50% 98%; }
+  .dark.theme-gold { --primary_2: 50 90% 65%; --accent_2: 40 80% 55%; --primary: 40 80% 55%; --accent: 50 90% 65%; --background: 35 25% 8%; }
 
   /* Theme: Lavender */
-  .theme-lavender { --primary: 250 50% 60%; --accent: 260 80% 85%; --background: 250 30% 98%; }
-  .dark.theme-lavender { --primary: 250 50% 70%; --accent: 260 80% 90%; --background: 250 20% 10%; }
+  .theme-lavender { --primary_2: 260 80% 85%; --accent_2: 250 50% 60%; --primary: 250 50% 60%; --accent: 260 80% 85%; --background: 250 30% 98%; }
+  .dark.theme-lavender { --primary_2: 260 80% 90%; --accent_2: 250 50% 70%; --primary: 250 50% 70%; --accent: 260 80% 90%; --background: 250 20% 10%; }
 
   /* Theme: Crimson */
-  .theme-crimson { --primary: 0 60% 50%; --accent: 350 70% 65%; --background: 0 40% 97%; }
-  .dark.theme-crimson { --primary: 0 60% 60%; --accent: 350 70% 70%; --background: 0 20% 8%; }
+  .theme-crimson { --primary_2: 350 70% 65%; --accent_2: 0 60% 50%; --primary: 0 60% 50%; --accent: 350 70% 65%; --background: 0 40% 97%; }
+  .dark.theme-crimson { --primary_2: 350 70% 70%; --accent_2: 0 60% 60%; --primary: 0 60% 60%; --accent: 350 70% 70%; --background: 0 20% 8%; }
 }
 
 @layer base {

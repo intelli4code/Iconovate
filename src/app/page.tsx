@@ -57,13 +57,13 @@ export default async function RootPage() {
         {Array.from({ length: backgroundEffects.count }).map((_, index) => {
           const position = gradientPositions[index % gradientPositions.length];
           const colors = index % 2 === 0
-            ? "from-primary/15 to-transparent"
-            : "from-accent/10 to-transparent";
+            ? "from-[hsl(var(--primary_2))] to-transparent"
+            : "from-[hsl(var(--accent_2))] to-transparent";
           
           return (
             <div
               key={index}
-              className={`absolute h-[70rem] w-[70rem] bg-gradient-radial ${colors} blur-3xl`}
+              className={`absolute h-[70rem] w-[70rem] bg-gradient-radial ${colors} opacity-15 blur-3xl`}
               style={{ ...position }}
             />
           );
