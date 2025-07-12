@@ -140,7 +140,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
              {stats.length === 0 && <p className="col-span-full text-muted-foreground">Stats will be displayed here.</p>}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Feature Section */}
        <motion.section
@@ -223,7 +223,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
             </Button>
           </motion.div>
         </div>
-      </section>
+      </motion.section>
 
         {/* Pricing CTA Section */}
        <motion.section
