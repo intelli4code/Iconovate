@@ -1,29 +1,9 @@
+import type { FooterContent as FooterContentType, SocialLink } from "@/types";
 import { LoadingLink } from "@/components/ui/loading-link";
 import { Rocket } from "lucide-react";
-import { db } from "@/lib/firebase";
-import { getDoc, doc } from "firebase/firestore";
-import type { FooterContent } from "@/types";
 import * as LucideIcons from "lucide-react";
 
-async function FooterContent() {
-    const getFooterData = async (): Promise<FooterContent | null> => {
-        try {
-            const contentDocRef = doc(db, "siteContent", "main");
-            const docSnap = await getDoc(contentDocRef);
-            if (docSnap.exists() && docSnap.data().footer) {
-                const footerData = docSnap.data().footer as FooterContent;
-                footerData.columns.sort((a, b) => a.order - b.order);
-                return footerData;
-            }
-            return null;
-        } catch (error) {
-            console.error("Failed to fetch footer data:", error);
-            return null;
-        }
-    };
-    
-    const footerData = await getFooterData();
-
+export function FooterContent({ footerData }: { footerData: FooterContentType | null }) {
     return (
         <div className="container mx-auto px-4 py-12">
             <div className="grid gap-8 md:grid-cols-5">
@@ -76,7 +56,7 @@ async function FooterContent() {
 export function MarketingFooter() {
   return (
     <footer className="border-t border-border/50">
-      <FooterContent />
+      {/* Content is now passed in via layout */}
     </footer>
   );
 }

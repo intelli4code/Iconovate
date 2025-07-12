@@ -2,7 +2,6 @@
 "use client";
 
 import { MarketingHeader } from '@/components/marketing/header';
-import { MarketingFooter } from '@/components/marketing/footer';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import type { BackgroundEffects } from '@/types';
@@ -20,8 +19,10 @@ const gradientPositions = [
 
 export default function MarketingLayout({
   children,
+  footer
 }: {
   children: React.ReactNode;
+  footer: React.ReactNode;
 }) {
   const [bgEffects, setBgEffects] = useState<BackgroundEffects>({ animate: true, count: 4 });
 
@@ -72,7 +73,9 @@ export default function MarketingLayout({
       </div>
       <MarketingHeader />
       <main className="flex-1">{children}</main>
-      <MarketingFooter />
+      <footer className="border-t border-border/50">
+        {footer}
+      </footer>
     </div>
   );
 }
