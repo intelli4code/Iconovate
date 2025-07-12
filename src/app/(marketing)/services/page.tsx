@@ -58,7 +58,8 @@ export default function ServicesPage() {
       <motion.section
         variants={fadeIn}
         initial="initial"
-        animate="animate"
+        whileInView="animate"
+        viewport={{ once: true, amount: 0.5 }}
         className="text-center max-w-3xl mx-auto"
       >
         <h1 className="text-4xl md:text-6xl font-bold">Our Services</h1>

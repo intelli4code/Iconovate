@@ -114,11 +114,11 @@ export default function AboutPage() {
                 initial="hidden"
                 whileInView="show"
                 viewport={{ once: true, amount: 0.3 }}
-                variants={fadeIn}
+                variants={staggerContainer}
                 className="container mx-auto px-4 mt-20"
             >
                 <div className="grid md:grid-cols-2 gap-12 items-center">
-                    <div className="relative flex justify-center">
+                    <motion.div variants={staggerItem} className="relative flex justify-center">
                         <Image
                             src={aboutStoryImageUrl}
                             data-ai-hint={aboutStoryImageHint}
@@ -127,8 +127,8 @@ export default function AboutPage() {
                             height={700}
                             className="rounded-lg object-cover w-[80%] md:w-full max-w-md transform rotate-3"
                         />
-                    </div>
-                    <div className="max-w-lg">
+                    </motion.div>
+                    <motion.div variants={staggerItem} className="max-w-lg">
                         <h2 className="text-3xl font-bold">Our Story</h2>
                         <p className="mt-4 text-muted-foreground text-lg">
                             BrandBoost AI was founded to democratize world-class branding. We noticed a gap in the market: ambitious startups and growing businesses needed high-quality design but were often priced out or left with generic, uninspired solutions.
@@ -139,7 +139,7 @@ export default function AboutPage() {
                         <Button asChild className="mt-6 rounded-full">
                             <LoadingLink href="/contact">Work With Us</LoadingLink>
                         </Button>
-                    </div>
+                    </motion.div>
                 </div>
             </motion.section>
 
@@ -148,13 +148,13 @@ export default function AboutPage() {
                 initial="hidden"
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
-                variants={fadeIn}
+                variants={staggerContainer}
                 className="container mx-auto px-4 mt-24 text-center"
             >
-                <h2 className="text-3xl font-bold">Our Team</h2>
-                <p className="mt-2 text-muted-foreground max-w-xl mx-auto">
+                <motion.h2 variants={staggerItem} className="text-3xl font-bold">Our Team</motion.h2>
+                <motion.p variants={staggerItem} className="mt-2 text-muted-foreground max-w-xl mx-auto">
                     Meet the creative minds and technical wizards behind BrandBoost AI. We're a blend of designers, developers, and strategists passionate about building brands.
-                </p>
+                </motion.p>
                 <motion.div
                     variants={staggerContainer}
                     initial="hidden"
@@ -188,11 +188,11 @@ export default function AboutPage() {
                 initial="hidden"
                 whileInView="show"
                 viewport={{ once: true, amount: 0.3 }}
-                variants={fadeIn}
+                variants={staggerContainer}
                 className="container mx-auto px-4 mt-24 text-center"
             >
-                <h2 className="text-3xl font-bold">Truth in Numbers</h2>
-                <p className="mt-2 text-muted-foreground max-w-xl mx-auto">Our track record speaks for itself. We're proud of the impact we've made for our clients worldwide.</p>
+                <motion.h2 variants={staggerItem} className="text-3xl font-bold">Truth in Numbers</motion.h2>
+                <motion.p variants={staggerItem} className="mt-2 text-muted-foreground max-w-xl mx-auto">Our track record speaks for itself. We're proud of the impact we've made for our clients worldwide.</motion.p>
                 <motion.div
                     variants={staggerContainer}
                     initial="hidden"

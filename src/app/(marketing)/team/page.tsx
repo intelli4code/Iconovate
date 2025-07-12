@@ -57,7 +57,8 @@ export default function TeamPage() {
       <motion.section
         variants={fadeIn}
         initial="initial"
-        animate="animate"
+        whileInView="animate"
+        viewport={{ once: true, amount: 0.5 }}
         className="text-center max-w-3xl mx-auto"
       >
         <h1 className="text-4xl md:text-6xl font-bold">Meet the Minds Behind the Magic</h1>
@@ -70,7 +71,7 @@ export default function TeamPage() {
         variants={staggerContainer}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true, amount: 0.1 }}
         className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
       >
         {teamMembers.map((member) => (

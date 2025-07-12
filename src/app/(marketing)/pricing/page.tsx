@@ -78,7 +78,8 @@ export default function PricingPage() {
       <motion.section
         variants={fadeIn}
         initial="initial"
-        animate="animate"
+        whileInView="animate"
+        viewport={{ once: true, amount: 0.5 }}
         className="container mx-auto px-4 text-center max-w-4xl"
       >
         <p className="text-primary font-bold tracking-widest uppercase">PRODUCTS</p>
@@ -89,7 +90,8 @@ export default function PricingPage() {
       <motion.section
         variants={staggerContainer}
         initial="hidden"
-        animate="show"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
         className="container mx-auto px-4 mt-16"
       >
         <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-start">
@@ -142,10 +144,10 @@ export default function PricingPage() {
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.2 }}
-        variants={fadeIn}
+        variants={staggerContainer}
         className="container mx-auto px-4 mt-24"
       >
-        <div className="grid lg:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
+        <motion.div variants={staggerItem} className="grid lg:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
           <div>
             <p className="text-primary font-bold tracking-widest uppercase">MEMBER TESTIMONIALS</p>
             <h2 className="text-4xl md:text-5xl font-bold mt-2">What users say about our platform</h2>
@@ -153,7 +155,7 @@ export default function PricingPage() {
           <p className="text-muted-foreground">
             Members who post their reviews are their own opinion and are not created in consultation with anyone at Swag Academy. comment you see is their personal opinion and we don't cooperate with them at all.
           </p>
-        </div>
+        </motion.div>
         <motion.div
           variants={staggerContainer}
           initial="hidden"
