@@ -69,6 +69,73 @@ const designProcessSteps = [
     },
 ];
 
+const tools = [
+  {
+    name: "Figurative",
+    description: "Collaborative design and prototyping tool online.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="8" cy="8" r="3" fill="#34D399"/>
+        <circle cx="16" cy="8" r="3" fill="#34D399"/>
+        <circle cx="8" cy="16" r="3" fill="#34D399"/>
+        <circle cx="16" cy="16" r="3" fill="#34D399"/>
+      </svg>
+    ),
+  },
+  {
+    name: "FrameX",
+    description: "Interactive prototypes for advanced animations website.",
+    icon: (
+       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L4 6L12 10L20 6L12 2Z" fill="#A78BFA"/>
+        <path d="M4 18L12 22L20 18L12 14L4 18Z" fill="#8B5CF6"/>
+        <path d="M4 6V18L12 14V2L4 6Z" fill="#C4B5FD"/>
+      </svg>
+    ),
+  },
+  {
+    name: "Shopty",
+    description: "E-commerce platform for online shopping websites.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L14.09 8.26L20 9.27L15.55 13.91L16.91 20L12 16.9L7.09 20L8.45 13.91L4 9.27L9.91 8.26L12 2Z" fill="#F472B6"/>
+      </svg>
+    ),
+  },
+  {
+    name: "Idease",
+    description: "All-in-one workspace for notes and project tasks.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 15.5C10 14.3954 10.8954 13.5 12 13.5C13.1046 13.5 14 14.3954 14 15.5C14 17.5 12 20.5 12 20.5C12 20.5 10 17.5 10 15.5Z" fill="#F97316"/>
+        <path d="M12 12C15.3137 12 18 9.31371 18 6C18 2.68629 15.3137 0 12 0C8.68629 0 6 2.68629 6 6C6 9.31371 8.68629 12 12 12Z" fill="#FB923C"/>
+      </svg>
+    ),
+  },
+  {
+    name: "Webflew",
+    description: "Design and develop websites visually with ease.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M2 17L12 22L22 17" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M2 12L12 17L22 12" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
+    name: "Payflow",
+    description: "Online payment processing platform for business.",
+    icon: (
+       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 7H17V10H7V7Z" fill="#60A5FA"/>
+        <path d="M7 14H17V17H7V14Z" fill="#3B82F6"/>
+      </svg>
+    ),
+  },
+];
+
+
 export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints }: HomePageContentProps) {
   const sortedTiers = pricingTiers.sort((a, b) => a.order - b.order);
 
@@ -243,6 +310,49 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
           </motion.div>
         </div>
       </motion.section>
+
+      {/* Tools Section */}
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="py-16 md:py-24"
+      >
+        <div className="container mx-auto px-4">
+          <motion.div variants={fadeIn} className="text-center max-w-2xl mx-auto">
+            <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary mb-4">
+              Tools
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mt-2">Tools We Utilize for Excellence</h2>
+            <p className="mt-4 text-muted-foreground">
+              Discover the advanced tools and technologies we leverage to create cutting-edge websites.
+            </p>
+          </motion.div>
+          <motion.div
+            variants={staggerContainer}
+            className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {tools.map((tool) => (
+              <motion.div key={tool.name} variants={fadeIn}>
+                <Card className="bg-card/50 border-border/50 p-6 rounded-2xl h-full relative overflow-hidden group">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 bg-background rounded-md">{tool.icon}</div>
+                      <h3 className="text-xl font-bold">{tool.name}</h3>
+                    </div>
+                    <Button asChild variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-background group-hover:bg-primary/20 transition-colors">
+                      <a href="#"><ArrowRight className="h-4 w-4" /></a>
+                    </Button>
+                  </div>
+                  <p className="mt-4 text-muted-foreground">{tool.description}</p>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </motion.section>
+
 
       {/* Portfolio Section */}
       <motion.section
