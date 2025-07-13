@@ -1,7 +1,10 @@
+
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
 import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType, FeaturePoint } from "@/types";
+import MarketingLayout from "./(marketing)/layout";
+import { FooterContent } from "@/components/marketing/footer";
 
 async function getHomepageData() {
   try {
@@ -50,14 +53,16 @@ export default async function RootPage() {
   const { portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints } = await getHomepageData();
 
   return (
-    <HomePageContent 
-      portfolioItems={portfolioItems} 
-      pricingTiers={pricingTiers} 
-      stats={stats} 
-      images={images} 
-      pageContent={pageContent}
-      footerData={footerData}
-      featurePoints={featurePoints}
-    />
+    <MarketingLayout footer={<FooterContent footerData={footerData} />}>
+      <HomePageContent 
+        portfolioItems={portfolioItems} 
+        pricingTiers={pricingTiers} 
+        stats={stats} 
+        images={images} 
+        pageContent={pageContent}
+        footerData={footerData}
+        featurePoints={featurePoints}
+      />
+    </MarketingLayout>
   );
 }
