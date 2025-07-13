@@ -1,7 +1,7 @@
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
-import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, BackgroundEffects, FooterContent as FooterContentType } from "@/types";
+import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType } from "@/types";
 
 async function getHomepageData() {
   try {
@@ -21,42 +21,28 @@ async function getHomepageData() {
     let stats: SiteStat[] = [];
     let images: { [key: string]: SiteImage } = {};
     let pageContent: PageContent | null = null;
-    let backgroundEffects: BackgroundEffects = { animate: true, count: 4 };
+    let footerData: FooterContentType | null = null;
 
     if (contentDoc.exists()) {
         const contentData = contentDoc.data();
         stats = contentData.stats || [];
         images = contentData.images || {};
         pageContent = contentData.pageContent || null;
-        backgroundEffects = contentData.backgroundEffects || backgroundEffects;
+        if(contentData.footer) {
+          footerData = contentData.footer as FooterContentType;
+          footerData.columns.sort((a,b) => a.order - b.order);
+        }
     }
 
-    return { portfolioItems, pricingTiers, stats, images, pageContent, backgroundEffects };
+    return { portfolioItems, pricingTiers, stats, images, pageContent, footerData };
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
-    return { portfolioItems: [], pricingTiers: [], stats: [], images: {}, pageContent: null, backgroundEffects: { animate: true, count: 4 } };
+    return { portfolioItems: [], pricingTiers: [], stats: [], images: {}, pageContent: null, footerData: null };
   }
 }
 
-async function getFooterData(): Promise<FooterContentType | null> {
-    try {
-        const contentDocRef = doc(db, "siteContent", "main");
-        const docSnap = await getDoc(contentDocRef);
-        if (docSnap.exists() && docSnap.data().footer) {
-            const footerData = docSnap.data().footer as FooterContentType;
-            footerData.columns.sort((a, b) => a.order - b.order);
-            return footerData;
-        }
-        return null;
-    } catch (error) {
-        console.error("Failed to fetch footer data:", error);
-        return null;
-    }
-}
-
 export default async function RootPage() {
-  const { portfolioItems, pricingTiers, stats, images, pageContent } = await getHomepageData();
-  const footerData = await getFooterData();
+  const { portfolioItems, pricingTiers, stats, images, pageContent, footerData } = await getHomepageData();
 
   return (
     <HomePageContent 
