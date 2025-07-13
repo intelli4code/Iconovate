@@ -1,4 +1,5 @@
 
+
 export interface Expense {
   id: string;
   description: string;
@@ -223,13 +224,20 @@ export interface FooterContent {
     socials: SocialLink[];
 }
 
+export interface FeaturePoint {
+    id: string;
+    icon: string;
+    title: string;
+    text: string;
+    link: string;
+    order: number;
+}
+
 export interface HomePageContent {
     heroTitle: string;
     heroSubtitle: string;
     featureTitle: string;
     featureSubtitle: string;
-    featurePoint1Title: string;
-    featurePoint1Text: string;
 }
 
 export interface PageContent {
@@ -243,16 +251,11 @@ export interface SiteStat {
     order: number;
 }
 
-export interface BackgroundEffects {
-    animate: boolean;
-    count: number;
-}
-
 export interface SiteContent {
     footer: FooterContent;
     images: { [key: string]: SiteImage };
     pageContent: PageContent;
     stats: SiteStat[];
     theme: string;
-    backgroundEffects: BackgroundEffects;
+    featurePoints: FeaturePoint[];
 }

@@ -7,11 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Star, ArrowRight, ShieldCheck, Check, Zap } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType } from "@/types";
+import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType, FeaturePoint } from "@/types";
 import { PortfolioItemCard } from "@/components/marketing/portfolio-item-card";
 import { motion } from "framer-motion";
-import MarketingLayout from "../layout";
-import { FooterContent } from "@/components/marketing/footer";
+import * as LucideIcons from 'lucide-react';
 
 interface HomePageContentProps {
   portfolioItems: PortfolioItem[];
@@ -20,6 +19,7 @@ interface HomePageContentProps {
   images: { [key: string]: SiteImage };
   pageContent: PageContent | null;
   footerData: FooterContentType | null;
+  featurePoints: FeaturePoint[];
 }
 
 const fadeIn = {
@@ -42,7 +42,7 @@ const dynamicGradientText = (text: string) => {
   return text.replace(/(amazing brands|designs)/g, `<span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">$1</span>`);
 };
 
-export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent, footerData }: HomePageContentProps) {
+export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints }: HomePageContentProps) {
   const sortedTiers = pricingTiers.sort((a, b) => a.order - b.order);
 
   const heroImage = images?.homeHero?.imageUrl || "https://placehold.co/800x600.png";
@@ -53,7 +53,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
   const homeContent = pageContent?.home;
 
   return (
-    <MarketingLayout footer={<FooterContent footerData={footerData} />}>
+    <>
       {/* Hero Section */}
       <section className="py-20 md:py-32">
         <motion.div 
@@ -156,18 +156,24 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
                     />
                 </motion.div>
                 <motion.div variants={staggerContainer} className="space-y-6">
-                    <motion.div variants={fadeIn} className="flex items-start gap-4">
-                        <div className="flex-shrink-0 text-primary bg-primary/10 p-3 rounded-full">
-                          <ShieldCheck className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-bold">{homeContent?.featurePoint1Title || "Stay focused on your creative vision"}</h3>
-                            <p className="mt-2 text-muted-foreground">{homeContent?.featurePoint1Text || "Our AI handles the tedious parts of brand research and asset generation, letting you focus on high-impact creative work that drives results."}</p>
-                             <Button asChild variant="link" className="px-0 mt-2">
-                                <LoadingLink href="/services">Learn more</LoadingLink>
-                            </Button>
-                        </div>
-                    </motion.div>
+                    {featurePoints.map((point) => {
+                      const Icon = (LucideIcons as any)[point.icon] || ShieldCheck;
+                      return (
+                        <motion.div key={point.id} variants={fadeIn} className="flex items-start gap-4">
+                            <div className="flex-shrink-0 text-primary bg-primary/10 p-3 rounded-full">
+                              <Icon className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold">{point.title}</h3>
+                                <p className="mt-2 text-muted-foreground">{point.text}</p>
+                                <Button asChild variant="link" className="px-0 mt-2">
+                                    <LoadingLink href={point.link || "/services"}>Learn more</LoadingLink>
+                                </Button>
+                            </div>
+                        </motion.div>
+                      )
+                    })}
+                    {featurePoints.length === 0 && <p className="text-muted-foreground">Feature points will be displayed here.</p>}
                 </motion.div>
             </div>
         </div>
@@ -276,6 +282,6 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
              {sortedTiers.length === 0 && <p className="col-span-full text-center text-muted-foreground mt-8">Pricing plans will be displayed here.</p>}
         </motion.div>
        </section>
-    </MarketingLayout>
+    </>
   );
 }

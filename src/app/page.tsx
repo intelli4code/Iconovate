@@ -1,7 +1,7 @@
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
-import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType } from "@/types";
+import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType, FeaturePoint } from "@/types";
 
 async function getHomepageData() {
   try {
@@ -22,27 +22,32 @@ async function getHomepageData() {
     let images: { [key: string]: SiteImage } = {};
     let pageContent: PageContent | null = null;
     let footerData: FooterContentType | null = null;
+    let featurePoints: FeaturePoint[] = [];
 
     if (contentDoc.exists()) {
         const contentData = contentDoc.data();
         stats = contentData.stats || [];
         images = contentData.images || {};
         pageContent = contentData.pageContent || null;
+        featurePoints = contentData.featurePoints || [];
         if(contentData.footer) {
           footerData = contentData.footer as FooterContentType;
           footerData.columns.sort((a,b) => a.order - b.order);
         }
     }
+    
+    stats.sort((a,b) => a.order - b.order);
+    featurePoints.sort((a, b) => a.order - b.order);
 
-    return { portfolioItems, pricingTiers, stats, images, pageContent, footerData };
+    return { portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints };
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
-    return { portfolioItems: [], pricingTiers: [], stats: [], images: {}, pageContent: null, footerData: null };
+    return { portfolioItems: [], pricingTiers: [], stats: [], images: {}, pageContent: null, footerData: null, featurePoints: [] };
   }
 }
 
 export default async function RootPage() {
-  const { portfolioItems, pricingTiers, stats, images, pageContent, footerData } = await getHomepageData();
+  const { portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints } = await getHomepageData();
 
   return (
     <HomePageContent 
@@ -52,6 +57,7 @@ export default async function RootPage() {
       images={images} 
       pageContent={pageContent}
       footerData={footerData}
+      featurePoints={featurePoints}
     />
   );
 }

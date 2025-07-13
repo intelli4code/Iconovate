@@ -2,7 +2,7 @@
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingLink } from "@/components/ui/loading-link";
-import { Brush, Image as ImageIcon, MessageSquareText, FileText, PencilRuler, Tags, Users, Link as LinkIcon, CaseUpper, Palette, Waves } from "lucide-react";
+import { Brush, Image as ImageIcon, MessageSquareText, FileText, PencilRuler, Tags, Users, Link as LinkIcon, CaseUpper, Palette, Waves, ListChecks, BarChartHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function WebEditingHubPage() {
@@ -10,6 +10,8 @@ export default function WebEditingHubPage() {
     { title: "Manage Site Text", description: "Edit headlines and text on your website.", href: "/dashboard/web-editing/site-text", icon: <CaseUpper /> },
     { title: "Manage Theme", description: "Change the color palette of your website.", href: "/dashboard/web-editing/theme", icon: <Palette /> },
     { title: "Manage Portfolio", description: "Add, edit, or delete portfolio projects.", href: "/dashboard/web-editing/portfolio", icon: <Brush /> },
+    { title: "Manage Feature Points", description: "Edit the feature points on the homepage.", href: "/dashboard/web-editing/feature-points", icon: <ListChecks /> },
+    { title: "Manage Stats", description: "Edit the statistics on the homepage.", href: "/dashboard/web-editing/stats", icon: <BarChartHorizontal /> },
     { title: "Manage Team Display", description: "Choose which team members appear on the site.", href: "/dashboard/web-editing/team", icon: <Users /> },
     { title: "Manage Pricing", description: "Update your service tiers and prices.", href: "/dashboard/web-editing/pricing", icon: <Tags /> },
     { title: "Manage Services", description: "Add or edit the services you offer.", href: "/dashboard/web-editing/services", icon: <PencilRuler /> },
