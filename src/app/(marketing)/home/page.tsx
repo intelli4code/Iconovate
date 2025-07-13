@@ -94,25 +94,14 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
             transition={{ duration: 0.5 }}
             className="relative hidden lg:block"
           >
-             <motion.div
-                animate={{
-                    y: [0, -10, 0],
-                }}
-                transition={{
-                    duration: 5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                }}
-            >
-                <Image
-                src={heroImage}
-                data-ai-hint={heroImageHint}
-                alt="App dashboard and mobile screenshots"
-                width={800}
-                height={600}
-                className="rounded-lg object-contain"
-                />
-            </motion.div>
+            <Image
+            src={heroImage}
+            data-ai-hint={heroImageHint}
+            alt="App dashboard and mobile screenshots"
+            width={800}
+            height={600}
+            className="rounded-lg object-contain"
+            />
           </motion.div>
         </motion.div>
       </section>
@@ -138,7 +127,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
              {stats.length === 0 && <p className="col-span-full text-muted-foreground">Stats will be displayed here.</p>}
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Feature Section */}
        <motion.section
