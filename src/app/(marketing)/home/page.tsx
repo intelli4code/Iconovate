@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Star, ArrowRight, ShieldCheck, Check, Zap } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent } from "@/types";
+import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType } from "@/types";
 import { PortfolioItemCard } from "@/components/marketing/portfolio-item-card";
 import { motion } from "framer-motion";
+import MarketingLayout from "../layout";
+import { FooterContent } from "@/components/marketing/footer";
 
 interface HomePageContentProps {
   portfolioItems: PortfolioItem[];
@@ -17,6 +19,7 @@ interface HomePageContentProps {
   stats: SiteStat[];
   images: { [key: string]: SiteImage };
   pageContent: PageContent | null;
+  footerData: FooterContentType | null;
 }
 
 const fadeIn = {
@@ -39,7 +42,7 @@ const dynamicGradientText = (text: string) => {
   return text.replace(/(amazing brands|designs)/g, `<span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">$1</span>`);
 };
 
-export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent }: HomePageContentProps) {
+export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent, footerData }: HomePageContentProps) {
   const sortedTiers = pricingTiers.sort((a, b) => a.order - b.order);
 
   const heroImage = images?.homeHero?.imageUrl || "https://placehold.co/800x600.png";
@@ -50,7 +53,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
   const homeContent = pageContent?.home;
 
   return (
-    <>
+    <MarketingLayout footer={<FooterContent footerData={footerData} />}>
       {/* Hero Section */}
       <section className="py-20 md:py-32">
         <motion.div 
@@ -135,7 +138,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
              {stats.length === 0 && <p className="col-span-full text-muted-foreground">Stats will be displayed here.</p>}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Feature Section */}
        <motion.section
@@ -285,6 +288,6 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
              {sortedTiers.length === 0 && <p className="col-span-full text-center text-muted-foreground mt-8">Pricing plans will be displayed here.</p>}
         </motion.div>
        </section>
-    </>
+    </MarketingLayout>
   );
 }

@@ -1,6 +1,3 @@
-
-import MarketingLayout from "./(marketing)/layout";
-import { FooterContent } from "@/components/marketing/footer";
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
@@ -62,8 +59,13 @@ export default async function RootPage() {
   const footerData = await getFooterData();
 
   return (
-      <MarketingLayout footer={<FooterContent footerData={footerData} />}>
-        <HomePageContent portfolioItems={portfolioItems} pricingTiers={pricingTiers} stats={stats} images={images} pageContent={pageContent} />
-      </MarketingLayout>
+    <HomePageContent 
+      portfolioItems={portfolioItems} 
+      pricingTiers={pricingTiers} 
+      stats={stats} 
+      images={images} 
+      pageContent={pageContent}
+      footerData={footerData}
+    />
   );
 }
