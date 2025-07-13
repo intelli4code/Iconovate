@@ -3,7 +3,7 @@ import { FooterContent } from "@/components/marketing/footer";
 import { db } from "@/lib/firebase";
 import { getDoc, doc } from "firebase/firestore";
 import type { FooterContent as FooterContentType } from "@/types";
-import ServicesPageContent from "./services-page-content";
+import ServicesPageContent from "../services-page-content";
 
 async function getFooterData(): Promise<FooterContentType | null> {
     try {
