@@ -18,7 +18,14 @@ async function getHomepageData() {
         getDoc(contentDocRef)
     ]);
 
-    const portfolioItems = portfolioSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PortfolioItem[];
+    const portfolioItems = portfolioSnapshot.docs.map(doc => {
+      const data = doc.data() as Omit<PortfolioItem, 'id' | 'createdAt'> & { createdAt: any };
+      return { 
+        id: doc.id, 
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString()
+      } as PortfolioItem;
+    })
     const pricingTiers = pricingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PricingTier[];
     
     let stats: SiteStat[] = [];
