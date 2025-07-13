@@ -4,7 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { LoadingLink } from "@/components/ui/loading-link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Star, ArrowRight, ShieldCheck, Check, Zap } from "lucide-react";
+import { Star, ArrowRight, ShieldCheck, Check, Zap, Compass, Wand2, Code, Rocket } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType, FeaturePoint } from "@/types";
@@ -41,6 +41,33 @@ const staggerContainer = {
 const dynamicGradientText = (text: string) => {
   return text.replace(/(amazing brands|designs)/g, `<span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">$1</span>`);
 };
+
+const designProcessSteps = [
+    {
+        icon: Compass,
+        step: "Step 01",
+        title: "Discovery Phase",
+        description: "Understanding your brand, objectives, and target audience to define project goals.",
+    },
+    {
+        icon: Wand2,
+        step: "Step 02",
+        title: "Design Concept",
+        description: "Creating initial design concepts based on insights gathered during the discovery phase.",
+    },
+    {
+        icon: Code,
+        step: "Step 03",
+        title: "Development & Testing",
+        description: "Building and refining the website, ensuring functionality and compatibility across devices.",
+    },
+    {
+        icon: Rocket,
+        step: "Step 04",
+        title: "Launch & Support",
+        description: "Deploying the finalized website and providing ongoing support to ensure long-term success.",
+    },
+];
 
 export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints }: HomePageContentProps) {
   const sortedTiers = pricingTiers.sort((a, b) => a.order - b.order);
@@ -180,6 +207,42 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
             </div>
         </div>
        </motion.section>
+
+      {/* Design Process Section */}
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="py-16 md:py-24"
+      >
+        <div className="container mx-auto px-4">
+          <motion.div variants={fadeIn} className="text-center max-w-2xl mx-auto">
+            <p className="font-semibold text-primary">PROCESS</p>
+            <h2 className="text-3xl md:text-4xl font-bold mt-2">Our Design Process</h2>
+            <p className="mt-4 text-muted-foreground">
+              Explore our streamlined approach to creating bespoke websites that align with your goals.
+            </p>
+          </motion.div>
+          <motion.div
+            variants={staggerContainer}
+            className="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-8"
+          >
+            {designProcessSteps.map((step) => (
+              <motion.div key={step.title} variants={fadeIn}>
+                <Card className="bg-card/50 border-border/50 p-6 rounded-2xl h-full relative overflow-hidden">
+                    <div className="absolute top-4 right-4 text-xs font-bold text-primary/50 bg-primary/10 px-2 py-1 rounded-full">{step.step}</div>
+                    <div className="mb-4 inline-block p-3 bg-primary/10 rounded-lg text-primary">
+                        <step.icon className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-xl font-bold">{step.title}</h3>
+                    <p className="mt-2 text-muted-foreground text-sm">{step.description}</p>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </motion.section>
 
       {/* Portfolio Section */}
       <motion.section
