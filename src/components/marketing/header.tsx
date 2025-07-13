@@ -56,14 +56,14 @@ export function MarketingHeader() {
         : "border-transparent bg-transparent"
     )}>
       <div className="container flex h-16 items-center">
-        <div className="mr-4 hidden md:flex">
+        <div className="flex items-center">
           <LoadingLink href="/" className="mr-6 flex items-center space-x-2">
             <Rocket className="h-6 w-6 text-primary" />
             <span className="hidden font-bold sm:inline-block">
               BrandBoost AI
             </span>
           </LoadingLink>
-          <nav className="flex items-center space-x-6 text-sm font-medium">
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
             <NavItems />
           </nav>
         </div>
@@ -91,11 +91,13 @@ export function MarketingHeader() {
           </SheetContent>
         </Sheet>
         
-        {/* Mobile Logo */}
-        <LoadingLink href="/" className="flex items-center space-x-2 md:hidden">
-            <Rocket className="h-6 w-6 text-primary" />
-            <span className="font-bold">BrandBoost AI</span>
-        </LoadingLink>
+        {/* Mobile Logo: Hidden on md and up, so it doesn't conflict with the main logo */}
+        <div className="flex md:hidden flex-1 items-center">
+            <LoadingLink href="/" className="flex items-center space-x-2">
+                <Rocket className="h-6 w-6 text-primary" />
+                <span className="font-bold">BrandBoost AI</span>
+            </LoadingLink>
+        </div>
 
 
         <div className="flex flex-1 items-center justify-end space-x-2">
