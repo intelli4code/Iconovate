@@ -55,12 +55,14 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
   return (
     <>
       {/* Hero Section */}
-      <section className="py-20 md:py-32">
-        <motion.div 
+      <motion.section 
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
           variants={staggerContainer}
+          className="py-20 md:py-32"
+        >
+        <div 
           className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center"
         >
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
@@ -102,8 +104,8 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
             className="rounded-lg object-contain"
             />
           </motion.div>
-        </motion.div>
-      </section>
+        </div>
+      </motion.section>
 
       {/* Stats Section */}
       <motion.section
@@ -180,12 +182,14 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
        </motion.section>
 
       {/* Portfolio Section */}
-      <section className="py-16 md:py-24">
-        <motion.div 
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.1 }}
-            variants={staggerContainer}
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={staggerContainer}
+        className="py-16 md:py-24"
+      >
+        <div 
             className="container mx-auto px-4"
         >
           <motion.div variants={fadeIn} className="text-center max-w-2xl mx-auto">
@@ -211,16 +215,18 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
               <LoadingLink href="/portfolio">View All Work</LoadingLink>
             </Button>
           </motion.div>
-        </motion.div>
-      </section>
+        </div>
+      </motion.section>
 
         {/* Pricing CTA Section */}
-       <section className="py-16 md:py-24 text-center">
-        <motion.div 
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.1 }}
-            variants={staggerContainer}
+       <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={staggerContainer}
+        className="py-16 md:py-24 text-center"
+       >
+        <div 
             className="container mx-auto px-4"
         >
             <motion.div variants={fadeIn} className="max-w-2xl mx-auto">
@@ -280,8 +286,8 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
               ))}
             </motion.div>
              {sortedTiers.length === 0 && <p className="col-span-full text-center text-muted-foreground mt-8">Pricing plans will be displayed here.</p>}
-        </motion.div>
-       </section>
+        </div>
+       </motion.section>
     </>
   );
 }
