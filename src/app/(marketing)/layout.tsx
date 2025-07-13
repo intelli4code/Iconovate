@@ -24,7 +24,7 @@ export default function MarketingLayout({
   children: React.ReactNode;
   footer: React.ReactNode;
 }) {
-  const [bgEffects, setBgEffects] = useState<BackgroundEffects>({ animate: true, count: 2 });
+  const [bgEffects, setBgEffects] = useState<BackgroundEffects>({ animate: false, count: 2 });
 
   useEffect(() => {
       const contentDocRef = doc(db, "siteContent", "main");
@@ -44,29 +44,12 @@ export default function MarketingLayout({
           const colors = index % 2 === 0
             ? "from-primary"
             : "from-accent";
-
-          const animation = bgEffects.animate
-            ? {
-                animate: {
-                  x: [0, 150, -100, 0],
-                  y: [0, -100, 150, 0],
-                  rotate: [0, 30, -30, 0],
-                  scale: [1, 1.2, 0.9, 1],
-                },
-                transition: {
-                  duration: 60 + index * 15,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                },
-              }
-            : {};
           
           return (
-            <motion.div
+            <div
               key={index}
               className={`absolute h-[50rem] w-[50rem] bg-no-repeat [background-image:radial-gradient(circle_at_center,var(--tw-gradient-from)_0,transparent_40%)] ${colors} opacity-20 blur-3xl`}
               style={{ ...position }}
-              {...animation}
             />
           );
         })}

@@ -58,7 +58,8 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
       <section className="py-20 md:py-32">
         <motion.div 
           initial="hidden"
-          animate="show"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
           variants={staggerContainer}
           className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center"
         >
@@ -89,9 +90,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
             </motion.div>
           </div>
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
+            variants={fadeIn}
             className="relative hidden lg:block"
           >
             <Image

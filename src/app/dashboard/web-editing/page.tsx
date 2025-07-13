@@ -9,7 +9,6 @@ export default function WebEditingHubPage() {
   const editingSections = [
     { title: "Manage Site Text", description: "Edit headlines and text on your website.", href: "/dashboard/web-editing/site-text", icon: <CaseUpper /> },
     { title: "Manage Theme", description: "Change the color palette of your website.", href: "/dashboard/web-editing/theme", icon: <Palette /> },
-    { title: "Manage Background", description: "Control the animated background effects.", href: "/dashboard/web-editing/background-effects", icon: <Waves /> },
     { title: "Manage Portfolio", description: "Add, edit, or delete portfolio projects.", href: "/dashboard/web-editing/portfolio", icon: <Brush /> },
     { title: "Manage Team Display", description: "Choose which team members appear on the site.", href: "/dashboard/web-editing/team", icon: <Users /> },
     { title: "Manage Pricing", description: "Update your service tiers and prices.", href: "/dashboard/web-editing/pricing", icon: <Tags /> },
