@@ -56,6 +56,7 @@ export function MarketingHeader() {
         : "border-transparent bg-transparent"
     )}>
       <div className="container flex h-16 items-center">
+        {/* Left side: Logo and main nav links */}
         <div className="flex items-center">
           <LoadingLink href="/" className="mr-6 flex items-center space-x-2">
             <Rocket className="h-6 w-6 text-primary" />
@@ -68,39 +69,11 @@ export function MarketingHeader() {
           </nav>
         </div>
 
-        {/* Mobile Nav */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
-            >
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle Menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="pr-0">
-             <LoadingLink href="/" className="flex items-center space-x-2">
-              <Rocket className="h-6 w-6 text-primary" />
-              <span className="font-bold">BrandBoost AI</span>
-            </LoadingLink>
-            <div className="my-4 h-px w-full bg-border" />
-            <div className="flex flex-col space-y-4">
-              <NavItems />
-            </div>
-          </SheetContent>
-        </Sheet>
-        
-        {/* Mobile Logo: Hidden on md and up, so it doesn't conflict with the main logo */}
-        <div className="flex md:hidden flex-1 items-center">
-            <LoadingLink href="/" className="flex items-center space-x-2">
-                <Rocket className="h-6 w-6 text-primary" />
-                <span className="font-bold">BrandBoost AI</span>
-            </LoadingLink>
-        </div>
+        {/* This div will grow and push the other items to the edges */}
+        <div className="flex-1" />
 
-
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        {/* Right side: Action buttons */}
+        <div className="flex items-center space-x-2">
           <ThemeToggle />
            <div className="hidden sm:flex items-center gap-2">
                 <Button asChild variant="ghost" className="rounded-full">
@@ -113,6 +86,31 @@ export function MarketingHeader() {
                     <LoadingLink href="/dashboard/projects">Start Project</LoadingLink>
                 </Button>
            </div>
+        </div>
+
+        {/* Mobile Nav Trigger - appears on the right for mobile */}
+        <div className="flex md:hidden">
+            <Sheet>
+            <SheetTrigger asChild>
+                <Button
+                variant="ghost"
+                className="ml-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+                </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="pr-0">
+                <LoadingLink href="/" className="flex items-center space-x-2">
+                <Rocket className="h-6 w-6 text-primary" />
+                <span className="font-bold">BrandBoost AI</span>
+                </LoadingLink>
+                <div className="my-4 h-px w-full bg-border" />
+                <div className="flex flex-col space-y-4">
+                <NavItems />
+                </div>
+            </SheetContent>
+            </Sheet>
         </div>
       </div>
     </header>
