@@ -135,6 +135,14 @@ const tools = [
   },
 ];
 
+const comparisonData = [
+  { other: "Experienced team delivering standard solutions.", arise: "Highly skilled specialists delivering customized solutions." },
+  { other: "Offers standard, template-based designs.", arise: "Offers innovative, bespoke website designs." },
+  { other: "Limited post-launch support and updates.", arise: "Comprehensive post-launch support and updates." },
+  { other: "Basic performance with average loading times.", arise: "Optimal performance with fast loading times." },
+  { other: "Basic SEO practices implemented.", arise: "Advanced SEO tactics for enhanced online visibility." }
+];
+
 
 export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints }: HomePageContentProps) {
   const sortedTiers = pricingTiers.sort((a, b) => a.order - b.order);
@@ -274,6 +282,66 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
             </div>
         </div>
        </motion.section>
+
+      {/* Comparison Section */}
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="py-16 md:py-24"
+      >
+        <div className="container mx-auto px-4">
+          <motion.div variants={fadeIn} className="text-center max-w-2xl mx-auto">
+            <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary mb-4">
+              Comparison
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mt-2">Choosing BrandBoost AI Over Others</h2>
+            <p className="mt-4 text-muted-foreground">
+              See why BrandBoost AI stands out with superior service, innovation, and client satisfaction benchmarks.
+            </p>
+          </motion.div>
+          
+          <div className="mt-16 grid grid-cols-2 items-center text-center gap-8 max-w-4xl mx-auto">
+             <h3 className="text-2xl font-bold">Other Agencies</h3>
+             <h3 className="text-2xl font-bold flex items-center justify-center gap-2">
+                <span className="text-primary font-black text-3xl">A</span>
+                <span>rise</span>
+                <span className="text-xs text-muted-foreground self-start">UI</span>
+            </h3>
+          </div>
+
+          <motion.div
+            variants={staggerContainer}
+            className="mt-8 space-y-4 max-w-5xl mx-auto"
+          >
+            {comparisonData.map((item, index) => (
+              <motion.div key={index} variants={fadeIn} className="grid md:grid-cols-[1fr_auto_1fr] items-stretch gap-2 md:gap-4">
+                <div className="bg-card/30 p-4 rounded-lg text-left flex items-center">
+                   <div className="flex items-center gap-3 text-muted-foreground">
+                      <Star className="h-5 w-5 text-yellow-500/70 fill-yellow-500/30 flex-shrink-0" />
+                      <span>{item.other}</span>
+                   </div>
+                </div>
+
+                <div className="hidden md:flex items-center justify-center">
+                    <div className="bg-card/50 text-primary font-bold rounded-full h-10 w-10 flex items-center justify-center border border-primary/20">
+                        V/S
+                    </div>
+                </div>
+                
+                <div className="bg-card/80 p-4 rounded-lg text-left border-l-2 border-primary relative overflow-hidden">
+                   <div className="absolute inset-0 bg-repeat bg-[length:20px_20px] opacity-5" style={{backgroundImage: `linear-gradient(45deg, hsl(var(--border)) 25%, transparent 25%), linear-gradient(-45deg, hsl(var(--border)) 25%, transparent 25%)`}}></div>
+                   <div className="flex items-center gap-3 relative">
+                      <Zap className="h-5 w-5 text-primary fill-primary/50 flex-shrink-0" />
+                      <span className="font-semibold">{item.arise}</span>
+                   </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </motion.section>
 
       {/* Design Process Section */}
       <motion.section
