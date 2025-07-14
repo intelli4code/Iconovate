@@ -4,13 +4,15 @@
 import { Button } from "@/components/ui/button";
 import { LoadingLink } from "@/components/ui/loading-link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Star, ArrowRight, ShieldCheck, Check, Zap, Compass, Wand2, Code, Rocket } from "lucide-react";
+import { Star, ArrowRight, ShieldCheck, Check, Zap, Compass, Wand2, Code, Rocket, HelpCircle } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType, FeaturePoint } from "@/types";
 import { PortfolioItemCard } from "@/components/marketing/portfolio-item-card";
 import { motion } from "framer-motion";
 import * as LucideIcons from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 
 interface HomePageContentProps {
   portfolioItems: PortfolioItem[];
@@ -142,6 +144,49 @@ const comparisonData = [
   { other: "Basic performance with average loading times.", arise: "Optimal performance with fast loading times." },
   { other: "Basic SEO practices implemented.", arise: "Advanced SEO tactics for enhanced online visibility." }
 ];
+
+const faqData = [
+    {
+        question: "What services does Arise offer?",
+        answer: "We offer a comprehensive range of design services, including brand identity, web and UI/UX design, marketing materials, and AI-powered brand research to give you a competitive edge."
+    },
+    {
+        question: "Do you provide hosting services?",
+        answer: "No, we focus on design and development. However, we can recommend reliable hosting providers and assist with the deployment process to ensure a smooth launch."
+    },
+    {
+        question: "How long does a typical project take?",
+        answer: "Project timelines vary depending on the scope and complexity. A typical brand identity project can take 2-4 weeks, while a full website design and development can take 6-12 weeks."
+    },
+    {
+        question: "How do you handle revisions during the process?",
+        answer: "Each of our packages includes a set number of revision rounds at key stages. We use a structured feedback process to ensure your input is incorporated effectively and efficiently."
+    },
+    {
+        question: "Do you offer ongoing support after the website launch?",
+        answer: "Yes, we offer various support and maintenance packages to ensure your website remains up-to-date, secure, and performs optimally. We can discuss these options towards the end of your project."
+    },
+    {
+        question: "Can you help with content creation for my website?",
+        answer: "While our primary focus is design, we partner with talented copywriters and photographers. We can connect you with them or work with your existing content to integrate it seamlessly into the design."
+    },
+     {
+        question: "Can I see examples of your previous work?",
+        answer: "Absolutely! You can view a selection of our recent projects in our portfolio section. We're proud of the results we've achieved for our clients."
+    },
+    {
+        question: "Is SEO included in your web design packages?",
+        answer: "We implement on-page SEO best practices in all our web design projects, including proper heading structure, mobile-friendliness, and fast load times. For advanced SEO strategies, we partner with specialized SEO agencies."
+    },
+     {
+        question: "What is your pricing structure like?",
+        answer: "Our pricing is project-based. We offer several packages tailored to different needs, from startups to enterprise-level companies. You can view our standard packages on the pricing page or contact us for a custom quote."
+    },
+    {
+        question: "What makes Arise different from other agencies?",
+        answer: "Our key differentiator is the integration of AI into our creative process. This allows us to deliver data-driven insights, faster turnaround times, and more innovative solutions without compromising on the bespoke quality of our design work."
+    }
+]
 
 
 export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints }: HomePageContentProps) {
@@ -456,6 +501,49 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
               <LoadingLink href="/portfolio">View All Work</LoadingLink>
             </Button>
           </motion.div>
+        </div>
+      </motion.section>
+
+       {/* FAQ Section */}
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={staggerContainer}
+        className="py-16 md:py-24"
+      >
+        <div className="container mx-auto px-4">
+          <motion.div variants={fadeIn} className="text-center max-w-2xl mx-auto">
+            <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary mb-4">
+              FAQ's
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mt-2">Frequently Asked Questions</h2>
+            <p className="mt-4 text-muted-foreground">
+              Answers to common questions about our services, processes, and what sets us apart.
+            </p>
+          </motion.div>
+
+          <motion.div variants={fadeIn} className="mt-12 max-w-4xl mx-auto">
+             <Accordion type="single" collapsible className="w-full">
+                <div className="grid md:grid-cols-2 gap-x-8">
+                  {faqData.map((faq, index) => (
+                    <AccordionItem key={index} value={`item-${index + 1}`}>
+                      <AccordionTrigger>{faq.question}</AccordionTrigger>
+                      <AccordionContent>{faq.answer}</AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </div>
+              </Accordion>
+          </motion.div>
+           <motion.div variants={fadeIn} className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
+              <div className="flex items-center gap-2">
+                <HelpCircle className="h-6 w-6 text-primary"/>
+                <p className="font-semibold">Still Have a Question?</p>
+              </div>
+              <Button asChild>
+                <LoadingLink href="/contact">Ask Question</LoadingLink>
+              </Button>
+            </motion.div>
         </div>
       </motion.section>
 
