@@ -1,5 +1,4 @@
-
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import { LoadingLink } from "@/components/ui/loading-link";
@@ -49,76 +48,81 @@ export function MarketingHeader() {
   );
 
   return (
-    <header className={cn(
-      "sticky top-0 z-50 w-full border-b transition-colors duration-300",
-      isScrolled 
-        ? "border-border/50 bg-background/80 backdrop-blur-sm" 
-        : "border-transparent bg-transparent"
-    )}>
-      <div className="container flex h-16 items-center justify-between">
-        {/* Left side: Logo and main nav links */}
-        <div className="flex items-center">
-          <LoadingLink href="/" className="mr-6 flex items-center space-x-2">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full border-b transition-colors duration-300",
+        isScrolled
+          ? "border-border/50 bg-background/80 backdrop-blur-sm"
+          : "border-transparent bg-transparent"
+      )}
+    >
+      <div className="container mx-auto px-4 flex h-16 items-center justify-between">
+        {/* Left: Logo + Nav */}
+        <div className="flex items-center space-x-6">
+          <LoadingLink href="/" className="flex items-center space-x-2">
             <Rocket className="h-6 w-6 text-primary" />
-            <span className="hidden font-bold sm:inline-block">
-              BrandBoost AI
-            </span>
+            <span className="hidden font-bold sm:inline-block">WiseVids</span>
           </LoadingLink>
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
             <NavItems />
           </nav>
         </div>
 
-        {/* Right side: Action buttons and mobile menu */}
-        <div className="flex items-center space-x-2">
-          <div className="hidden sm:flex items-center gap-2">
-                <ThemeToggle />
-                <Button asChild variant="ghost" className="rounded-full">
-                    <LoadingLink href="/designer/login">Designer Portal</LoadingLink>
-                </Button>
-                <Button asChild variant="outline" className="rounded-full">
-                    <LoadingLink href="/client-login">Client Portal</LoadingLink>
-                </Button>
-                <Button asChild className="rounded-full">
-                    <LoadingLink href="/dashboard/projects">Start Project</LoadingLink>
-                </Button>
-           </div>
-           
-            <div className="flex md:hidden">
-              <ThemeToggle />
-              <Sheet>
-              <SheetTrigger asChild>
-                  <Button
-                  variant="ghost"
-                  className="ml-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                  >
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle Menu</span>
+        {/* Right: Action Buttons + Theme Toggle */}
+        <div className="hidden md:flex items-center space-x-2">
+          <Button asChild variant="ghost" className="rounded-full">
+            <LoadingLink href="/designer/login">Designer Portal</LoadingLink>
+          </Button>
+          <Button asChild variant="outline" className="rounded-full">
+            <LoadingLink href="/client-login">Client Portal</LoadingLink>
+          </Button>
+          <Button asChild className="rounded-full">
+            <LoadingLink href="/dashboard/projects">Start Project</LoadingLink>
+          </Button>
+          <div className="hidden sm:flex">
+            <ThemeToggle />
+          </div>
+        </div>
+
+        {/* Mobile: Theme Toggle + Menu */}
+        <div className="flex md:hidden items-center space-x-2">
+          <ThemeToggle />
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                className="ml-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="pr-0">
+              <LoadingLink href="/" className="flex items-center space-x-2">
+                <Rocket className="h-6 w-6 text-primary" />
+                <span className="font-bold">WiseVids</span>
+              </LoadingLink>
+              <div className="my-4 h-px w-full bg-border" />
+              <div className="flex flex-col space-y-4">
+                <NavItems />
+                <div className="flex flex-col space-y-2 pt-4 border-t">
+                  <Button asChild variant="outline">
+                    <LoadingLink href="/designer/login">
+                      Designer Portal
+                    </LoadingLink>
                   </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="pr-0">
-                  <LoadingLink href="/" className="flex items-center space-x-2">
-                  <Rocket className="h-6 w-6 text-primary" />
-                  <span className="font-bold">BrandBoost AI</span>
-                  </LoadingLink>
-                  <div className="my-4 h-px w-full bg-border" />
-                  <div className="flex flex-col space-y-4">
-                  <NavItems />
-                   <div className="flex flex-col space-y-2 pt-4 border-t">
-                      <Button asChild variant="outline">
-                          <LoadingLink href="/designer/login">Designer Portal</LoadingLink>
-                      </Button>
-                      <Button asChild variant="outline">
-                          <LoadingLink href="/client-login">Client Portal</LoadingLink>
-                      </Button>
-                      <Button asChild>
-                          <LoadingLink href="/dashboard/projects">Start Project</LoadingLink>
-                      </Button>
-                   </div>
-                  </div>
-              </SheetContent>
-              </Sheet>
-            </div>
+                  <Button asChild variant="outline">
+                    <LoadingLink href="/client-login">Client Portal</LoadingLink>
+                  </Button>
+                  <Button asChild>
+                    <LoadingLink href="/dashboard/projects">
+                      Start Project
+                    </LoadingLink>
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
