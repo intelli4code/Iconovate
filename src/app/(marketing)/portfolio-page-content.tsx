@@ -1,10 +1,7 @@
 "use client";
 
 import { PortfolioItemCard } from "@/components/marketing/portfolio-item-card";
-import { db } from "@/lib/firebase";
 import type { PortfolioItem } from "@/types";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 const fadeIn = {
@@ -28,22 +25,7 @@ const staggerItem = {
   show: { opacity: 1, y: 0 }
 };
 
-export default function PortfolioPageContent() {
-  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-
-  useEffect(() => {
-    async function fetchItems() {
-      try {
-        const q = query(collection(db, "portfolioItems"), orderBy("createdAt", "desc"));
-        const snapshot = await getDocs(q);
-        setPortfolioItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PortfolioItem[]);
-      } catch (error) {
-        console.error("Failed to fetch portfolio items:", error);
-      }
-    }
-    fetchItems();
-  }, []);
-
+export default function PortfolioPageContent({ portfolioItems }: { portfolioItems: PortfolioItem[] }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
