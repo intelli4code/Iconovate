@@ -73,69 +73,76 @@ const designProcessSteps = [
 
 const tools = [
   {
-    name: "Figurative",
-    description: "Collaborative design and prototyping tool online.",
+    name: "Adobe Photoshop",
+    description: "Industry-standard for raster graphics editing and image manipulation.",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="8" cy="8" r="3" fill="#34D399"/>
-        <circle cx="16" cy="8" r="3" fill="#34D399"/>
-        <circle cx="8" cy="16" r="3" fill="#34D399"/>
-        <circle cx="16" cy="16" r="3" fill="#34D399"/>
+        <rect width="24" height="24" rx="4" fill="#31A8FF"/>
+        <path d="M12.42 8.16H10.12V16H12.42C14.84 16 15.82 14.52 15.82 12.08C15.82 9.64 14.82 8.16 12.42 8.16ZM12.38 14.4H11.7V9.76H12.38C13.7 9.76 14.28 10.6 14.28 12.08C14.28 13.56 13.7 14.4 12.38 14.4Z" fill="white"/>
+        <path d="M8.2 8.16H6V16H8.2V8.16Z" fill="white"/>
       </svg>
     ),
   },
   {
-    name: "FrameX",
-    description: "Interactive prototypes for advanced animations website.",
+    name: "Canva",
+    description: "User-friendly online design platform for quick and beautiful graphics.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+       <rect width="24" height="24" rx="4" fill="#8D44AD"/>
+       <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20Z" fill="url(#paint0_radial_1_2)"/>
+        <defs>
+        <radialGradient id="paint0_radial_1_2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12) rotate(90) scale(10)">
+        <stop stop-color="#9B59B6"/>
+        <stop offset="1" stop-color="#8E44AD"/>
+        </radialGradient>
+        </defs>
+      </svg>
+    ),
+  },
+  {
+    name: "Adobe Illustrator",
+    description: "Premier vector graphics editor for creating scalable logos and illustrations.",
+     icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="24" height="24" rx="4" fill="#FF9A00"/>
+        <path d="M12 8.16L10.2 13.08H13.8L12 8.16ZM14.9 16H9.1L6 8.16H8.6L12 14.28L15.4 8.16H18L14.9 16Z" fill="white"/>
+        <path d="M8.2 8.16H6V16H8.2V8.16Z" fill="white"/>
+      </svg>
+    ),
+  },
+  {
+    name: "Premiere Pro",
+    description: "Professional video editing for creating compelling visual stories.",
+     icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="24" height="24" rx="4" fill="#9999FF"/>
+        <path d="M12.42 8.16H10.12V16H12.42C14.84 16 15.82 14.52 15.82 12.08C15.82 9.64 14.82 8.16 12.42 8.16ZM12.38 14.4H11.7V9.76H12.38C13.7 9.76 14.28 10.6 14.28 12.08C14.28 13.56 13.7 14.4 12.38 14.4Z" fill="white"/>
+        <path d="M8.2 8.16H6V16H8.2V8.16Z" fill="white"/>
+      </svg>
+    ),
+  },
+  {
+    name: "After Effects",
+    description: "Digital visual effects, motion graphics, and compositing application.",
+     icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="24" height="24" rx="4" fill="#9999FF"/>
+        <path d="M12 8.16L10.2 13.08H13.8L12 8.16ZM14.9 16H9.1L6 8.16H8.6L12 14.28L15.4 8.16H18L14.9 16Z" fill="white"/>
+        <path d="M8.2 8.16H6V16H8.2V8.16Z" fill="white"/>
+      </svg>
+    ),
+  },
+  {
+    name: "Figma",
+    description: "A collaborative web application for interface design.",
     icon: (
        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L4 6L12 10L20 6L12 2Z" fill="#A78BFA"/>
-        <path d="M4 18L12 22L20 18L12 14L4 18Z" fill="#8B5CF6"/>
-        <path d="M4 6V18L12 14V2L4 6Z" fill="#C4B5FD"/>
-      </svg>
-    ),
-  },
-  {
-    name: "Shopty",
-    description: "E-commerce platform for online shopping websites.",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L14.09 8.26L20 9.27L15.55 13.91L16.91 20L12 16.9L7.09 20L8.45 13.91L4 9.27L9.91 8.26L12 2Z" fill="#F472B6"/>
-      </svg>
-    ),
-  },
-  {
-    name: "Idease",
-    description: "All-in-one workspace for notes and project tasks.",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 15.5C10 14.3954 10.8954 13.5 12 13.5C13.1046 13.5 14 14.3954 14 15.5C14 17.5 12 20.5 12 20.5C12 20.5 10 17.5 10 15.5Z" fill="#F97316"/>
-        <path d="M12 12C15.3137 12 18 9.31371 18 6C18 2.68629 15.3137 0 12 0C8.68629 0 6 2.68629 6 6C6 9.31371 8.68629 12 12 12Z" fill="#FB923C"/>
-      </svg>
-    ),
-  },
-  {
-    name: "Webflew",
-    description: "Design and develop websites visually with ease.",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M2 17L12 22L22 17" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M2 12L12 17L22 12" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-  },
-  {
-    name: "Payflow",
-    description: "Online payment processing platform for business.",
-    icon: (
-       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M7 7H17V10H7V7Z" fill="#60A5FA"/>
-        <path d="M7 14H17V17H7V14Z" fill="#3B82F6"/>
+        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM8 16C6.9 16 6 15.1 6 14V10C6 8.9 6.9 8 8 8H10V10H8V14C8 14.55 8.45 15 9 15H10V16H8ZM12 12H10V8H12V12ZM16 14C16 15.1 15.1 16 14 16H12V14H14V10H12V8H14C15.1 8 16 8.9 16 10V14Z" fill="#F24E1E"/>
       </svg>
     ),
   },
 ];
+
 
 const comparisonData = [
   { other: "Experienced team delivering standard solutions.", arise: "Highly skilled specialists delivering customized solutions." },
