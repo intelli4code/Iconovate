@@ -11,9 +11,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Loader2, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
-import { saveContactMessage, SaveContactMessageInputSchema, type SaveContactMessageInput } from "@/ai/flows/save-contact-message";
+import { saveContactMessage } from "@/ai/flows/save-contact-message";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import type { SaveContactMessageInput } from "@/types/contact-form";
+import { SaveContactMessageInputSchema } from "@/types/contact-form";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
