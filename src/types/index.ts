@@ -1,4 +1,15 @@
 
+import { Timestamp } from "firebase/firestore";
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  selectedPackage?: string;
+  createdAt: Timestamp;
+}
 
 export interface Expense {
   id: string;

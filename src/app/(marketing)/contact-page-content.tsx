@@ -1,11 +1,19 @@
+
 "use client";
 
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Loader2, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { saveContactMessage, SaveContactMessageInputSchema, type SaveContactMessageInput } from "@/ai/flows/save-contact-message";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -14,6 +22,44 @@ const fadeIn = {
 };
 
 export default function ContactPageContent() {
+  const searchParams = useSearchParams();
+  const selectedPackage = searchParams.get('plan');
+  const { toast } = useToast();
+  
+  const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<SaveContactMessageInput>({
+    resolver: zodResolver(SaveContactMessageInputSchema),
+    defaultValues: {
+      selectedPackage: selectedPackage || ""
+    }
+  });
+
+  useEffect(() => {
+    setValue('selectedPackage', selectedPackage || "");
+  }, [selectedPackage, setValue]);
+
+  const onSubmit: SubmitHandler<SaveContactMessageInput> = async (data) => {
+    try {
+      const result = await saveContactMessage(data);
+      if (result.success) {
+        toast({
+          title: "Message Sent!",
+          description: "Thank you for contacting us. We'll get back to you shortly.",
+          action: <CheckCircle className="text-green-500" />
+        });
+        reset();
+      } else {
+        throw new Error(result.error || "An unknown error occurred.");
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Submission Failed",
+        description: error.message || "Could not send your message. Please try again.",
+      });
+    }
+  };
+
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -44,26 +90,39 @@ export default function ContactPageContent() {
         <div className="lg:col-span-3">
           <div className="p-8 rounded-lg bg-card/50 h-full">
             <h2 className="text-2xl font-bold mb-6">Send us a message</h2>
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {selectedPackage && (
+                <Card className="bg-secondary/50">
+                  <CardContent className="p-4">
+                    <p className="text-sm">You've selected the <span className="font-bold text-primary">{selectedPackage}</span> package.</p>
+                  </CardContent>
+                </Card>
+              )}
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">Your Name</Label>
-                  <Input id="name" placeholder="John Doe" />
+                  <Input id="name" placeholder="John Doe" {...register("name")} />
+                  {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Your Email</Label>
-                  <Input id="email" type="email" placeholder="john@example.com" />
+                  <Input id="email" type="email" placeholder="john@example.com" {...register("email")} />
+                  {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="subject">Subject</Label>
-                <Input id="subject" placeholder="e.g., Website Redesign Project" />
+                <Input id="subject" placeholder="e.g., Website Redesign Project" {...register("subject")} />
+                 {errors.subject && <p className="text-sm text-destructive">{errors.subject.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="message">Your Message</Label>
-                <Textarea id="message" rows={6} placeholder="Tell us about your project, goals, and timeline." />
+                <Textarea id="message" rows={6} placeholder="Tell us about your project, goals, and timeline." {...register("message")} />
+                 {errors.message && <p className="text-sm text-destructive">{errors.message.message}</p>}
               </div>
-              <Button type="submit" className="w-full rounded-full">Send Message</Button>
+              <Button type="submit" className="w-full rounded-full" disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Send Message"}
+              </Button>
             </form>
           </div>
         </div>

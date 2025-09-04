@@ -270,7 +270,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
         className="py-16 md:py-24"
       >
         <div className="container mx-auto px-4">
-          <div className="grid sm:grid-cols-3 gap-8 text-center max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center justify-center max-w-4xl mx-auto">
             {stats.map((stat) => (
               <motion.div key={stat.id} variants={fadeIn}>
                 <Card className="bg-white/5 border-white/10 p-6 rounded-2xl backdrop-blur-sm">
@@ -612,7 +612,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
                         "w-full rounded-lg",
                         tier.isPopular ? "bg-gradient-to-r from-primary to-accent text-white" : "bg-transparent border border-border/80 hover:bg-border/50"
                       )}>
-                         <LoadingLink href={tier.name === 'Enterprise' ? '/contact' : '/login'}>
+                         <LoadingLink href={`/contact?plan=${tier.name}`}>
                            {tier.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
                          </LoadingLink>
                       </Button>

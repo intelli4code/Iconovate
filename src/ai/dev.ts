@@ -23,3 +23,5 @@ import '@/ai/flows/competitor-analyzer.ts';
 import '@/ai/flows/brief-analyzer.ts';
 import '@/ai/flows/persona-generator.ts';
 import '@/ai/flows/weekly-summary-generator.ts';
+import '@/ai/flows/save-contact-message.ts';
+

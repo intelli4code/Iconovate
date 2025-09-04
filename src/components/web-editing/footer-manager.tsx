@@ -48,7 +48,6 @@ const initialFooterData: FooterContent = {
         { id: 'portals', title: 'Portals', order: 3, links: [
             { id: uuidv4(), text: 'Client Portal', href: '/client-login' },
             { id: uuidv4(), text: 'Designer Portal', href: '/designer/login' },
-            { id: uuidv4(), text: 'Admin Login', href: '/login' },
         ]},
     ],
     socials: [

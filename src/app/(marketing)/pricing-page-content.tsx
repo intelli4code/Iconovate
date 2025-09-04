@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -126,7 +127,7 @@ export default function PricingPageContent() {
                     "w-full rounded-lg",
                     tier.isPopular ? "bg-gradient-to-r from-primary to-purple-600 text-white" : "bg-transparent border border-border/80 hover:bg-border/50"
                   )}>
-                     <LoadingLink href={tier.name === 'Enterprise' ? '/contact' : '/login'}>
+                     <LoadingLink href={`/contact?plan=${tier.name}`}>
                        {tier.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
                      </LoadingLink>
                   </Button>
