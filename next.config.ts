@@ -22,12 +22,6 @@ const nextConfig: NextConfig = {
         hostname: 'vfsduerelweqhhwggsxs.supabase.co',
         port: '',
         pathname: '/**',
-      },
-       {
-        protocol: 'https',
-        hostname: 'onvurqhacnjbgajtbokn.supabase.co',
-        port: '',
-        pathname: '/**',
       }
     ],
   },
