@@ -49,23 +49,14 @@ export function PortfolioItemCard({ item }: { item: PortfolioItem }) {
             <PortfolioCardContent item={item} />
         </div>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-3xl bg-card/50 backdrop-blur-sm">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">{item.title}</DialogTitle>
-          <DialogDescription>{item.category}</DialogDescription>
-        </DialogHeader>
-        <div className="grid md:grid-cols-2 gap-6 py-4">
-          <div className="relative aspect-video rounded-lg overflow-hidden">
+      <DialogContent className="max-w-5xl w-full h-[90vh] bg-card/50 backdrop-blur-sm p-2 sm:p-4">
+        <div className="relative w-full h-full">
             <Image
-              src={item.imageUrl}
-              alt={item.title}
-              fill
-              className="object-cover"
+                src={item.imageUrl}
+                alt={item.title}
+                fill
+                className="object-contain"
             />
-          </div>
-          <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line">
-            {item.content}
-          </div>
         </div>
       </DialogContent>
     </Dialog>
