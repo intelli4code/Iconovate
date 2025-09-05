@@ -28,14 +28,19 @@ const staggerItem = {
   show: { opacity: 1, y: 0 }
 };
 
-export default function PortfolioPageContent({ portfolioItems }: { portfolioItems: PortfolioItem[] }) {
+interface PortfolioPageContentProps {
+    allItems: PortfolioItem[];
+    featuredItems: PortfolioItem[];
+}
+
+export default function PortfolioPageContent({ allItems, featuredItems }: PortfolioPageContentProps) {
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const categories = ["All", ...Array.from(new Set(portfolioItems.map(item => item.category)))];
+  const categories = ["All", ...Array.from(new Set(allItems.map(item => item.category)))];
   
   const filteredItems = activeCategory === "All"
-    ? portfolioItems
-    : portfolioItems.filter(item => item.category === activeCategory);
+    ? allItems
+    : allItems.filter(item => item.category === activeCategory);
 
   return (
     <motion.div
@@ -57,32 +62,52 @@ export default function PortfolioPageContent({ portfolioItems }: { portfolioItem
         </p>
       </motion.section>
       
-      <motion.div
-        variants={fadeIn}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true, amount: 0.2 }}
-        className="flex justify-center flex-wrap gap-2 mt-12"
-      >
-        {categories.map(category => (
-          <Button
-            key={category}
-            variant={activeCategory === category ? "default" : "outline"}
-            onClick={() => setActiveCategory(category)}
-            className="rounded-full"
+      {featuredItems.length > 0 && (
+          <motion.section 
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.1 }}
+            className="mt-20"
           >
-            {category}
-          </Button>
-        ))}
-      </motion.div>
+              <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">Featured Work</h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {featuredItems.map((item) => (
+                    <motion.div key={item.id} variants={staggerItem}>
+                        <PortfolioItemCard item={item} />
+                    </motion.div>
+                ))}
+              </div>
+          </motion.section>
+      )}
 
       <motion.section
         variants={staggerContainer}
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.1 }}
-        className="mt-16"
+        className="mt-20"
       >
+        <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">All Projects</h2>
+        <motion.div
+            variants={fadeIn}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, amount: 0.2 }}
+            className="flex justify-center flex-wrap gap-2 mb-12"
+        >
+            {categories.map(category => (
+            <Button
+                key={category}
+                variant={activeCategory === category ? "default" : "outline"}
+                onClick={() => setActiveCategory(category)}
+                className="rounded-full"
+            >
+                {category}
+            </Button>
+            ))}
+        </motion.div>
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredItems.map((item) => (
             <motion.div key={item.id} variants={staggerItem}>
@@ -90,10 +115,10 @@ export default function PortfolioPageContent({ portfolioItems }: { portfolioItem
             </motion.div>
           ))}
         </div>
-        {filteredItems.length === 0 && portfolioItems.length > 0 && (
+        {filteredItems.length === 0 && allItems.length > 0 && (
             <p className="text-center text-muted-foreground mt-16">No items found for this category.</p>
         )}
-        {portfolioItems.length === 0 && (
+        {allItems.length === 0 && (
           <p className="text-center text-muted-foreground mt-16">No portfolio items have been added yet.</p>
         )}
       </motion.section>

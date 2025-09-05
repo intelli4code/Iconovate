@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -21,9 +20,11 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, Trash2, Loader2, Edit, UploadCloud } from "lucide-react";
+import { PlusCircle, Trash2, Loader2, Edit, UploadCloud, Star } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Switch } from "../ui/switch";
+import { cn } from "@/lib/utils";
 
 const portfolioSchema = z.object({
   title: z.string().min(3, "Title is required"),
@@ -31,6 +32,7 @@ const portfolioSchema = z.object({
   description: z.string().min(10, "Description is required"),
   content: z.string().min(20, "Content for the dialog is required"),
   aspectRatio: z.enum(['1:1', '16:9', '9:16']).default('1:1'),
+  isFeatured: z.boolean().default(false),
   image: z.any().optional(),
 });
 
@@ -75,11 +77,12 @@ export function PortfolioManager() {
         description: item.description,
         content: item.content,
         aspectRatio: item.aspectRatio || '1:1',
+        isFeatured: item.isFeatured || false,
       });
       setPreview(item.imageUrl);
     } else {
       setEditingItem(null);
-      reset({ title: "", category: "", description: "", content: "", aspectRatio: '1:1' });
+      reset({ title: "", category: "", description: "", content: "", aspectRatio: '1:1', isFeatured: false });
       setPreview(null);
     }
     setIsDialogOpen(true);
@@ -130,6 +133,7 @@ export function PortfolioManager() {
         description: data.description,
         content: data.content,
         aspectRatio: data.aspectRatio,
+        isFeatured: data.isFeatured,
         imageUrl,
         imagePath,
         fileType,
@@ -163,6 +167,19 @@ export function PortfolioManager() {
       toast({ variant: "destructive", title: "Deletion Failed", description: error.message });
     }
   };
+
+  const handleFeatureToggle = async (item: PortfolioItem) => {
+      const itemRef = doc(db, "portfolioItems", item.id);
+      try {
+          await updateDoc(itemRef, { isFeatured: !item.isFeatured });
+          toast({
+              title: "Feature Status Updated",
+              description: `${item.title} is now ${!item.isFeatured ? "featured" : "not featured"}.`
+          });
+      } catch (error) {
+          toast({ variant: "destructive", title: "Update Failed" });
+      }
+  }
 
   return (
     <Card>
@@ -200,10 +217,10 @@ export function PortfolioManager() {
                 {filteredItems.map((item) => (
                     <Card key={item.id} className="overflow-hidden group">
                         <CardContent className="p-0">
-                            <div className="relative aspect-[4/3] overflow-hidden">
+                            <div className="relative aspect-video overflow-hidden">
                                 <Image
                                     src={item.imageUrl}
-                                    alt={`Portfolio piece for ${item.title}`}
+                                    alt={item.title}
                                     width={600}
                                     height={400}
                                     className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
@@ -214,17 +231,30 @@ export function PortfolioManager() {
                                 <h3 className="mt-1 text-lg font-bold truncate">{item.title}</h3>
                             </div>
                         </CardContent>
-                        <CardFooter className="flex justify-end gap-2 bg-muted/50 p-2">
-                             <Button variant="outline" size="sm" onClick={() => handleOpenDialog(item)}><Edit className="mr-2 h-4 w-4" /> Edit</Button>
+                        <CardFooter className="flex justify-between items-center gap-2 bg-muted/50 p-2">
+                           <div className="flex items-center space-x-2">
+                            <Switch
+                                id={`feature-${item.id}`}
+                                checked={item.isFeatured}
+                                onCheckedChange={() => handleFeatureToggle(item)}
+                            />
+                            <Label htmlFor={`feature-${item.id}`} className="flex items-center text-sm gap-1">
+                                <Star className={cn("h-4 w-4", item.isFeatured ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground")} />
+                                Feature
+                            </Label>
+                           </div>
+                           <div className="flex gap-1">
+                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenDialog(item)}><Edit className="h-4 w-4" /></Button>
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant="destructive" size="sm"><Trash2 className="mr-2 h-4 w-4" /> Delete</Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete "{item.title}". This cannot be undone.</AlertDialogDescription></AlertDialogHeader>
                                     <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDelete(item)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction></AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
+                           </div>
                         </CardFooter>
                     </Card>
                 ))}
@@ -259,6 +289,16 @@ export function PortfolioManager() {
                   <Label htmlFor="category">Category</Label>
                   <Input id="category" {...register("category")} />
                   {errors.category && <p className="text-sm text-destructive">{errors.category.message}</p>}
+              </div>
+               <div className="flex items-center space-x-2">
+                  <Controller
+                    control={control}
+                    name="isFeatured"
+                    render={({ field }) => (
+                        <Switch id="isFeatured" checked={field.value} onCheckedChange={field.onChange} />
+                    )}
+                  />
+                  <Label htmlFor="isFeatured">Feature this item?</Label>
               </div>
             </div>
             <div className="space-y-4">
