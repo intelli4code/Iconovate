@@ -92,8 +92,8 @@ const tools = [
        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20Z" fill="url(#paint0_radial_1_2)"/>
         <defs>
         <radialGradient id="paint0_radial_1_2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12) rotate(90) scale(10)">
-        <stop stop-color="#9B59B6"/>
-        <stop offset="1" stop-color="#8E44AD"/>
+        <stop stopColor="#9B59B6"/>
+        <stop offset="1" stopColor="#8E44AD"/>
         </radialGradient>
         </defs>
       </svg>
@@ -627,3 +627,5 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
     </>
   );
 }
+
+    
