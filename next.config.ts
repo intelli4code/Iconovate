@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://cocgikgckaozdsxqnjas.supabase.co').hostname,
+        hostname: 'cocgikgckaozdsxqnjas.supabase.co',
         port: '',
         pathname: '/**',
       },
