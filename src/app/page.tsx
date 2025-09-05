@@ -1,7 +1,7 @@
 
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, getDocs, doc, where } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, doc, where, getDoc } from "firebase/firestore";
 import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType, FeaturePoint } from "@/types";
 import MarketingLayout from "./(marketing)/layout";
 import { FooterContent } from "@/components/marketing/footer";

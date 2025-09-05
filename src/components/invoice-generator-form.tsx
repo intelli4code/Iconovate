@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -120,18 +121,6 @@ export function InvoiceGeneratorForm() {
     if (project) {
         setValue('projectId', project.id, { shouldValidate: true });
         setValue('projectName', project.name, { shouldValidate: true });
-        
-        const taskLineItems = project.tasks.map(task => ({
-            description: task.text,
-            quantity: 1,
-            price: 0
-        }));
-        
-        if(taskLineItems.length > 0) {
-          setValue('lineItems', taskLineItems, { shouldValidate: true });
-        } else {
-          setValue('lineItems', [{ description: `Work for project: ${project.name}`, quantity: 1, price: 0 }], { shouldValidate: true });
-        }
     }
   }
 

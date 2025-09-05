@@ -22,7 +22,7 @@ const TaskGeneratorOutputSchema = z.object({
     z.object({
         text: z.string().describe("A single, actionable task for a design project."),
     })
-  ).describe("A list of actionable tasks based on the project brief."),
+  ).max(5).describe("A list of 4-5 high-level, actionable tasks based on the project brief."),
 });
 export type TaskGeneratorOutput = z.infer<typeof TaskGeneratorOutputSchema>;
 
@@ -34,12 +34,18 @@ const prompt = ai.definePrompt({
   name: 'taskGeneratorPrompt',
   input: { schema: TaskGeneratorInputSchema },
   output: { schema: TaskGeneratorOutputSchema },
-  prompt: `You are an expert project manager for a design agency. Based on the following client brief, generate a list of actionable, bite-sized tasks required to complete the project. The tasks should cover the entire project lifecycle from research to final delivery.
+  prompt: `You are an expert project manager for a design agency. Based on the following client brief, generate a list of 4-5 high-level, main tasks required to complete the project. Do not break them down into sub-tasks. The tasks should represent major phases of a design project.
+
+For example:
+- Discovery & Research
+- Concept & Ideation
+- Design & Build
+- Final Review & Delivery
 
 Project Brief:
 {{{briefDescription}}}
 
-Generate a comprehensive list of tasks.`,
+Generate a list of 4-5 high-level tasks.`,
 });
 
 const taskGeneratorFlow = ai.defineFlow(
