@@ -21,7 +21,7 @@ function PortfolioCardContent({ item }: { item: PortfolioItem }) {
                         alt={`Portfolio piece for ${item.title}`}
                         width={600}
                         height={400}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
                     />
                     </div>
                     <div className="p-6 flex-grow">
@@ -50,8 +50,8 @@ export function PortfolioItemCard({ item }: { item: PortfolioItem }) {
             <PortfolioCardContent item={item} />
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-5xl w-full h-[90vh] bg-card/50 backdrop-blur-sm p-2 sm:p-4 flex flex-col">
-        <DialogHeader className="p-4 pb-0">
+      <DialogContent className="max-w-7xl w-[95vw] h-[95vh] bg-card/80 backdrop-blur-sm p-2 sm:p-4 flex flex-col">
+        <DialogHeader className="p-4 pb-2">
           <DialogTitle>{item.title}</DialogTitle>
           <DialogDescription>{item.description}</DialogDescription>
         </DialogHeader>
