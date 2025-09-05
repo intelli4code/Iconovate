@@ -105,7 +105,8 @@ export function SiteImagesManager() {
         const { error: uploadError } = await supabase.storage.from('data-storage').upload(imagePath, data.image);
         if (uploadError) throw uploadError;
 
-        const imageUrl = supabase.storage.from('data-storage').getPublicUrl(imagePath).data.publicUrl;
+        const { data: publicUrlData } = supabase.storage.from('data-storage').getPublicUrl(imagePath);
+        const imageUrl = publicUrlData.publicUrl;
 
         const contentDocRef = doc(db, "siteContent", "main");
         await updateDoc(contentDocRef, {
