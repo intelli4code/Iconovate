@@ -108,7 +108,8 @@ export function PortfolioManager() {
         if (uploadError) throw uploadError;
 
         imagePath = newImagePath;
-        imageUrl = supabase.storage.from('data-storage').getPublicUrl(newImagePath).data.publicUrl;
+        const { data: publicUrlData } = supabase.storage.from('data-storage').getPublicUrl(newImagePath);
+        imageUrl = publicUrlData.publicUrl;
         fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
 
       } else if (!editingItem) {
