@@ -1,12 +1,13 @@
 
 "use client";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import type { PortfolioItem } from "@/types";
 import { LoadingLink } from "../ui/loading-link";
 import { motion } from "framer-motion";
+import { DialogDescription } from "../ui/dialog";
 
 function PortfolioCardContent({ item }: { item: PortfolioItem }) {
     return (
@@ -49,8 +50,12 @@ export function PortfolioItemCard({ item }: { item: PortfolioItem }) {
             <PortfolioCardContent item={item} />
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-5xl w-full h-[90vh] bg-card/50 backdrop-blur-sm p-2 sm:p-4">
-        <div className="relative w-full h-full">
+      <DialogContent className="max-w-5xl w-full h-[90vh] bg-card/50 backdrop-blur-sm p-2 sm:p-4 flex flex-col">
+        <DialogHeader className="p-4 pb-0">
+          <DialogTitle>{item.title}</DialogTitle>
+          <DialogDescription>{item.description}</DialogDescription>
+        </DialogHeader>
+        <div className="relative w-full h-full flex-1">
             <Image
                 src={item.imageUrl}
                 alt={item.title}
