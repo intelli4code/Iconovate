@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { PortfolioItemCard } from "@/components/marketing/portfolio-item-card";
 import type { PortfolioItem } from "@/types";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
 const fadeIn = {
@@ -21,11 +21,6 @@ const staggerContainer = {
       staggerChildren: 0.1
     }
   }
-};
-
-const staggerItem = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
 };
 
 interface PortfolioPageContentProps {
@@ -73,9 +68,7 @@ export default function PortfolioPageContent({ allItems, featuredItems }: Portfo
               <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">Featured Work</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {featuredItems.map((item) => (
-                    <motion.div key={item.id} variants={staggerItem}>
-                        <PortfolioItemCard item={item} />
-                    </motion.div>
+                    <PortfolioItemCard key={item.id} item={item} />
                 ))}
               </div>
           </motion.section>
@@ -108,16 +101,21 @@ export default function PortfolioPageContent({ allItems, featuredItems }: Portfo
             ))}
         </motion.div>
 
-        <motion.div
-            variants={staggerContainer}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {filteredItems.map((item) => (
-            <motion.div key={item.id} variants={staggerItem}>
-               <PortfolioItemCard item={item} />
+        <AnimatePresence mode="wait">
+            <motion.div
+                key={activeCategory}
+                variants={staggerContainer}
+                initial="hidden"
+                animate="show"
+                exit="hidden"
+                className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
+              {filteredItems.map((item) => (
+                   <PortfolioItemCard key={item.id} item={item} />
+              ))}
             </motion.div>
-          ))}
-        </motion.div>
+        </AnimatePresence>
+
         {filteredItems.length === 0 && allItems.length > 0 && (
             <p className="text-center text-muted-foreground mt-16">No items found for this category.</p>
         )}

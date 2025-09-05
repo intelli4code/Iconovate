@@ -1,15 +1,19 @@
 
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import type { PortfolioItem } from "@/types";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-function PortfolioCardContent({ item }: { item: PortfolioItem }) {
+const staggerItem = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
 
+function PortfolioCardContent({ item }: { item: PortfolioItem }) {
     const ratioClasses = {
         '1:1': 'aspect-square',
         '16:9': 'aspect-video',
@@ -39,16 +43,18 @@ function PortfolioCardContent({ item }: { item: PortfolioItem }) {
 export function PortfolioItemCard({ item }: { item: PortfolioItem }) {
   if (item.fileType === 'pdf') {
       return (
-          <a href={item.imageUrl} target="_blank" rel="noopener noreferrer">
-              <PortfolioCardContent item={item} />
-          </a>
+          <motion.div variants={staggerItem} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+            <a href={item.imageUrl} target="_blank" rel="noopener noreferrer">
+                <PortfolioCardContent item={item} />
+            </a>
+          </motion.div>
       )
   }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <motion.div whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+        <motion.div variants={staggerItem} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
             <PortfolioCardContent item={item} />
         </motion.div>
       </DialogTrigger>
