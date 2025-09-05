@@ -7,7 +7,8 @@ import type { PortfolioItem } from "@/types";
 async function getPortfolioItems() {
     try {
         const allItemsQuery = query(collection(db, "portfolioItems"), orderBy("createdAt", "desc"));
-        const featuredItemsQuery = query(collection(db, "portfolioItems"), where("isFeatured", "==", true), orderBy("createdAt", "desc"));
+        // To fix the composite index error, we'll filter first, then sort in code.
+        const featuredItemsQuery = query(collection(db, "portfolioItems"), where("isFeatured", "==", true));
 
         const [allItemsSnapshot, featuredItemsSnapshot] = await Promise.all([
             getDocs(allItemsQuery),
@@ -20,11 +21,14 @@ async function getPortfolioItems() {
             createdAt: doc.data().createdAt.toDate().toISOString(),
         })) as PortfolioItem[];
 
-        const featuredItems = featuredItemsSnapshot.docs.map(doc => ({ 
+        const featuredItemsData = featuredItemsSnapshot.docs.map(doc => ({ 
             id: doc.id, 
             ...doc.data(),
             createdAt: doc.data().createdAt.toDate().toISOString(),
         })) as PortfolioItem[];
+
+        // Sort featured items by date descending in the code
+        const featuredItems = featuredItemsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         
         return { allItems, featuredItems };
     } catch (error) {
