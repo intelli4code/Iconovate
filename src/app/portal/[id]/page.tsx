@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState, type FormEvent, useEffect, useRef } from "react"
@@ -51,11 +52,11 @@ function ClientChat({ feedback, onNewMessage }: { feedback: FeedbackType[], onNe
                 throw new Error("File too large");
             }
             const filePath = `chat-uploads/${uuidv4()}-${selectedFile.name}`;
-            const { data, error: uploadError } = await supabase.storage.from('data-storage').upload(filePath, selectedFile);
+            const { data, error: uploadError } = await supabase.storage.from('main').upload(filePath, selectedFile);
 
             if (uploadError) throw uploadError;
 
-            const { data: publicUrlData } = supabase.storage.from('data-storage').getPublicUrl(data.path);
+            const { data: publicUrlData } = supabase.storage.from('main').getPublicUrl(data.path);
 
             const fileData = {
                 name: selectedFile.name,

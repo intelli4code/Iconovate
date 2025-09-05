@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -104,11 +105,11 @@ export function PortfolioManager() {
         if (!supabase) throw new Error("Supabase not configured for file uploads.");
         
         const newImagePath = `portfolio/${uuidv4()}-${file.name}`;
-        const { error: uploadError } = await supabase.storage.from('data-storage').upload(newImagePath, file);
+        const { error: uploadError } = await supabase.storage.from('main').upload(newImagePath, file);
         if (uploadError) throw uploadError;
 
         imagePath = newImagePath;
-        const { data: publicUrlData } = supabase.storage.from('data-storage').getPublicUrl(newImagePath);
+        const { data: publicUrlData } = supabase.storage.from('main').getPublicUrl(newImagePath);
         imageUrl = publicUrlData.publicUrl;
         fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
 
@@ -147,7 +148,7 @@ export function PortfolioManager() {
   const handleDelete = async (item: PortfolioItem) => {
     try {
       if (item.imagePath && supabase) {
-        await supabase.storage.from('data-storage').remove([item.imagePath]);
+        await supabase.storage.from('main').remove([item.imagePath]);
       }
       await deleteDoc(doc(db, "portfolioItems", item.id));
       toast({ title: "Item Deleted" });

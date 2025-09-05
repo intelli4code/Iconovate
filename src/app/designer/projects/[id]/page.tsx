@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState, useEffect, type FormEvent } from "react"
+import { useState, type FormEvent, useEffect } from "react"
 import { doc, onSnapshot, updateDoc, arrayUnion, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { supabase } from "@/lib/supabase"
@@ -285,10 +285,10 @@ export default function DesignerProjectPage() {
     setIsSubmitting(true);
     try {
         const filePath = `${project.id}/${uuidv4()}-${selectedFile.name}`;
-        const { data, error: uploadError } = await supabase.storage.from('data-storage').upload(filePath, selectedFile);
+        const { data, error: uploadError } = await supabase.storage.from('main').upload(filePath, selectedFile);
         if (uploadError) throw uploadError;
 
-        const { data: publicUrlData } = supabase.storage.from('data-storage').getPublicUrl(data.path);
+        const { data: publicUrlData } = supabase.storage.from('main').getPublicUrl(data.path);
 
         const newAsset: Asset = {
           id: uuidv4(),

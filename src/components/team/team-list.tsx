@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -117,13 +118,13 @@ export function TeamList() {
                 }
                 const filePath = `team-pfps/${uuidv4()}-${selectedFile.name}`;
                 const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('data-storage')
+                    .from('main')
                     .upload(filePath, selectedFile, { upsert: true });
 
                 if (uploadError) throw uploadError;
 
                 avatarPath = uploadData.path;
-                const { data: publicUrlData } = supabase.storage.from('data-storage').getPublicUrl(avatarPath);
+                const { data: publicUrlData } = supabase.storage.from('main').getPublicUrl(avatarPath);
                 avatarUrl = publicUrlData.publicUrl;
             }
 
@@ -180,7 +181,7 @@ export function TeamList() {
                  toast({ 
                     variant: "destructive", 
                     title: "Save Failed", 
-                    description: error.message || "An unexpected error occurred. Please check Supabase RLS policies for `data-storage` bucket." 
+                    description: error.message || "An unexpected error occurred. Please check Supabase RLS policies for `main` bucket." 
                 });
             }
         }
@@ -193,7 +194,7 @@ export function TeamList() {
                     toast({ variant: "destructive", title: "Storage Not Configured", description: "Avatar deletion is disabled."});
                     return;
                 }
-                await supabase.storage.from('data-storage').remove([member.avatarPath]);
+                await supabase.storage.from('main').remove([member.avatarPath]);
             }
             await deleteDoc(doc(db, "teamMembers", member.id));
             toast({ title: "Member Removed", description: `${member.name} has been removed from the team.` });

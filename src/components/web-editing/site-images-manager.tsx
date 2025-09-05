@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -99,13 +100,13 @@ export function SiteImagesManager() {
         
         // Delete old image if it exists
         if (editingImage.imagePath) {
-            await supabase.storage.from('data-storage').remove([editingImage.imagePath]);
+            await supabase.storage.from('main').remove([editingImage.imagePath]);
         }
 
-        const { error: uploadError } = await supabase.storage.from('data-storage').upload(imagePath, data.image);
+        const { error: uploadError } = await supabase.storage.from('main').upload(imagePath, data.image);
         if (uploadError) throw uploadError;
 
-        const { data: publicUrlData } = supabase.storage.from('data-storage').getPublicUrl(imagePath);
+        const { data: publicUrlData } = supabase.storage.from('main').getPublicUrl(imagePath);
         const imageUrl = publicUrlData.publicUrl;
 
         const contentDocRef = doc(db, "siteContent", "main");

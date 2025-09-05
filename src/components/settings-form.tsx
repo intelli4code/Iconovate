@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -130,13 +131,13 @@ export function SettingsForm() {
             }
             const filePath = `team-pfps/${uuidv4()}-${selectedFile.name}`;
             const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('data-storage')
+                .from('main')
                 .upload(filePath, selectedFile, { upsert: true });
 
             if (uploadError) throw uploadError;
 
             avatarPath = uploadData.path;
-            const { data: publicUrlData } = supabase.storage.from('data-storage').getPublicUrl(avatarPath);
+            const { data: publicUrlData } = supabase.storage.from('main').getPublicUrl(avatarPath);
             avatarUrl = publicUrlData.publicUrl;
         }
         

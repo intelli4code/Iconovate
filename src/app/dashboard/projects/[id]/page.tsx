@@ -99,7 +99,7 @@ export default function ProjectDetailPage() {
         const filePath = `${project.id}/${uuidv4()}-${selectedFile.name}`;
         
         const { data, error: uploadError } = await supabase.storage
-            .from('data-storage')
+            .from('main')
             .upload(filePath, selectedFile);
 
         if (uploadError) {
@@ -107,7 +107,7 @@ export default function ProjectDetailPage() {
         }
 
         const { data: publicUrlData } = supabase.storage
-            .from('data-storage')
+            .from('main')
             .getPublicUrl(data.path);
 
         const newAsset: Asset = {
@@ -136,7 +136,7 @@ export default function ProjectDetailPage() {
         toast({ 
             variant: "destructive", 
             title: "Upload Failed", 
-            description: error.message || "An unknown error occurred. Please check your Supabase bucket policies and ensure 'data-storage' exists and allows public uploads."
+            description: error.message || "An unknown error occurred. Please check your Supabase bucket policies and ensure 'main' exists and allows public uploads."
         });
     } finally {
         setIsSubmitting(false);
@@ -153,7 +153,7 @@ export default function ProjectDetailPage() {
     }
     try {
       // 1. Delete from Supabase Storage
-      const { error: storageError } = await supabase.storage.from('data-storage').remove([assetToDelete.path]);
+      const { error: storageError } = await supabase.storage.from('main').remove([assetToDelete.path]);
       if (storageError) {
         throw storageError;
       }
