@@ -9,6 +9,7 @@ export interface ContactMessage {
   message: string;
   selectedPackage?: string;
   createdAt: Timestamp;
+  status: 'New' | 'Contacted' | 'Converted' | 'Archived';
 }
 
 export interface Expense {

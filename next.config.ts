@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'onvurqhacnjbgajtbokn.supabase.co',
+        hostname: 'vfsduerelweqhhwggsxs.supabase.co',
         port: '',
         pathname: '/**',
       },

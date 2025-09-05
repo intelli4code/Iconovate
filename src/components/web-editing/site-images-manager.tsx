@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { db } from "@/lib/firebase";
 import { supabase } from "@/lib/supabase";
-import { doc, onSnapshot, updateDoc, setDoc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc, setDoc } from "firebase/firestore";
 import type { SiteImage } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -31,6 +31,7 @@ const initialImageSlots: SiteImage[] = [
     { id: 'homeHero', name: 'Homepage Hero Image', description: 'The main image on the homepage.', imageUrl: 'https://placehold.co/800x600.png', imagePath: '', imageHint: 'app dashboard screenshot' },
     { id: 'homeFeature', name: 'Homepage Feature Image', description: 'The image in the "Intelligent Design" section.', imageUrl: 'https://placehold.co/800x600.png', imagePath: '', imageHint: 'app interface design' },
     { id: 'aboutStory', name: 'About Us Story Image', description: 'The image next to the "Our Story" text.', imageUrl: 'https://placehold.co/600x700.png', imagePath: '', imageHint: 'professional man' },
+    { id: 'servicesProcess', name: 'Services Creative Process', description: 'The image in the "Creative Process" section on the services page.', imageUrl: 'https://placehold.co/600x400.png', imagePath: '', imageHint: 'design process flowchart' },
 ];
 
 export function SiteImagesManager() {
@@ -49,7 +50,7 @@ export function SiteImagesManager() {
     setLoading(true);
     const contentDocRef = doc(db, "siteContent", "main");
     const unsubscribe = onSnapshot(contentDocRef, async (docSnap) => {
-        if (docSnap.exists()) {
+        if (docSnap.exists() && docSnap.data().images) {
             setImages(docSnap.data().images || {});
         } else {
             // If the document doesn't exist, create it with initial data
@@ -57,7 +58,7 @@ export function SiteImagesManager() {
                 acc[img.id] = img;
                 return acc;
             }, {} as { [key: string]: SiteImage });
-            await setDoc(contentDocRef, { images: initialImagesObject });
+            await setDoc(contentDocRef, { images: initialImagesObject }, { merge: true });
             setImages(initialImagesObject);
         }
         setLoading(false);

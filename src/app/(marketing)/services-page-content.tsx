@@ -1,10 +1,11 @@
+
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, getDocs } from "firebase/firestore";
-import type { Service } from "@/types";
+import { collection, query, orderBy, getDocs, onSnapshot, doc } from "firebase/firestore";
+import type { Service, SiteImage } from "@/types";
 import * as LucideIcons from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -33,18 +34,27 @@ const staggerItem = {
 
 export default function ServicesPageContent() {
     const [services, setServices] = useState<Service[]>([]);
+    const [image, setImage] = useState<SiteImage | null>(null);
 
     useEffect(() => {
-        async function fetchServices() {
-            try {
-                const servicesQuery = query(collection(db, "services"), orderBy("order", "asc"));
-                const servicesSnapshot = await getDocs(servicesQuery);
-                setServices(servicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Service[]);
-            } catch (error) {
-                console.error("Failed to fetch services:", error);
+        const servicesQuery = query(collection(db, "services"), orderBy("order", "asc"));
+        const unsubscribeServices = onSnapshot(servicesQuery, (snapshot) => {
+            setServices(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Service[]);
+        }, (error) => {
+            console.error("Failed to fetch services:", error);
+        });
+        
+        const contentDocRef = doc(db, "siteContent", "main");
+        const unsubscribeContent = onSnapshot(contentDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                setImage(docSnap.data().images?.servicesProcess || null);
             }
+        });
+
+        return () => {
+            unsubscribeServices();
+            unsubscribeContent();
         }
-        fetchServices();
     }, []);
 
   return (
@@ -115,8 +125,8 @@ export default function ServicesPageContent() {
           </div>
           <div>
             <Image 
-              src="https://placehold.co/600x400.png"
-              data-ai-hint="design process flowchart"
+              src={image?.imageUrl || "https://placehold.co/600x400.png"}
+              data-ai-hint={image?.imageHint || "design process flowchart"}
               alt="Diagram of a creative process"
               width={600}
               height={400}

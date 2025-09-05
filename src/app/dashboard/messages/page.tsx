@@ -7,7 +7,7 @@ export default function MessagesPage() {
     <>
       <PageHeader
         title="Contact Messages"
-        description="View all messages submitted through your website's contact form."
+        description="View and manage messages submitted through your website's contact form."
       />
       <MessageList />
     </>
