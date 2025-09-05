@@ -166,10 +166,10 @@ export interface PortfolioItem {
   category: string;
   imageUrl: string;
   imagePath: string; // for supabase deletion
-  imageHint: string;
   description: string; // for the card
   content: string; // for the dialog, can be markdown/html
   fileType?: 'image' | 'pdf';
+  aspectRatio?: '1:1' | '16:9' | '9:16';
   createdAt: any;
 }
 

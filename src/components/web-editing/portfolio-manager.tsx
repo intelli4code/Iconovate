@@ -3,7 +3,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { db } from "@/lib/firebase";
@@ -13,7 +13,6 @@ import { v4 as uuidv4 } from "uuid";
 import type { PortfolioItem } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { motion } from "framer-motion";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -24,14 +23,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { PlusCircle, Trash2, Loader2, Edit, UploadCloud } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 const portfolioSchema = z.object({
   title: z.string().min(3, "Title is required"),
   category: z.string().min(3, "Category is required"),
   description: z.string().min(10, "Description is required"),
   content: z.string().min(20, "Content for the dialog is required"),
-  imageHint: z.string().optional(),
+  aspectRatio: z.enum(['1:1', '16:9', '9:16']).default('1:1'),
   image: z.any().optional(),
 });
 
@@ -47,7 +46,7 @@ export function PortfolioManager() {
   const [preview, setPreview] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<PortfolioFormValues>({
+  const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm<PortfolioFormValues>({
     resolver: zodResolver(portfolioSchema),
   });
   
@@ -75,12 +74,12 @@ export function PortfolioManager() {
         category: item.category,
         description: item.description,
         content: item.content,
-        imageHint: item.imageHint,
+        aspectRatio: item.aspectRatio || '1:1',
       });
       setPreview(item.imageUrl);
     } else {
       setEditingItem(null);
-      reset({ title: "", category: "", description: "", content: "", imageHint: "" });
+      reset({ title: "", category: "", description: "", content: "", aspectRatio: '1:1' });
       setPreview(null);
     }
     setIsDialogOpen(true);
@@ -130,7 +129,7 @@ export function PortfolioManager() {
         category: data.category,
         description: data.description,
         content: data.content,
-        imageHint: data.imageHint || "image",
+        aspectRatio: data.aspectRatio,
         imageUrl,
         imagePath,
         fileType,
@@ -204,11 +203,10 @@ export function PortfolioManager() {
                             <div className="relative aspect-[4/3] overflow-hidden">
                                 <Image
                                     src={item.imageUrl}
-                                    data-ai-hint={item.imageHint}
                                     alt={`Portfolio piece for ${item.title}`}
                                     width={600}
                                     height={400}
-                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                    className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
                                 />
                             </div>
                             <div className="p-4">
@@ -271,8 +269,28 @@ export function PortfolioManager() {
               </div>
               <div className="space-y-2">
                   <Label htmlFor="content">Full Content (for dialog)</Label>
-                  <Textarea id="content" {...register("content")} rows={6} />
+                  <Textarea id="content" {...register("content")} rows={3} />
                   {errors.content && <p className="text-sm text-destructive">{errors.content.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label>Aspect Ratio</Label>
+                <Controller
+                  name="aspectRatio"
+                  control={control}
+                  render={({ field }) => (
+                    <RadioGroup onValueChange={field.onChange} value={field.value} className="grid grid-cols-3 gap-2">
+                      <Label className="border cursor-pointer rounded-md p-2 flex items-center justify-center text-sm [&:has(:checked)]:bg-primary [&:has(:checked)]:text-primary-foreground">
+                        <RadioGroupItem value="1:1" className="sr-only" /> 1:1
+                      </Label>
+                      <Label className="border cursor-pointer rounded-md p-2 flex items-center justify-center text-sm [&:has(:checked)]:bg-primary [&:has(:checked)]:text-primary-foreground">
+                        <RadioGroupItem value="16:9" className="sr-only" /> 16:9
+                      </Label>
+                      <Label className="border cursor-pointer rounded-md p-2 flex items-center justify-center text-sm [&:has(:checked)]:bg-primary [&:has(:checked)]:text-primary-foreground">
+                        <RadioGroupItem value="9:16" className="sr-only" /> 9:16
+                      </Label>
+                    </RadioGroup>
+                  )}
+                />
               </div>
             </div>
              <div className="md:col-span-2 flex justify-end gap-2">
