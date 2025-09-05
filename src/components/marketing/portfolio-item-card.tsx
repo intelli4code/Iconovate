@@ -17,24 +17,22 @@ function PortfolioCardContent({ item }: { item: PortfolioItem }) {
     };
 
     return (
-        <motion.div key={item.id} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
-            <Card className="overflow-hidden group bg-card/50 border-border/50 cursor-pointer h-full">
-                <CardContent className="p-0 flex flex-col h-full">
-                    <div className={cn("relative w-full overflow-hidden", ratioClasses[item.aspectRatio || '1:1'])}>
-                        <Image
-                            src={item.imageUrl}
-                            alt={`Portfolio piece for ${item.title}`}
-                            fill
-                            className="object-contain transition-transform duration-300 group-hover:scale-105"
-                        />
-                    </div>
-                    <div className="p-6 flex-grow">
-                        <p className="text-sm text-primary font-semibold">{item.category}</p>
-                        <h3 className="mt-1 text-xl font-bold">{item.title}</h3>
-                    </div>
-                </CardContent>
-            </Card>
-        </motion.div>
+        <Card className="overflow-hidden group bg-card/50 border-border/50 cursor-pointer h-full">
+            <CardContent className="p-0 flex flex-col h-full">
+                <div className={cn("relative w-full overflow-hidden", ratioClasses[item.aspectRatio || '1:1'])}>
+                    <Image
+                        src={item.imageUrl}
+                        alt={`Portfolio piece for ${item.title}`}
+                        fill
+                        className="object-contain transition-transform duration-300 group-hover:scale-105"
+                    />
+                </div>
+                <div className="p-6 flex-grow">
+                    <p className="text-sm text-primary font-semibold">{item.category}</p>
+                    <h3 className="mt-1 text-xl font-bold">{item.title}</h3>
+                </div>
+            </CardContent>
+        </Card>
     );
 }
 
@@ -50,9 +48,9 @@ export function PortfolioItemCard({ item }: { item: PortfolioItem }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <div>
+        <motion.div whileHover={{ y: -5, transition: { duration: 0.2 } }}>
             <PortfolioCardContent item={item} />
-        </div>
+        </motion.div>
       </DialogTrigger>
       <DialogContent className="max-w-7xl w-[95vw] h-[95vh] bg-card/80 backdrop-blur-sm p-2 sm:p-4 flex flex-col">
         <DialogHeader className="p-4 pb-2">

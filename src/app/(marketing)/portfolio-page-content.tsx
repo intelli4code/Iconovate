@@ -108,13 +108,16 @@ export default function PortfolioPageContent({ allItems, featuredItems }: Portfo
             ))}
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div
+            variants={staggerContainer}
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
           {filteredItems.map((item) => (
             <motion.div key={item.id} variants={staggerItem}>
                <PortfolioItemCard item={item} />
             </motion.div>
           ))}
-        </div>
+        </motion.div>
         {filteredItems.length === 0 && allItems.length > 0 && (
             <p className="text-center text-muted-foreground mt-16">No items found for this category.</p>
         )}
