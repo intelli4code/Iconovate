@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import type { PortfolioItem } from "@/types";
@@ -17,7 +17,7 @@ function PortfolioCardContent({ item }: { item: PortfolioItem }) {
     };
 
     return (
-        <motion.div whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+        <motion.div key={item.id} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
             <Card className="overflow-hidden group bg-card/50 border-border/50 cursor-pointer h-full">
                 <CardContent className="p-0 flex flex-col h-full">
                     <div className={cn("relative w-full overflow-hidden", ratioClasses[item.aspectRatio || '1:1'])}>
