@@ -52,11 +52,3 @@ export function FooterContent({ footerData }: { footerData: FooterContentType | 
         </div>
     )
 }
-
-export function MarketingFooter() {
-  return (
-    <footer className="border-t border-border/50">
-      {/* Content is now passed in via layout */}
-    </footer>
-  );
-}
