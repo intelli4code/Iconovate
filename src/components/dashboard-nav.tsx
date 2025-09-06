@@ -15,7 +15,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail, FileText, Megaphone, SearchCode, ReceiptText, Brush, ClipboardCheck, UsersRound, CalendarClock, CreditCard, Download, Upload, CalendarCheck, LayoutTemplate, MessageSquare, Lightbulb } from "lucide-react"
+import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail, FileText, Megaphone, SearchCode, ReceiptText, Brush, ClipboardCheck, UsersRound, CalendarClock, CreditCard, Download, Upload, CalendarCheck, LayoutTemplate, MessageSquare, Lightbulb, Repeat } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -47,6 +47,14 @@ export function DashboardNav() {
               <LoadingLink href="/dashboard/projects">
                 <FolderKanban />
                 <span>Projects</span>
+              </LoadingLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+           <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/dashboard/returning-orders")}>
+              <LoadingLink href="/dashboard/returning-orders">
+                <Repeat />
+                <span>Returning Orders</span>
               </LoadingLink>
             </SidebarMenuButton>
           </SidebarMenuItem>

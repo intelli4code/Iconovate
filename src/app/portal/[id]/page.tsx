@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2, ReceiptText, CreditCard, Send, ShieldCheck, Rocket } from "lucide-react"
+import { Download, MessageSquare, CheckCircle, Clock, Info, Paperclip, RefreshCw, AlertTriangle, XCircle, Star, Mail, FileText, Upload, Link2, Loader2, ReceiptText, CreditCard, Send, ShieldCheck, Rocket, Plus } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -264,10 +264,12 @@ export default function ClientPortalPage() {
   const [newTask, setNewTask] = useState("");
   const [briefDescription, setBriefDescription] = useState("");
   const [briefLinks, setBriefLinks] = useState("");
+  const [newProjectBrief, setNewProjectBrief] = useState("");
   const [revisionDetails, setRevisionDetails] = useState("");
   const { toast } = useToast();
   
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -482,6 +484,28 @@ export default function ClientPortalPage() {
     });
   };
 
+  const handleNewProjectRequest = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!newProjectBrief.trim()) {
+        toast({ variant: "destructive", title: "Brief cannot be empty." });
+        return;
+    }
+    try {
+        await addDoc(collection(db, "projectRequests"), {
+            clientName: project.client,
+            clientEmail: project.clientEmail || "",
+            brief: newProjectBrief.trim(),
+            status: 'Pending',
+            requestedAt: serverTimestamp()
+        });
+        toast({ title: "New Project Requested!", description: "We have received your request and will get back to you shortly." });
+        setNewProjectBrief("");
+        setIsNewProjectDialogOpen(false);
+    } catch (error) {
+        toast({ variant: "destructive", title: "Request Failed" });
+    }
+  };
+
   const handlePaymentRequestSubmit = async () => {
     if (!project || !selectedInvoice || !paymentReference.trim()) {
         toast({ variant: "destructive", title: "Missing Information", description: "Please provide a reference."});
@@ -523,16 +547,53 @@ export default function ClientPortalPage() {
   const canRequestRevision = revisionsRemaining > 0 && !isFinalState && project.status !== 'Revision Requested';
   const canCompleteProject = project.assets && project.assets.length > 0 && !isFinalState && project.paymentStatus === 'Paid';
   const defaultTab = project.status === 'Awaiting Brief' ? 'brief' : 'deliverables';
+  const canRequestNewProject = project.status !== 'Awaiting Brief';
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="bg-card border-b">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <LoadingLink href="/" className="flex items-center gap-2">
-            <Rocket className="w-6 h-6 text-primary" />
-            <h1 className="text-xl font-bold font-headline text-primary">BrandBoost AI</h1>
-          </LoadingLink>
-          <h2 className="text-muted-foreground text-sm hidden sm:block">Client Portal for: {project.name}</h2>
+            <div className="flex items-center gap-4">
+                <LoadingLink href="/" className="flex items-center gap-2">
+                    <Rocket className="w-6 h-6 text-primary" />
+                    <h1 className="text-xl font-bold font-headline text-primary">BrandBoost AI</h1>
+                </LoadingLink>
+                <h2 className="text-muted-foreground text-sm hidden sm:block">Client Portal for: {project.name}</h2>
+            </div>
+            {canRequestNewProject && (
+                 <Dialog open={isNewProjectDialogOpen} onOpenChange={setIsNewProjectDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4"/>
+                            Request New Project
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Request a New Project</DialogTitle>
+                            <DialogDescription>
+                                We're excited to work with you again! Please provide a brief for your new project.
+                            </DialogDescription>
+                        </DialogHeader>
+                         <form onSubmit={handleNewProjectRequest} className="space-y-4">
+                            <div>
+                                <Label htmlFor="new-project-brief">Project Brief</Label>
+                                <Textarea 
+                                    id="new-project-brief" 
+                                    rows={8}
+                                    value={newProjectBrief}
+                                    onChange={(e) => setNewProjectBrief(e.target.value)}
+                                    placeholder="Describe your new project, goals, and any initial ideas."
+                                />
+                            </div>
+                            <DialogFooter>
+                                <Button type="button" variant="ghost" onClick={() => setIsNewProjectDialogOpen(false)}>Cancel</Button>
+                                <Button type="submit">Submit Request</Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
       </header>
 

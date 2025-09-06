@@ -1,4 +1,5 @@
 
+
 import { Timestamp } from "firebase/firestore";
 
 export interface ContactMessage {
@@ -17,6 +18,15 @@ export interface Expense {
   description: string;
   amount: number;
   date: string;
+}
+
+export interface ProjectRequest {
+  id: string;
+  clientName: string;
+  clientEmail: string;
+  brief: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  requestedAt: any; // serverTimestamp
 }
 
 export type PaymentStatus = 'Pending' | 'Approved' | 'Rejected';
