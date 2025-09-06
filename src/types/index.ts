@@ -5,11 +5,14 @@ export interface ContactMessage {
   id: string;
   name: string;
   email: string;
-  subject: string;
-  message: string;
-  selectedPackage?: string;
+  service: string;
+  description: string;
+  duration: string;
+  budget: string;
+  sourceFiles: string;
+  revisions: number;
   createdAt: Timestamp;
-  status: 'New' | 'Contacted' | 'Converted' | 'Archived';
+  status: 'New' | 'Contacted' | 'Converted' | 'Archived' | 'Declined';
 }
 
 export interface Expense {
@@ -199,6 +202,7 @@ export interface Service {
   icon: string; // lucide icon name
   title: string;
   description: string;
+  deliverables?: string[];
   order: number;
 }
 

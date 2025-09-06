@@ -13,7 +13,7 @@ import { Mail, Phone, MapPin, Loader2, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { saveContactMessage } from "@/ai/flows/save-contact-message";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import type { SaveContactMessageInput } from "@/types/contact-form";
 import { SaveContactMessageInputSchema } from "@/types/contact-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -36,7 +36,7 @@ export default function ContactPageContent() {
   const { register, handleSubmit, reset, setValue, control, formState: { errors, isSubmitting } } = useForm<SaveContactMessageInput>({
     resolver: zodResolver(SaveContactMessageInputSchema),
     defaultValues: {
-      selectedPackage: selectedPackage || ""
+      service: selectedPackage || ""
     }
   });
   
@@ -49,7 +49,7 @@ export default function ContactPageContent() {
   }, []);
 
   useEffect(() => {
-    setValue('selectedPackage', selectedPackage || "");
+    setValue('service', selectedPackage || "");
   }, [selectedPackage, setValue]);
 
   const onSubmit: SubmitHandler<SaveContactMessageInput> = async (data) => {
@@ -125,11 +125,10 @@ export default function ContactPageContent() {
                   {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
                 </div>
               </div>
-
-               <div className="space-y-2">
+                <div className="space-y-2">
                 <Label>Service of Interest</Label>
                 <Controller
-                  name="selectedPackage"
+                  name="service"
                   control={control}
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} defaultValue={field.value || selectedPackage || ""}>
@@ -137,30 +136,48 @@ export default function ContactPageContent() {
                         <SelectValue placeholder="Select a service..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="General Inquiry">General Inquiry</SelectItem>
-                        <SelectItem value="Logo Design">Logo Design</SelectItem>
-                        <SelectItem value="Thumbnail Design">Thumbnail Design</SelectItem>
-                        <SelectItem value="Stationery Design">Stationery Design</SelectItem>
-                        <SelectItem value="Brand Strategy Session">Brand Strategy Session</SelectItem>
-                        <SelectItem value="Social Media Post Design">Social Media Post Design</SelectItem>
-                        <SelectItem value="Social Media Profile Kit">Social Media Profile Kit</SelectItem>
-                        <SelectItem value="Pitch Deck Design">Pitch Deck Design</SelectItem>
+                        {services.map(service => (
+                            <SelectItem key={service.id} value={service.title}>{service.title}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   )}
                 />
+                 {errors.service && <p className="text-sm text-destructive">{errors.service.message}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="subject">Subject</Label>
-                <Input id="subject" placeholder="e.g., Website Redesign Project" {...register("subject")} />
-                 {errors.subject && <p className="text-sm text-destructive">{errors.subject.message}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="message">Your Message</Label>
-                <Textarea id="message" rows={6} placeholder="Tell us about your project, goals, and timeline." {...register("message")} />
-                 {errors.message && <p className="text-sm text-destructive">{errors.message.message}</p>}
-              </div>
+                <div className="space-y-2">
+                    <Label htmlFor="description">Project Description</Label>
+                    <Textarea id="description" {...register("description")} placeholder="Tell us about your project, goals, and target audience." />
+                    {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
+                </div>
+                
+                 <div className="grid sm:grid-cols-2 gap-6">
+                     <div className="space-y-2">
+                        <Label htmlFor="duration">Expected Duration</Label>
+                        <Input id="duration" {...register("duration")} placeholder="e.g., 2-4 Weeks" />
+                        {errors.duration && <p className="text-sm text-destructive">{errors.duration.message}</p>}
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="budget">Budget Range</Label>
+                        <Input id="budget" {...register("budget")} placeholder="e.g., $500 - $1000" />
+                        {errors.budget && <p className="text-sm text-destructive">{errors.budget.message}</p>}
+                    </div>
+                 </div>
+
+                 <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="sourceFiles">Required Source Files</Label>
+                        <Input id="sourceFiles" {...register("sourceFiles")} placeholder="e.g., Figma, Adobe Illustrator" />
+                        {errors.sourceFiles && <p className="text-sm text-destructive">{errors.sourceFiles.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="revisions">Expected Revisions</Label>
+                        <Input id="revisions" type="number" {...register("revisions")} placeholder="e.g., 3" />
+                         {errors.revisions && <p className="text-sm text-destructive">{errors.revisions.message}</p>}
+                    </div>
+                 </div>
+
               <Button type="submit" className="w-full rounded-full" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Send Message"}
               </Button>

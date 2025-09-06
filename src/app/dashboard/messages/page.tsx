@@ -1,15 +1,16 @@
 
-import { MessageList } from "@/components/messages/message-list";
+
+import { ProjectIntakeList } from "@/components/messages/project-intake-list";
 import { PageHeader } from "@/components/page-header";
 
-export default function MessagesPage() {
+export default function ProjectIntakePage() {
   return (
     <>
       <PageHeader
-        title="Contact Messages"
-        description="View and manage messages submitted through your website's contact form."
+        title="Project Intake"
+        description="View and manage new project requests from your contact form."
       />
-      <MessageList />
+      <ProjectIntakeList />
     </>
   );
 }

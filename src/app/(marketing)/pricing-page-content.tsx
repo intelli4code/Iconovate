@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, Star, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -147,7 +147,7 @@ export default function PricingPageContent() {
         </div>
       </motion.section>
       
-       {/* Short-term packages */}
+       {/* Mini Projects */}
       <motion.section
         initial="hidden"
         whileInView="show"
@@ -155,7 +155,7 @@ export default function PricingPageContent() {
         variants={staggerContainer}
         className="container mx-auto px-4 mt-24 text-center"
       >
-        <motion.h2 variants={staggerItem} className="text-3xl font-bold">À La Carte Services</motion.h2>
+        <motion.h2 variants={staggerItem} className="text-3xl font-bold">Mini Projects</motion.h2>
         <motion.p variants={staggerItem} className="mt-2 text-muted-foreground max-w-xl mx-auto">
           Need something specific? We offer a range of individual services to meet your immediate design needs.
         </motion.p>
@@ -164,15 +164,34 @@ export default function PricingPageContent() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.2 }}
-            className="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+            className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {services.map((service) => {
             const Icon = (LucideIcons as any)[service.icon] || LucideIcons.HelpCircle;
             return (
               <motion.div key={service.id} variants={staggerItem}>
-                <Card className="h-full bg-card/50 text-center flex flex-col items-center justify-center p-6">
-                    <Icon className="h-8 w-8 text-primary mb-3" />
-                    <h3 className="font-semibold">{service.title}</h3>
+                <Card className="h-full bg-card/50 text-left flex flex-col">
+                    <CardHeader className="flex-row items-center gap-4">
+                         <Icon className="h-10 w-10 text-primary flex-shrink-0" />
+                         <CardTitle>{service.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                        <ul className="space-y-2 text-sm text-muted-foreground">
+                            {service.deliverables?.map((item, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                <Check className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                                <span>{item}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </CardContent>
+                    <CardFooter>
+                         <Button asChild className="w-full">
+                            <LoadingLink href={`/contact?plan=${service.title}`}>
+                                Order Now
+                            </LoadingLink>
+                        </Button>
+                    </CardFooter>
                 </Card>
               </motion.div>
             )

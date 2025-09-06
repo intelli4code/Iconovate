@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -61,7 +62,7 @@ export function MarketingHeader() {
         <div className="flex items-center space-x-6">
           <LoadingLink href="/" className="flex items-center space-x-2">
             <Rocket className="h-6 w-6 text-primary" />
-            <span className="hidden font-bold sm:inline-block">WiseVids</span>
+            <span className="hidden font-bold sm:inline-block">BrandBoost AI</span>
           </LoadingLink>
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
             <NavItems />
@@ -77,7 +78,7 @@ export function MarketingHeader() {
             <LoadingLink href="/client-login">Client Portal</LoadingLink>
           </Button>
           <Button asChild className="rounded-full">
-            <LoadingLink href="/dashboard/projects">Start Project</LoadingLink>
+            <LoadingLink href="/contact">Start Project</LoadingLink>
           </Button>
           <div className="hidden sm:flex">
             <ThemeToggle />
@@ -100,7 +101,7 @@ export function MarketingHeader() {
             <SheetContent side="left" className="pr-0">
               <LoadingLink href="/" className="flex items-center space-x-2">
                 <Rocket className="h-6 w-6 text-primary" />
-                <span className="font-bold">WiseVids</span>
+                <span className="font-bold">BrandBoost AI</span>
               </LoadingLink>
               <div className="my-4 h-px w-full bg-border" />
               <div className="flex flex-col space-y-4">
@@ -115,7 +116,7 @@ export function MarketingHeader() {
                     <LoadingLink href="/client-login">Client Portal</LoadingLink>
                   </Button>
                   <Button asChild>
-                    <LoadingLink href="/dashboard/projects">
+                    <LoadingLink href="/contact">
                       Start Project
                     </LoadingLink>
                   </Button>

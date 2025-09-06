@@ -24,17 +24,19 @@ const serviceSchema = z.object({
   title: z.string().min(3, "Title is required"),
   description: z.string().min(10, "Description is required"),
   icon: z.string().min(1, "An icon name from lucide-react is required"),
+  deliverables: z.string().optional(),
 });
 
 type ServiceFormValues = z.infer<typeof serviceSchema>;
 
 const initialServices: Omit<Service, 'id'>[] = [
-    { title: "Logo & Brand Identity", description: "Craft a memorable brand with a unique logo, color palette, and typography that tells your story.", icon: 'Palette', order: 1 },
-    { title: "Web & UI/UX Design", description: "Create intuitive, beautiful, and user-friendly websites and applications that convert.", icon: 'PenTool', order: 2 },
-    { title: "AI-Powered Brand Research", description: "Leverage AI for deep market insights, competitor analysis, and strategic brand positioning.", icon: 'BrainCircuit', order: 3 },
-    { title: "Marketing Materials", description: "Design compelling brochures, flyers, social media graphics, and presentations that capture attention.", icon: 'Megaphone', order: 4 },
-    { title: "Packaging Design", description: "Develop eye-catching packaging that stands out on the shelves and reflects your brand's quality.", icon: 'Box', order: 5 },
-    { title: "Presentation Design", description: "Transform your ideas into stunning presentations that captivate and persuade your audience.", icon: 'Presentation', order: 6 },
+    { title: "Logo Design", description: "A single, professional logo concept.", icon: 'Palette', deliverables: ["1 Logo Concept", "High-Resolution Files", "Vector Source File"], order: 1 },
+    { title: "Thumbnail Design", description: "Eye-catching thumbnails for your content.", icon: 'Image', deliverables: ["3 Thumbnail Designs", "JPG/PNG format", "2 Revisions"], order: 2 },
+    { title: "Stationery Design", description: "Business cards, letterheads, and envelopes.", icon: 'Contact', deliverables: ["Business Card Design", "Letterhead Design", "2 Revisions"], order: 3 },
+    { title: "Brand Strategy Session", description: "A one-hour consultation to define your brand.", icon: 'BrainCircuit', deliverables: ["1-Hour Workshop", "Strategy Document", "Actionable Plan"], order: 4 },
+    { title: "Social Media Post Design", description: "A single, engaging social media post design.", icon: 'Megaphone', deliverables: ["1 Post Design", "Sized for 1 Platform", "Source File Included"], order: 5 },
+    { title: "Social Media Profile Kit", description: "Profile picture and banner for one platform.", icon: 'Share2', deliverables: ["Profile Picture", "Banner Image", "2 Revisions"], order: 6 },
+    { title: "Pitch Deck Design", description: "A professional pitch deck to wow investors.", icon: 'Presentation', deliverables: ["Up to 10 Slides", "Custom Branded Theme", "Source File Included"], order: 7 },
 ];
 
 export function ServicesManager() {
@@ -56,14 +58,12 @@ export function ServicesManager() {
     const q = query(collection(db, "services"), orderBy("order", "asc"));
     const unsubscribe = onSnapshot(q, async (snapshot) => {
         if (snapshot.empty) {
-            // Seed the database if it's empty
             const batch = writeBatch(db);
             initialServices.forEach(service => {
                 const docRef = doc(collection(db, "services"));
                 batch.set(docRef, service);
             });
             await batch.commit();
-            // The listener will pick up the new data automatically.
         } else {
             setServices(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service)));
         }
@@ -78,10 +78,10 @@ export function ServicesManager() {
   const handleOpenDialog = (service: Service | null = null) => {
     if (service) {
       setEditingService(service);
-      reset({ title: service.title, description: service.description, icon: service.icon });
+      reset({ title: service.title, description: service.description, icon: service.icon, deliverables: service.deliverables?.join('\n') });
     } else {
       setEditingService(null);
-      reset({ title: "", description: "", icon: "" });
+      reset({ title: "", description: "", icon: "", deliverables: "" });
     }
     setIsDialogOpen(true);
   };
@@ -91,12 +91,16 @@ export function ServicesManager() {
         toast({ variant: "destructive", title: "Invalid Icon", description: "Please provide a valid icon name from the Lucide React library." });
         return;
     }
+    const serviceData = {
+        ...data,
+        deliverables: data.deliverables?.split('\n').filter(d => d.trim()) || [],
+    }
     try {
       if (editingService) {
-        await updateDoc(doc(db, "services", editingService.id), data);
+        await updateDoc(doc(db, "services", editingService.id), serviceData);
         toast({ title: "Service Updated" });
       } else {
-        await addDoc(collection(db, "services"), { ...data, order: services.length + 1 });
+        await addDoc(collection(db, "services"), { ...serviceData, order: services.length + 1 });
         toast({ title: "Service Added" });
       }
       setIsDialogOpen(false);
@@ -131,7 +135,7 @@ export function ServicesManager() {
             return (
               <Card key={service.id}>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
                       <Icon className="h-8 w-8 text-primary" />
                       <CardTitle>{service.title}</CardTitle>
@@ -173,6 +177,10 @@ export function ServicesManager() {
               <Label htmlFor="description">Description</Label>
               <Textarea id="description" {...register("description")} />
               {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
+            </div>
+             <div className="space-y-2">
+              <Label htmlFor="deliverables">Deliverables (one per line)</Label>
+              <Textarea id="deliverables" {...register("deliverables")} rows={4}/>
             </div>
             <div className="space-y-2">
               <Label htmlFor="icon">Icon Name</Label>
