@@ -1,11 +1,12 @@
 
+
 "use client" // Add use client for state and hooks
 
 import * as React from "react" // Import React
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
-import { LogIn, Search } from "lucide-react"
+import { LogIn, Search, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LoadingLink } from "@/components/ui/loading-link"
 import { GlobalSearch } from "@/components/global-search"
