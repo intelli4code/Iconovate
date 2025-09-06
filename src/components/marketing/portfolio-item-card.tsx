@@ -28,7 +28,7 @@ function PortfolioCardContent({ item }: { item: PortfolioItem }) {
                         src={item.imageUrl}
                         alt={`Portfolio piece for ${item.title}`}
                         fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="object-contain transition-transform duration-300 group-hover:scale-105"
                     />
                 </div>
                 <div className="p-6 flex-grow">

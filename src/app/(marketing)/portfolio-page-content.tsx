@@ -66,11 +66,11 @@ export default function PortfolioPageContent({ allItems, featuredItems }: Portfo
             className="mt-20"
           >
               <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">Featured Work</h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="columns-2 md:columns-3 gap-8 space-y-8">
                 {featuredItems.map((item) => (
-                  <motion.div key={item.id} variants={fadeIn}>
+                  <div key={item.id} className="break-inside-avoid">
                     <PortfolioItemCard item={item} />
-                  </motion.div>
+                  </div>
                 ))}
               </div>
           </motion.section>
@@ -110,10 +110,12 @@ export default function PortfolioPageContent({ allItems, featuredItems }: Portfo
                 initial="hidden"
                 animate="show"
                 exit="hidden"
-                className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                className="columns-2 md:columns-3 gap-8 space-y-8"
             >
               {filteredItems.map((item) => (
-                   <PortfolioItemCard key={item.id} item={item} />
+                   <div key={item.id} className="break-inside-avoid">
+                      <PortfolioItemCard item={item} />
+                   </div>
               ))}
             </motion.div>
         </AnimatePresence>
