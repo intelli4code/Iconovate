@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import * as React from "react"
@@ -6,7 +7,6 @@ import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } fro
 import { db } from "@/lib/firebase"
 import { LoadingLink } from "@/components/ui/loading-link"
 import { format } from 'date-fns'
-import { sendInvoiceReminder } from '@/app/actions/send-reminder-action';
 import { sendInvoiceByEmail } from '@/app/actions/send-invoice-action';
 
 import type { Invoice, InvoiceStatus } from "@/types"
@@ -23,7 +23,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Loader2, PlusCircle, CheckCircle, Clock, Send, Mail } from "lucide-react"
+import { MoreHorizontal, Loader2, PlusCircle, CheckCircle, Clock, Send, Mail, Edit } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog"
 
 const statusStyles: { [key in InvoiceStatus]: string } = {
@@ -96,12 +96,12 @@ export function InvoiceList() {
 
   const handleSendEmail = async (invoice: Invoice) => {
     setIsSending(invoice.id);
-    let result;
-    if (invoice.status === 'Overdue') {
-        result = await sendInvoiceReminder(invoice);
-    } else {
-        result = await sendInvoiceByEmail(invoice);
+    // If the invoice is a draft, update its status to 'Sent' first.
+    if (invoice.status === 'Draft') {
+      await updateDoc(doc(db, "invoices", invoice.id), { status: 'Sent' });
     }
+    
+    const result = await sendInvoiceByEmail(invoice);
     
     if (result.success) {
       toast({
@@ -187,8 +187,11 @@ export function InvoiceList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onSelect={() => alert("Edit functionality coming soon!")}>
+                           <Edit className="mr-2 h-4 w-4"/> Edit Invoice
+                        </DropdownMenuItem>
                         <DropdownMenuItem onSelect={() => handleSendEmail(invoice)} disabled={isSending === invoice.id}>
-                            <Mail className="mr-2 h-4 w-4"/> {invoice.status === 'Overdue' ? 'Send Reminder Email' : 'Send as Email'}
+                            <Mail className="mr-2 h-4 w-4"/> Send as Email
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onSelect={() => handleUpdateStatus(invoice.id, 'Paid')} disabled={invoice.status === 'Paid'}>

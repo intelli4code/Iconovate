@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -8,7 +9,7 @@ import { z } from 'zod';
 import { generateInvoiceData, type InvoiceGeneratorOutput } from '@/ai/flows/invoice-generator';
 import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Project, Invoice, InvoiceStatus, Notification } from '@/types';
+import type { Project, Invoice, InvoiceStatus, Notification, Expense } from '@/types';
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import html2canvas from 'html2canvas';
@@ -121,6 +122,19 @@ export function InvoiceGeneratorForm() {
     if (project) {
         setValue('projectId', project.id, { shouldValidate: true });
         setValue('projectName', project.name, { shouldValidate: true });
+        
+        // Auto-fill line items with project expenses
+        const expenseLineItems = project.expenses?.map((exp: Expense) => ({
+            description: exp.description,
+            quantity: 1,
+            price: exp.amount
+        })) || [];
+        
+        if (expenseLineItems.length > 0) {
+            setValue('lineItems', expenseLineItems, { shouldValidate: true });
+        } else {
+            setValue('lineItems', [{ description: "", quantity: 1, price: 0 }], { shouldValidate: true });
+        }
     }
   }
 
