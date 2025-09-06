@@ -93,9 +93,19 @@ export default function ServicesPageContent() {
                   <CardHeader>
                     <div className="mb-4"><Icon className="h-8 w-8 text-primary" /></div>
                     <CardTitle>{service.title}</CardTitle>
+                    <CardDescription>{service.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <CardDescription>{service.description}</CardDescription>
+                    {service.deliverables && service.deliverables.length > 0 && (
+                        <ul className="space-y-2 text-sm text-muted-foreground">
+                            {service.deliverables.map((item, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                <Check className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                                <span>{item}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -138,3 +148,5 @@ export default function ServicesPageContent() {
     </motion.div>
   );
 }
+
+  

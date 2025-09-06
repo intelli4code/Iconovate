@@ -173,10 +173,12 @@ export default function PricingPageContent() {
                 <Card className="h-full bg-card/50 text-left flex flex-col">
                     <CardHeader className="flex-row items-center gap-4">
                          <Icon className="h-10 w-10 text-primary flex-shrink-0" />
-                         <CardTitle>{service.title}</CardTitle>
+                         <div>
+                            <CardTitle>{service.title}</CardTitle>
+                            <CardDescription className="mt-1">{service.description}</CardDescription>
+                         </div>
                     </CardHeader>
                     <CardContent className="flex-grow">
-                        <p className="text-sm text-muted-foreground mb-4">{service.description}</p>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             {service.deliverables?.map((item, index) => (
                                 <li key={index} className="flex items-start gap-2">
@@ -257,3 +259,5 @@ export default function PricingPageContent() {
     </motion.div>
   );
 }
+
+  
