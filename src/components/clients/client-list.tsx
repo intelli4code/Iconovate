@@ -36,6 +36,7 @@ import { Badge } from "../ui/badge"
 interface Client {
   name: string;
   avatar: string;
+  email: string;
   projectCount: number;
   activeProjects: number;
   completedProjects: number;
@@ -77,6 +78,7 @@ export function ClientList() {
                     clientMap.set(project.client, {
                         name: project.client,
                         avatar: '', // Placeholder
+                        email: project.clientEmail || 'No email provided',
                         projectCount: 0,
                         activeProjects: 0,
                         completedProjects: 0,
@@ -89,6 +91,9 @@ export function ClientList() {
                 const clientData = clientMap.get(project.client)!;
                 clientData.projectCount++;
                 clientData.projects.push(project);
+                if (project.clientEmail && clientData.email === 'No email provided') {
+                    clientData.email = project.clientEmail;
+                }
 
                 if (project.status === 'Completed') {
                     clientData.completedProjects++;
@@ -157,7 +162,7 @@ export function ClientList() {
                 <div className="flex items-start justify-between">
                     <div>
                         <CardTitle>{client.name}</CardTitle>
-                        <CardDescription>{client.projectCount} Projects</CardDescription>
+                        <CardDescription>{client.email}</CardDescription>
                     </div>
                     <Avatar>
                         <AvatarFallback>{client.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
@@ -187,7 +192,7 @@ export function ClientList() {
         <DialogContent className="max-w-3xl">
             <DialogHeader>
                 <DialogTitle>{selectedClient?.name}</DialogTitle>
-                <DialogDescription>A complete overview of the client's history.</DialogDescription>
+                <DialogDescription>{selectedClient?.email}</DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-3 gap-4 py-4 text-center">
                 <div className="p-4 bg-muted rounded-lg">
