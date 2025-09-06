@@ -36,7 +36,7 @@ const staggerItem = {
 };
 
 export default function PricingPageContent() {
-  const [pageData, setPageData<{
+  const [pageData, setPageData] = useState<{
     pricingTiers: PricingTier[];
     testimonials: Testimonial[];
     services: Service[];
