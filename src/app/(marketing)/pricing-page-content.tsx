@@ -36,7 +36,7 @@ const staggerItem = {
 };
 
 export default function PricingPageContent() {
-  const [pageData, setPageData] = useState<{
+  const [pageData, setPageData<{
     pricingTiers: PricingTier[];
     testimonials: Testimonial[];
     services: Service[];
@@ -136,7 +136,7 @@ export default function PricingPageContent() {
                     tier.isPopular ? "bg-gradient-to-r from-primary to-purple-600 text-white" : "bg-transparent border border-border/80 hover:bg-border/50"
                   )}>
                      <LoadingLink href={`/contact?plan=${tier.name}`}>
-                       {tier.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
+                       {tier.name === 'Enterprise' ? 'Contact Sales' : 'Start Working'}
                      </LoadingLink>
                   </Button>
                 </div>
@@ -256,3 +256,5 @@ export default function PricingPageContent() {
     </motion.div>
   );
 }
+
+    
