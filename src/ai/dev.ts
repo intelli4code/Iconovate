@@ -24,4 +24,8 @@ import '@/ai/flows/brief-analyzer.ts';
 import '@/ai/flows/persona-generator.ts';
 import '@/ai/flows/weekly-summary-generator.ts';
 import '@/ai/flows/save-contact-message.ts';
+import '@/ai/flows/archetype-analyzer.ts';
+import '@/ai/flows/visual-synthesis.ts';
+import '@/ai/flows/proposal-generator.ts';
+
 

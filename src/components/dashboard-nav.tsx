@@ -15,7 +15,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail, FileText, Megaphone, SearchCode, ReceiptText, Brush, ClipboardCheck, UsersRound, CalendarClock, CreditCard, Download, Upload, CalendarCheck, LayoutTemplate, MessageSquare } from "lucide-react"
+import { Rocket, LayoutGrid, FolderKanban, BrainCircuit, Presentation, Settings, LifeBuoy, GalleryHorizontalEnd, BookText, PenTool, Palette, Quote, Baseline, Users, Grid3x3, Shapes, Blend, Share2, Star, Mail, FileText, Megaphone, SearchCode, ReceiptText, Brush, ClipboardCheck, UsersRound, CalendarClock, CreditCard, Download, Upload, CalendarCheck, LayoutTemplate, MessageSquare, Lightbulb } from "lucide-react"
 
 export function DashboardNav() {
   const pathname = usePathname()
@@ -150,6 +150,14 @@ export function DashboardNav() {
           <SidebarMenuItem className="px-2 text-xs text-muted-foreground">
               AI Tools
           </SidebarMenuItem>
+            <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive("/dashboard/strategy-workshop")}>
+                    <LoadingLink href="/dashboard/strategy-workshop">
+                        <Lightbulb />
+                        <span>Strategy Workshop</span>
+                    </LoadingLink>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
            <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/dashboard/brief-analysis")}>
               <LoadingLink href="/dashboard/brief-analysis">
