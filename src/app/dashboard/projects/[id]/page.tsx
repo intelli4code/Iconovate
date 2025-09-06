@@ -13,13 +13,14 @@ import { generateTasksFromBrief } from "@/ai/flows/task-generator"
 
 import { PageHeader } from "@/components/page-header"
 import { ProjectTabs } from "@/components/projects/project-tabs"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { CheckCircle, UploadCloud, Loader2, AlertTriangle, ShieldCheck, RefreshCw, XCircle, BrainCircuit, Info } from "lucide-react"
 import Loading from "../../loading"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
 import { v4 as uuidv4 } from 'uuid';
 import { Label } from "@/components/ui/label"
@@ -491,6 +492,25 @@ export default function ProjectDetailPage() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                  <Button variant="destructive">Cancel Project</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will immediately mark the project as "Canceled". This action can be undone by manually changing the project status.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Go Back</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleConfirmCancellation} className={buttonVariants({ variant: "destructive" })}>
+                    Yes, Cancel Project
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button onClick={handleCompleteProject} variant="secondary">Mark as Complete</Button>
           </div>
         }
