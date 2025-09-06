@@ -1,5 +1,6 @@
 
 
+
 "use client"
 
 import * as React from "react"
@@ -37,7 +38,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Project, ProjectStatus, ProjectType, TeamMember, ProjectPaymentStatus } from "@/types"
-import { ListFilter, PlusCircle, MoreHorizontal, Loader2 } from "lucide-react"
+import { ListFilter, PlusCircle, MoreHorizontal, Loader2, LogIn } from "lucide-react"
 import { LoadingLink } from "@/components/ui/loading-link"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -262,6 +263,9 @@ export function ProjectList() {
                         <LoadingLink href={`/dashboard/projects/${project.id}`} className="w-full cursor-pointer">
                           View Details
                         </LoadingLink>
+                      </DropdownMenuItem>
+                       <DropdownMenuItem onSelect={() => router.push(`/portal/${project.id}`)}>
+                        <LogIn className="mr-2 h-4 w-4" /> Client Portal View
                       </DropdownMenuItem>
                       <DropdownMenuItem>Edit</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">Archive</DropdownMenuItem>

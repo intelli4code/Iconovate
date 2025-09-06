@@ -10,6 +10,114 @@ import { Button } from "@/components/ui/button"
 import { LoadingLink } from "@/components/ui/loading-link"
 import { GlobalSearch } from "@/components/global-search"
 import { NotificationCenter } from "@/components/notification-center"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { db } from "@/lib/firebase"
+import { collection, onSnapshot, query, where } from "firebase/firestore"
+import type { Project, TeamMember } from "@/types"
+import { useRouter } from "next/navigation"
+
+function PortalLoginDialog({ onOpenChange }: { onOpenChange: (open: boolean) => void }) {
+    const [projects, setProjects] = React.useState<Project[]>([]);
+    const [team, setTeam] = React.useState<TeamMember[]>([]);
+    const [loading, setLoading] = React.useState(true);
+    const [view, setView] = React.useState<'client' | 'designer'>('client');
+    const router = useRouter();
+
+    React.useEffect(() => {
+        const projectsQuery = query(collection(db, "projects"));
+        const teamQuery = query(collection(db, "teamMembers"), where("role", "==", "Designer"));
+        
+        const unsubProjects = onSnapshot(projectsQuery, (snap) => setProjects(snap.docs.map(d => ({id: d.id, ...d.data()}) as Project)));
+        const unsubTeam = onSnapshot(teamQuery, (snap) => setTeam(snap.docs.map(d => ({id: d.id, ...d.data()}) as TeamMember)));
+        
+        setLoading(false);
+        return () => {
+            unsubProjects();
+            unsubTeam();
+        };
+    }, []);
+
+    const handleLogin = (url: string) => {
+        onOpenChange(false);
+        router.push(url);
+    }
+    
+    const handleDesignerLogin = (designerId: string) => {
+        sessionStorage.setItem('designerId', designerId);
+        handleLogin('/designer');
+    }
+
+    return (
+        <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+                <DialogTitle>Quick Portal Login</DialogTitle>
+                <DialogDescription>
+                    Select a portal to log into directly without needing credentials.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-2">
+                <Button variant={view === 'client' ? 'default' : 'outline'} onClick={() => setView('client')}>Client Portals</Button>
+                <Button variant={view === 'designer' ? 'default' : 'outline'} onClick={() => setView('designer')}>Designer Portals</Button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto">
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>{view === 'client' ? 'Project' : 'Designer'}</TableHead>
+                            <TableHead>{view === 'client' ? 'Client' : 'Email'}</TableHead>
+                            <TableHead className="text-right"></TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {loading ? <TableRow><TableCell colSpan={3} className="text-center"><Loader2 className="h-5 w-5 animate-spin mx-auto"/></TableCell></TableRow> :
+                        view === 'client' ? (
+                             projects.map(p => (
+                                <TableRow key={p.id}>
+                                    <TableCell>{p.name}</TableCell>
+                                    <TableCell>{p.client}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button size="sm" onClick={() => handleLogin(`/portal/${p.id}`)}>
+                                            <LogIn className="mr-2 h-4 w-4"/> Login
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                             ))
+                        ) : (
+                             team.map(d => (
+                                <TableRow key={d.id}>
+                                    <TableCell>{d.name}</TableCell>
+                                    <TableCell>{d.email}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button size="sm" onClick={() => handleDesignerLogin(d.id)}>
+                                            <LogIn className="mr-2 h-4 w-4"/> Login
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                             ))
+                        )
+                        }
+                    </TableBody>
+                 </Table>
+            </div>
+        </DialogContent>
+    )
+}
+
 
 export default function DashboardLayout({
   children,
@@ -17,6 +125,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [searchOpen, setSearchOpen] = React.useState(false);
+  const [portalLoginOpen, setPortalLoginOpen] = React.useState(false);
 
   return (
     <SidebarProvider>
@@ -40,16 +149,14 @@ export default function DashboardLayout({
           </div>
           <div className="flex items-center gap-2">
             <NotificationCenter />
-            <Button variant="outline" size="sm" asChild>
-                <LoadingLink href="/client-login">
-                    <LogIn className="mr-2 h-4 w-4" /> Client Portal
-                </LoadingLink>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-                <LoadingLink href="/designer/login">
-                    <LogIn className="mr-2 h-4 w-4" /> Designer Portal
-                </LoadingLink>
-            </Button>
+            <Dialog open={portalLoginOpen} onOpenChange={setPortalLoginOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                    <LogIn className="mr-2 h-4 w-4" /> Portal Login
+                </Button>
+              </DialogTrigger>
+              <PortalLoginDialog onOpenChange={setPortalLoginOpen} />
+            </Dialog>
           </div>
           <UserNav />
         </header>

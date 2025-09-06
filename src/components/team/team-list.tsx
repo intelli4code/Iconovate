@@ -1,5 +1,6 @@
 
 
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -22,7 +23,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { db, auth } from "@/lib/firebase"
-import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore"
+import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, where } from "firebase/firestore"
 import { createUserWithEmailAndPassword } from "firebase/auth"
 import { supabase } from "@/lib/supabase"
 import type { TeamMember, TeamMemberRole } from "@/types"
