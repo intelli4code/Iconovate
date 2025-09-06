@@ -78,7 +78,7 @@ export function ServicesManager() {
   const handleOpenDialog = (service: Service | null = null) => {
     if (service) {
       setEditingService(service);
-      reset({ title: service.title, description: service.description, icon: service.icon, deliverables: service.deliverables?.join('\n') });
+      reset({ title: service.title, description: service.description, icon: service.icon, deliverables: service.deliverables?.join('\\n') });
     } else {
       setEditingService(null);
       reset({ title: "", description: "", icon: "", deliverables: "" });
@@ -93,7 +93,7 @@ export function ServicesManager() {
     }
     const serviceData = {
         ...data,
-        deliverables: data.deliverables?.split('\n').filter(d => d.trim()) || [],
+        deliverables: data.deliverables?.split('\\n').filter(d => d.trim()) || [],
     }
     try {
       if (editingService) {
