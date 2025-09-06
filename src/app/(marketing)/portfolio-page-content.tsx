@@ -66,9 +66,11 @@ export default function PortfolioPageContent({ allItems, featuredItems }: Portfo
             className="mt-20"
           >
               <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">Featured Work</h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {featuredItems.map((item) => (
-                    <PortfolioItemCard key={item.id} item={item} />
+                  <motion.div key={item.id} variants={fadeIn}>
+                    <PortfolioItemCard item={item} />
+                  </motion.div>
                 ))}
               </div>
           </motion.section>
@@ -108,7 +110,7 @@ export default function PortfolioPageContent({ allItems, featuredItems }: Portfo
                 initial="hidden"
                 animate="show"
                 exit="hidden"
-                className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 items-start"
+                className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
             >
               {filteredItems.map((item) => (
                    <PortfolioItemCard key={item.id} item={item} />
