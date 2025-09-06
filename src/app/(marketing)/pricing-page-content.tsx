@@ -9,9 +9,10 @@ import { cn } from "@/lib/utils";
 import { LoadingLink } from "@/components/ui/loading-link";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
-import type { PricingTier, Testimonial } from "@/types";
+import type { PricingTier, Testimonial, Service } from "@/types";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import * as LucideIcons from "lucide-react";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -38,23 +39,30 @@ export default function PricingPageContent() {
   const [pageData, setPageData] = useState<{
     pricingTiers: PricingTier[];
     testimonials: Testimonial[];
+    services: Service[];
   } | null>(null);
 
   useEffect(() => {
     async function fetchData() {
       try {
         const pricingQuery = query(collection(db, "pricingTiers"), orderBy("order", "asc"));
-        const pricingSnapshot = await getDocs(pricingQuery);
-        const pricingTiers = pricingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PricingTier[];
-
         const testimonialQuery = query(collection(db, "testimonials"), orderBy("order", "asc"));
-        const testimonialSnapshot = await getDocs(testimonialQuery);
-        const testimonials = testimonialSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Testimonial[];
+        const servicesQuery = query(collection(db, "services"), orderBy("order", "asc"));
 
-        setPageData({ pricingTiers, testimonials });
+        const [pricingSnapshot, testimonialSnapshot, servicesSnapshot] = await Promise.all([
+            getDocs(pricingQuery),
+            getDocs(testimonialQuery),
+            getDocs(servicesQuery)
+        ]);
+        
+        const pricingTiers = pricingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PricingTier[];
+        const testimonials = testimonialSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Testimonial[];
+        const services = servicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Service[];
+
+        setPageData({ pricingTiers, testimonials, services });
       } catch (error) {
         console.error("Failed to fetch pricing page data:", error);
-        setPageData({ pricingTiers: [], testimonials: [] });
+        setPageData({ pricingTiers: [], testimonials: [], services: [] });
       }
     }
     fetchData();
@@ -64,7 +72,7 @@ export default function PricingPageContent() {
     return <div>Loading...</div>; // Or a proper loading skeleton
   }
   
-  const { pricingTiers, testimonials } = pageData;
+  const { pricingTiers, testimonials, services } = pageData;
 
 
   return (
@@ -138,6 +146,40 @@ export default function PricingPageContent() {
            {pricingTiers.length === 0 && <p className="col-span-full text-center text-muted-foreground">Pricing plans will be displayed here.</p>}
         </div>
       </motion.section>
+      
+       {/* Short-term packages */}
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="container mx-auto px-4 mt-24 text-center"
+      >
+        <motion.h2 variants={staggerItem} className="text-3xl font-bold">À La Carte Services</motion.h2>
+        <motion.p variants={staggerItem} className="mt-2 text-muted-foreground max-w-xl mx-auto">
+          Need something specific? We offer a range of individual services to meet your immediate design needs.
+        </motion.p>
+        <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.2 }}
+            className="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        >
+          {services.map((service) => {
+            const Icon = (LucideIcons as any)[service.icon] || LucideIcons.HelpCircle;
+            return (
+              <motion.div key={service.id} variants={staggerItem}>
+                <Card className="h-full bg-card/50 text-center flex flex-col items-center justify-center p-6">
+                    <Icon className="h-8 w-8 text-primary mb-3" />
+                    <h3 className="font-semibold">{service.title}</h3>
+                </Card>
+              </motion.div>
+            )
+          })}
+        </motion.div>
+      </motion.section>
+
 
       {/* Testimonials Section */}
       <motion.section

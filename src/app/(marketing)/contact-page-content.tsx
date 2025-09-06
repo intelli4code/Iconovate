@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { SaveContactMessageInput } from "@/types/contact-form";
 import { SaveContactMessageInputSchema } from "@/types/contact-form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Service } from "@/types";
+import { db } from "@/lib/firebase";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -27,13 +31,22 @@ export default function ContactPageContent() {
   const searchParams = useSearchParams();
   const selectedPackage = searchParams.get('plan');
   const { toast } = useToast();
-  
-  const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<SaveContactMessageInput>({
+  const [services, setServices] = useState<Service[]>([]);
+
+  const { register, handleSubmit, reset, setValue, control, formState: { errors, isSubmitting } } = useForm<SaveContactMessageInput>({
     resolver: zodResolver(SaveContactMessageInputSchema),
     defaultValues: {
       selectedPackage: selectedPackage || ""
     }
   });
+  
+  useEffect(() => {
+    const servicesQuery = query(collection(db, "services"), orderBy("order", "asc"));
+    const unsubscribeServices = onSnapshot(servicesQuery, (snapshot) => {
+        setServices(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Service[]);
+    });
+    return () => unsubscribeServices();
+  }, []);
 
   useEffect(() => {
     setValue('selectedPackage', selectedPackage || "");
@@ -100,7 +113,7 @@ export default function ContactPageContent() {
                   </CardContent>
                 </Card>
               )}
-              <div className="grid sm:grid-cols-2 gap-6">
+               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">Your Name</Label>
                   <Input id="name" placeholder="John Doe" {...register("name")} />
@@ -112,6 +125,32 @@ export default function ContactPageContent() {
                   {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
                 </div>
               </div>
+
+               <div className="space-y-2">
+                <Label>Service of Interest</Label>
+                <Controller
+                  name="selectedPackage"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value || selectedPackage || ""}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a service..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="General Inquiry">General Inquiry</SelectItem>
+                        <SelectItem value="Logo Design">Logo Design</SelectItem>
+                        <SelectItem value="Thumbnail Design">Thumbnail Design</SelectItem>
+                        <SelectItem value="Stationery Design">Stationery Design</SelectItem>
+                        <SelectItem value="Brand Strategy Session">Brand Strategy Session</SelectItem>
+                        <SelectItem value="Social Media Post Design">Social Media Post Design</SelectItem>
+                        <SelectItem value="Social Media Profile Kit">Social Media Profile Kit</SelectItem>
+                        <SelectItem value="Pitch Deck Design">Pitch Deck Design</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="subject">Subject</Label>
                 <Input id="subject" placeholder="e.g., Website Redesign Project" {...register("subject")} />

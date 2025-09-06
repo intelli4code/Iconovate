@@ -2,7 +2,7 @@
 import HomePageContent from "./(marketing)/home/page";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, limit, getDocs, doc, where, getDoc } from "firebase/firestore";
-import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType, FeaturePoint } from "@/types";
+import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType, FeaturePoint, Testimonial } from "@/types";
 import MarketingLayout from "./(marketing)/layout";
 import { FooterContent } from "@/components/marketing/footer";
 
@@ -11,11 +11,13 @@ async function getHomepageData() {
     const portfolioQuery = query(collection(db, "portfolioItems"), where("isFeatured", "==", true), orderBy("createdAt", "desc"), limit(6));
     const pricingQuery = query(collection(db, "pricingTiers"), orderBy("order", "asc"));
     const contentDocRef = doc(db, "siteContent", "main");
+    const testimonialQuery = query(collection(db, "testimonials"), orderBy("order", "asc"), limit(3));
     
-    const [portfolioSnapshot, pricingSnapshot, contentDoc] = await Promise.all([
+    const [portfolioSnapshot, pricingSnapshot, contentDoc, testimonialSnapshot] = await Promise.all([
         getDocs(portfolioQuery),
         getDocs(pricingQuery),
-        getDoc(contentDocRef)
+        getDoc(contentDocRef),
+        getDocs(testimonialQuery)
     ]);
 
     const portfolioItems = portfolioSnapshot.docs.map(doc => {
@@ -27,6 +29,7 @@ async function getHomepageData() {
       } as PortfolioItem;
     })
     const pricingTiers = pricingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PricingTier[];
+    const testimonials = testimonialSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Testimonial[];
     
     let stats: SiteStat[] = [];
     let images: { [key: string]: SiteImage } = {};
@@ -49,15 +52,15 @@ async function getHomepageData() {
     stats.sort((a,b) => a.order - b.order);
     featurePoints.sort((a, b) => a.order - b.order);
 
-    return { portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints };
+    return { portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints, testimonials };
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
-    return { portfolioItems: [], pricingTiers: [], stats: [], images: {}, pageContent: null, footerData: null, featurePoints: [] };
+    return { portfolioItems: [], pricingTiers: [], stats: [], images: {}, pageContent: null, footerData: null, featurePoints: [], testimonials: [] };
   }
 }
 
 export default async function RootPage() {
-  const { portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints } = await getHomepageData();
+  const { portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints, testimonials } = await getHomepageData();
 
   return (
     <MarketingLayout footer={<FooterContent footerData={footerData} />}>
@@ -69,6 +72,7 @@ export default async function RootPage() {
         pageContent={pageContent}
         footerData={footerData}
         featurePoints={featurePoints}
+        testimonials={testimonials}
       />
     </MarketingLayout>
   );

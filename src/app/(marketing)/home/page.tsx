@@ -7,11 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Star, ArrowRight, ShieldCheck, Check, Zap, Compass, Wand2, Code, Rocket, HelpCircle } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType, FeaturePoint } from "@/types";
+import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType, FeaturePoint, Testimonial } from "@/types";
 import { PortfolioItemCard } from "@/components/marketing/portfolio-item-card";
 import { motion } from "framer-motion";
 import * as LucideIcons from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 interface HomePageContentProps {
@@ -22,6 +23,7 @@ interface HomePageContentProps {
   pageContent: PageContent | null;
   footerData: FooterContentType | null;
   featurePoints: FeaturePoint[];
+  testimonials: Testimonial[];
 }
 
 const fadeIn = {
@@ -38,6 +40,11 @@ const staggerContainer = {
       staggerChildren: 0.2
     }
   }
+};
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
 };
 
 const dynamicGradientText = (text: string) => {
@@ -196,7 +203,7 @@ const faqData = [
 ]
 
 
-export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints }: HomePageContentProps) {
+export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints, testimonials }: HomePageContentProps) {
   const sortedTiers = pricingTiers.sort((a, b) => a.order - b.order);
 
   const heroImage = images?.homeHero?.imageUrl || "https://placehold.co/800x600.png";
@@ -509,6 +516,55 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
             </Button>
           </motion.div>
         </div>
+      </motion.section>
+      
+       {/* Testimonials Section */}
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="container mx-auto px-4 mt-12 mb-24"
+      >
+        <motion.div variants={staggerItem} className="grid lg:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
+          <div>
+            <p className="text-primary font-bold tracking-widest uppercase">MEMBER TESTIMONIALS</p>
+            <h2 className="text-4xl md:text-5xl font-bold mt-2">What users say about our platform</h2>
+          </div>
+          <p className="text-muted-foreground">
+            Members who post their reviews are their own opinion and are not created in consultation with anyone at Swag Academy. comment you see is their personal opinion and we don't cooperate with them at all.
+          </p>
+        </motion.div>
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+          className="mt-12 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto"
+        >
+          {testimonials.map((testimonial) => (
+            <motion.div key={testimonial.id} variants={staggerItem} whileHover={{ y: -5 }}>
+              <Card className="bg-card/50 p-6 rounded-2xl border-border/50 h-full">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={testimonial.src} data-ai-hint={testimonial.hint} />
+                    <AvatarFallback>{testimonial.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold">{testimonial.name}</h3>
+                    <div className="flex items-center gap-0.5 mt-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={cn('h-4 w-4', testimonial.rating > i ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground')} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-4 text-muted-foreground text-sm">{testimonial.review}</p>
+              </Card>
+            </motion.div>
+          ))}
+          {testimonials.length === 0 && <p className="col-span-full text-center text-muted-foreground">Testimonials will be displayed here.</p>}
+        </motion.div>
       </motion.section>
 
        {/* FAQ Section */}
