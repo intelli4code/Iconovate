@@ -187,7 +187,9 @@ export default function PricingPageContent() {
           {testimonials.length === 0 && <p className="col-span-full text-center text-muted-foreground">Testimonials will be displayed here.</p>}
         </motion.div>
         <div className="text-center mt-12">
-          <Button size="lg" className="rounded-full bg-gradient-to-r from-primary to-purple-600 text-white">Register Now</Button>
+          <Button asChild size="lg" className="rounded-full bg-gradient-to-r from-primary to-purple-600 text-white">
+            <LoadingLink href="/contact">Start Working</LoadingLink>
+          </Button>
         </div>
       </motion.section>
     </motion.div>
