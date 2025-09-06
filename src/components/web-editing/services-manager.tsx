@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, Trash2, Loader2, Edit } from "lucide-react";
+import { PlusCircle, Trash2, Loader2, Edit, Check } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const serviceSchema = z.object({
@@ -133,30 +133,40 @@ export function ServicesManager() {
           {services.map(service => {
             const Icon = (LucideIcons as any)[service.icon] || LucideIcons.HelpCircle;
             return (
-              <Card key={service.id}>
+              <Card key={service.id} className="flex flex-col">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
                       <Icon className="h-8 w-8 text-primary" />
                       <CardTitle>{service.title}</CardTitle>
                     </div>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(service)}><Edit className="h-4 w-4" /></Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This action will permanently delete this service.</AlertDialogDescription></AlertDialogHeader>
-                          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDelete(service.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction></AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <CardDescription>{service.description}</CardDescription>
+                <CardContent className="flex-grow">
+                    <CardDescription>{service.description}</CardDescription>
+                    {service.deliverables && service.deliverables.length > 0 && (
+                        <ul className="space-y-2 text-sm text-muted-foreground mt-4">
+                            {service.deliverables.map((item, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                <Check className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                                <span>{item}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </CardContent>
+                <CardFooter className="flex justify-end gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(service)}><Edit className="h-4 w-4" /></Button>
+                    <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This action will permanently delete this service.</AlertDialogDescription></AlertDialogHeader>
+                        <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDelete(service.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction></AlertDialogFooter>
+                    </AlertDialogContent>
+                    </AlertDialog>
+                </CardFooter>
               </Card>
             );
           })}
