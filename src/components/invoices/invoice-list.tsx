@@ -3,13 +3,15 @@
 "use client"
 
 import * as React from "react"
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore"
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, arrayUnion, serverTimestamp } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { LoadingLink } from "@/components/ui/loading-link"
 import { format } from 'date-fns'
 import { sendInvoiceByEmail } from '@/app/actions/send-invoice-action';
+import { v4 as uuidv4 } from 'uuid';
 
-import type { Invoice, InvoiceStatus } from "@/types"
+
+import type { Invoice, InvoiceStatus, Notification } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import {
   Table,
@@ -25,6 +27,8 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Loader2, PlusCircle, CheckCircle, Clock, Send, Mail, Edit } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog"
+import { InvoiceGeneratorForm } from "../invoice-generator-form"
+import { Dialog, DialogContent } from "../ui/dialog"
 
 const statusStyles: { [key in InvoiceStatus]: string } = {
   'Draft': 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300 border-gray-300',
@@ -41,6 +45,9 @@ export function InvoiceList() {
   const [invoices, setInvoices] = React.useState<Invoice[]>([])
   const [loading, setLoading] = React.useState(true)
   const [isSending, setIsSending] = React.useState<string | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+  const [editingInvoice, setEditingInvoice] = React.useState<Invoice | null>(null);
+
   const { toast } = useToast()
 
   React.useEffect(() => {
@@ -83,6 +90,26 @@ export function InvoiceList() {
     }
   }
 
+  const handleSendToClient = async (invoice: Invoice) => {
+    const invoiceRef = doc(db, "invoices", invoice.id);
+    const projectRef = doc(db, "projects", invoice.projectId);
+
+    const notification: Notification = {
+      id: uuidv4(),
+      text: `A new invoice (${invoice.invoiceNumber}) has been issued for your project.`,
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      await updateDoc(invoiceRef, { status: 'Sent' });
+      await updateDoc(projectRef, { notifications: arrayUnion(notification) });
+      toast({ title: "Invoice Sent!", description: "The invoice is now visible to the client." });
+    } catch (error) {
+      console.error("Error sending invoice to client:", error);
+      toast({ variant: "destructive", title: "Failed to Send" });
+    }
+  };
+
   const handleDeleteInvoice = async (invoiceId: string) => {
      const invoiceRef = doc(db, "invoices", invoiceId);
      try {
@@ -117,8 +144,14 @@ export function InvoiceList() {
     }
     setIsSending(null);
   };
+  
+  const handleEditOpen = (invoice: Invoice) => {
+    setEditingInvoice(invoice);
+    setIsEditDialogOpen(true);
+  };
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex justify-between items-start">
@@ -187,9 +220,14 @@ export function InvoiceList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onSelect={() => alert("Edit functionality coming soon!")}>
+                        <DropdownMenuItem onSelect={() => handleEditOpen(invoice)}>
                            <Edit className="mr-2 h-4 w-4"/> Edit Invoice
                         </DropdownMenuItem>
+                         {invoice.status === 'Draft' && (
+                           <DropdownMenuItem onSelect={() => handleSendToClient(invoice)}>
+                             <Send className="mr-2 h-4 w-4" /> Send to Client
+                           </DropdownMenuItem>
+                         )}
                         <DropdownMenuItem onSelect={() => handleSendEmail(invoice)} disabled={isSending === invoice.id}>
                             <Mail className="mr-2 h-4 w-4"/> Send as Email
                         </DropdownMenuItem>
@@ -231,5 +269,15 @@ export function InvoiceList() {
         </Table>
       </CardContent>
     </Card>
+
+     <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-7xl">
+           <InvoiceGeneratorForm 
+              editingInvoice={editingInvoice}
+              onClose={() => setIsEditDialogOpen(false)}
+           />
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

@@ -6,8 +6,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { generateInvoiceData, type InvoiceGeneratorOutput } from '@/ai/flows/invoice-generator';
-import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
+import { generateInvoiceData } from '@/ai/flows/invoice-generator';
+import { collection, onSnapshot, query, orderBy, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Project, Invoice, InvoiceStatus, Notification, Expense } from '@/types';
 import { useToast } from "@/hooks/use-toast";
@@ -21,7 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, FileText, Plus, Trash2, Download, Send, Save } from 'lucide-react';
+import { Loader2, FileText, Plus, Trash2, Download, Save, Edit } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
@@ -36,6 +36,8 @@ const FormSchema = z.object({
   clientName: z.string().min(2, "Client name is required."),
   clientAddress: z.string().min(5, "Client address is required."),
   projectName: z.string().min(2, "Project name is required."),
+  issueDate: z.string().optional(),
+  dueDate: z.string().optional(),
   lineItems: z.array(LineItemSchema).min(1, "At least one line item is required."),
   taxRate: z.coerce.number().optional().default(0),
   notes: z.string().optional(),
@@ -44,10 +46,16 @@ const FormSchema = z.object({
 
 type FormValues = z.infer<typeof FormSchema>;
 
-export function InvoiceGeneratorForm() {
+interface InvoiceGeneratorFormProps {
+    editingInvoice?: Invoice | null;
+    onClose?: () => void;
+}
+
+
+export function InvoiceGeneratorForm({ editingInvoice = null, onClose }: InvoiceGeneratorFormProps) {
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<InvoiceGeneratorOutput | null>(null);
+  const [result, setResult] = useState<Invoice | null>(editingInvoice);
   const { toast } = useToast();
   
   const [projects, setProjects] = useState<Project[]>([]);
@@ -76,8 +84,30 @@ export function InvoiceGeneratorForm() {
     control,
     name: "lineItems"
   });
+  
+  // Effect to populate form when editing
+  useEffect(() => {
+    if (editingInvoice) {
+      reset({
+        projectId: editingInvoice.projectId,
+        clientName: editingInvoice.clientName,
+        clientAddress: editingInvoice.clientAddress,
+        projectName: editingInvoice.projectName,
+        issueDate: editingInvoice.issueDate,
+        dueDate: editingInvoice.dueDate,
+        lineItems: editingInvoice.lineItems.map(item => ({...item, price: item.price / 100})), // Assuming price is in cents
+        taxRate: editingInvoice.taxRate,
+        notes: editingInvoice.notes,
+        paymentLink: editingInvoice.paymentLink,
+      });
+      setResult(editingInvoice);
+    }
+  }, [editingInvoice, reset]);
+
 
   useEffect(() => {
+    if(editingInvoice) return; // Don't fetch projects when editing
+
     setLoadingProjects(true);
     const projectsRef = collection(db, "projects");
     const q = query(projectsRef, orderBy("createdAt", "desc"));
@@ -100,7 +130,7 @@ export function InvoiceGeneratorForm() {
     });
 
     return () => unsubscribe();
-  }, [toast]);
+  }, [toast, editingInvoice]);
 
 
   const handleClientChange = (clientName: string) => {
@@ -123,7 +153,6 @@ export function InvoiceGeneratorForm() {
         setValue('projectId', project.id, { shouldValidate: true });
         setValue('projectName', project.name, { shouldValidate: true });
         
-        // Auto-fill line items with project expenses
         const expenseLineItems = project.expenses?.map((exp: Expense) => ({
             description: exp.description,
             quantity: 1,
@@ -143,8 +172,8 @@ export function InvoiceGeneratorForm() {
     setResult(null);
     try {
       const { projectId, ...invoiceInput } = data;
-      const response = await generateInvoiceData(invoiceInput);
-      setResult(response);
+      const response = await generateInvoiceData(invoiceInput as any);
+      setResult({ ...(response as any), id: editingInvoice?.id || '' }); // Keep id if editing
     } catch (error) {
       console.error("Error generating invoice:", error);
       toast({
@@ -164,32 +193,24 @@ export function InvoiceGeneratorForm() {
       }
       setIsSubmitting(true);
       try {
-          const invoiceData: Omit<Invoice, 'id' | 'createdAt'> & {createdAt: any} = {
+          const invoiceData: Omit<Invoice, 'id' | 'createdAt'> = {
               ...result,
               projectId: getValues('projectId'),
               status,
-              createdAt: serverTimestamp()
           };
           
-          await addDoc(collection(db, "invoices"), invoiceData);
-
-          if (status === 'Sent') {
-              const projectRef = doc(db, "projects", getValues('projectId'));
-              const notification: Notification = {
-                  id: uuidv4(),
-                  text: `A new invoice (${result.invoiceNumber}) has been issued for your project.`,
-                  timestamp: new Date().toISOString(),
-              };
-              await updateDoc(projectRef, { notifications: arrayUnion(notification) });
+          if(editingInvoice) {
+            await updateDoc(doc(db, "invoices", editingInvoice.id), invoiceData);
+            toast({ title: `Invoice Updated!`, description: `The invoice has been successfully updated.` });
+          } else {
+            await addDoc(collection(db, "invoices"), { ...invoiceData, createdAt: serverTimestamp() });
+            toast({ title: `Invoice Saved!`, description: `The invoice has been saved as a ${status}.`});
           }
           
-          toast({
-              title: `Invoice ${status}!`,
-              description: `The invoice has been successfully saved.`
-          });
-          setResult(null); // Clear the form/result after successful save
+          setResult(null);
           reset();
           setSelectedClient("");
+          if (onClose) onClose();
 
       } catch (error) {
           console.error("Error saving invoice: ", error);
@@ -207,7 +228,6 @@ export function InvoiceGeneratorForm() {
     const canvas = await html2canvas(invoicePreviewRef.current, { scale: 2 });
     const imgData = canvas.toDataURL('image/png');
     
-    // Calculate PDF dimensions to fit the image
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'px',
@@ -226,117 +246,118 @@ export function InvoiceGeneratorForm() {
 
   return (
     <div className="grid lg:grid-cols-5 gap-8">
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle>Invoice Details</CardTitle>
-          <CardDescription>Fill in the details to generate an invoice.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            
-            <div className='space-y-2'>
-              <Label>Select Client</Label>
-              <Select onValueChange={handleClientChange} value={selectedClient} disabled={loadingProjects}>
-                  <SelectTrigger>
-                      <SelectValue placeholder={loadingProjects ? "Loading clients..." : "Choose a client"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                      {clients.map(client => <SelectItem key={client} value={client}>{client}</SelectItem>)}
-                  </SelectContent>
-              </Select>
-            </div>
+      {!editingInvoice && (
+        <Card className="lg:col-span-2">
+            <CardHeader>
+            <CardTitle>Invoice Details</CardTitle>
+            <CardDescription>Fill in the details to generate an invoice.</CardDescription>
+            </CardHeader>
+            <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div className='space-y-2'>
+                <Label>Select Client</Label>
+                <Select onValueChange={handleClientChange} value={selectedClient} disabled={loadingProjects}>
+                    <SelectTrigger>
+                        <SelectValue placeholder={loadingProjects ? "Loading clients..." : "Choose a client"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {clients.map(client => <SelectItem key={client} value={client}>{client}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+                </div>
 
-            <div className='space-y-2'>
-              <Label>Select Project</Label>
-              <Select onValueChange={handleProjectChange} disabled={!selectedClient} name="projectId">
-                  <SelectTrigger>
-                      <SelectValue placeholder="Choose a project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                      {clientProjects.map(project => <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>)}
-                  </SelectContent>
-              </Select>
-               {errors.projectId && <p className="text-sm text-destructive mt-1">{errors.projectId.message}</p>}
-            </div>
+                <div className='space-y-2'>
+                <Label>Select Project</Label>
+                <Select onValueChange={handleProjectChange} disabled={!selectedClient} name="projectId">
+                    <SelectTrigger>
+                        <SelectValue placeholder="Choose a project" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {clientProjects.map(project => <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+                {errors.projectId && <p className="text-sm text-destructive mt-1">{errors.projectId.message}</p>}
+                </div>
 
-            <Separator />
-            
-            <div>
-              <Label htmlFor="clientName">Client Name</Label>
-              <Input id="clientName" {...register('clientName')} readOnly placeholder="Selected from dropdown" />
-              {errors.clientName && <p className="text-sm text-destructive mt-1">{errors.clientName.message}</p>}
-            </div>
-             <div>
-              <Label htmlFor="clientAddress">Client Address</Label>
-              <Textarea id="clientAddress" {...register('clientAddress')} placeholder="123 Tech Avenue, Silicon Valley, CA 94043" />
-              {errors.clientAddress && <p className="text-sm text-destructive mt-1">{errors.clientAddress.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="projectName">Project Name</Label>
-              <Input id="projectName" {...register('projectName')} readOnly placeholder="Selected from dropdown" />
-              {errors.projectName && <p className="text-sm text-destructive mt-1">{errors.projectName.message}</p>}
-            </div>
-            
-            <Separator />
-            
-            <div className="space-y-2">
-                <Label>Line Items</Label>
-                {fields.map((field, index) => (
-                    <div key={field.id} className="flex gap-2 items-start p-2 border rounded-md">
-                        <div className="flex-1">
-                          <Textarea {...register(`lineItems.${index}.description`)} placeholder="Description" className="h-10 text-xs" />
-                          {errors.lineItems?.[index]?.description && <p className="text-xs text-destructive mt-1">{errors.lineItems[index]?.description?.message}</p>}
+                <Separator />
+                
+                <div>
+                <Label htmlFor="clientName">Client Name</Label>
+                <Input id="clientName" {...register('clientName')} readOnly placeholder="Selected from dropdown" />
+                {errors.clientName && <p className="text-sm text-destructive mt-1">{errors.clientName.message}</p>}
+                </div>
+                <div>
+                <Label htmlFor="clientAddress">Client Address</Label>
+                <Textarea id="clientAddress" {...register('clientAddress')} placeholder="123 Tech Avenue, Silicon Valley, CA 94043" />
+                {errors.clientAddress && <p className="text-sm text-destructive mt-1">{errors.clientAddress.message}</p>}
+                </div>
+                <div>
+                <Label htmlFor="projectName">Project Name</Label>
+                <Input id="projectName" {...register('projectName')} readOnly placeholder="Selected from dropdown" />
+                {errors.projectName && <p className="text-sm text-destructive mt-1">{errors.projectName.message}</p>}
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-2">
+                    <Label>Line Items</Label>
+                    {fields.map((field, index) => (
+                        <div key={field.id} className="flex gap-2 items-start p-2 border rounded-md">
+                            <div className="flex-1">
+                            <Textarea {...register(`lineItems.${index}.description`)} placeholder="Description" className="h-10 text-xs" />
+                            {errors.lineItems?.[index]?.description && <p className="text-xs text-destructive mt-1">{errors.lineItems[index]?.description?.message}</p>}
+                            </div>
+                            <div className="w-20">
+                            <Input {...register(`lineItems.${index}.quantity`)} type="number" placeholder="Qty" className="text-xs" />
+                            {errors.lineItems?.[index]?.quantity && <p className="text-xs text-destructive mt-1">{errors.lineItems[index]?.quantity?.message}</p>}
+                            </div>
+                            <div className="w-24">
+                            <Input {...register(`lineItems.${index}.price`)} type="number" step="0.01" placeholder="Price" className="text-xs" />
+                            {errors.lineItems?.[index]?.price && <p className="text-xs text-destructive mt-1">{errors.lineItems[index]?.price?.message}</p>}
+                            </div>
+                            <Button type="button" variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => remove(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                         </div>
-                        <div className="w-20">
-                          <Input {...register(`lineItems.${index}.quantity`)} type="number" placeholder="Qty" className="text-xs" />
-                          {errors.lineItems?.[index]?.quantity && <p className="text-xs text-destructive mt-1">{errors.lineItems[index]?.quantity?.message}</p>}
-                        </div>
-                         <div className="w-24">
-                          <Input {...register(`lineItems.${index}.price`)} type="number" step="0.01" placeholder="Price" className="text-xs" />
-                           {errors.lineItems?.[index]?.price && <p className="text-xs text-destructive mt-1">{errors.lineItems[index]?.price?.message}</p>}
-                        </div>
-                        <Button type="button" variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => remove(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                    </div>
-                ))}
-                <Button type="button" variant="outline" size="sm" onClick={() => append({ description: "", quantity: 1, price: 0 })}>
-                    <Plus className="mr-2 h-4 w-4" /> Add Item
+                    ))}
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ description: "", quantity: 1, price: 0 })}>
+                        <Plus className="mr-2 h-4 w-4" /> Add Item
+                    </Button>
+                    {errors.lineItems && !errors.lineItems?.[fields.length -1] && <p className="text-sm text-destructive mt-1">{errors.lineItems.message}</p>}
+                </div>
+
+                <Separator />
+                
+                <div>
+                <Label htmlFor="paymentLink">Payment Link (Optional)</Label>
+                <Input id="paymentLink" {...register('paymentLink')} placeholder="https://buy.stripe.com/..." />
+                {errors.paymentLink && <p className="text-sm text-destructive mt-1">{errors.paymentLink.message}</p>}
+                </div>
+
+                <div>
+                <Label htmlFor="taxRate">Tax Rate (%)</Label>
+                <Input id="taxRate" type="number" {...register('taxRate')} placeholder="e.g., 8.5" />
+                </div>
+
+                <div>
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea id="notes" {...register('notes')} placeholder="e.g., Thank you for your business!" />
+                </div>
+
+                <Button type="submit" disabled={loading} className="w-full">
+                {loading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <FileText className="mr-2 h-4 w-4" />
+                )}
+                Generate Invoice Preview
                 </Button>
-                {errors.lineItems && !errors.lineItems?.[fields.length -1] && <p className="text-sm text-destructive mt-1">{errors.lineItems.message}</p>}
-            </div>
-
-            <Separator />
-            
-            <div>
-              <Label htmlFor="paymentLink">Payment Link (Optional)</Label>
-              <Input id="paymentLink" {...register('paymentLink')} placeholder="https://buy.stripe.com/..." />
-               {errors.paymentLink && <p className="text-sm text-destructive mt-1">{errors.paymentLink.message}</p>}
-            </div>
-
-            <div>
-              <Label htmlFor="taxRate">Tax Rate (%)</Label>
-              <Input id="taxRate" type="number" {...register('taxRate')} placeholder="e.g., 8.5" />
-            </div>
-
-            <div>
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea id="notes" {...register('notes')} placeholder="e.g., Thank you for your business!" />
-            </div>
-
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <FileText className="mr-2 h-4 w-4" />
-              )}
-              Generate Invoice Preview
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+            </form>
+            </CardContent>
+        </Card>
+      )}
       
-      <Card className="lg:col-span-3">
+      <Card className={editingInvoice ? "lg:col-span-5" : "lg:col-span-3"}>
         <CardHeader>
-          <CardTitle>Generated Invoice</CardTitle>
+          <CardTitle>{editingInvoice ? 'Edit' : 'Generated'} Invoice</CardTitle>
           <CardDescription>Your generated invoice will appear here, ready to be sent.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -424,11 +445,7 @@ export function InvoiceGeneratorForm() {
                     </Button>
                     <Button onClick={() => handleSaveInvoice('Draft')} variant="secondary" disabled={isSubmitting}>
                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        Save as Draft
-                    </Button>
-                    <Button onClick={() => handleSaveInvoice('Sent')} disabled={isSubmitting}>
-                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                        Save and Send
+                        {editingInvoice ? 'Update Invoice' : 'Save as Draft'}
                     </Button>
                 </div>
             </div>
