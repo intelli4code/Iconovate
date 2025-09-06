@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, doc } from "firebase/firestore";
 import type { TeamMember, SiteStat, SiteImage } from "@/types";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { motion } from "framer-motion";
 
 const fadeIn = {
@@ -199,10 +200,12 @@ export default function AboutPageContent() {
                     className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-12"
                 >
                     {stats.map((stat) => (
-                        <motion.div key={stat.id} variants={staggerItem}>
-                            <h3 className="text-5xl md:text-6xl font-bold text-primary">{stat.value}</h3>
-                            <p className="mt-2 text-muted-foreground">{stat.label}</p>
-                        </motion.div>
+                         <Fragment key={stat.id}>
+                            <motion.div variants={staggerItem}>
+                                <h3 className="text-5xl md:text-6xl font-bold text-primary">{stat.value}</h3>
+                                <p className="mt-2 text-muted-foreground">{stat.label}</p>
+                            </motion.div>
+                        </Fragment>
                     ))}
                 </motion.div>
                  {stats.length === 0 && <p className="text-muted-foreground mt-8">Key statistics will be displayed here.</p>}
