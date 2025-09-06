@@ -256,5 +256,3 @@ export default function PricingPageContent() {
     </motion.div>
   );
 }
-
-    
