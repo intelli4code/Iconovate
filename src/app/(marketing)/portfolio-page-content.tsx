@@ -66,7 +66,7 @@ export default function PortfolioPageContent({ allItems, featuredItems }: Portfo
             className="mt-20"
           >
               <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">Featured Work</h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
                 {featuredItems.map((item) => (
                     <PortfolioItemCard key={item.id} item={item} />
                 ))}
@@ -108,7 +108,7 @@ export default function PortfolioPageContent({ allItems, featuredItems }: Portfo
                 initial="hidden"
                 animate="show"
                 exit="hidden"
-                className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 items-start"
             >
               {filteredItems.map((item) => (
                    <PortfolioItemCard key={item.id} item={item} />
