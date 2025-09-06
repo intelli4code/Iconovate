@@ -176,6 +176,7 @@ export default function PricingPageContent() {
                          <CardTitle>{service.title}</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-grow">
+                        <p className="text-sm text-muted-foreground mb-4">{service.description}</p>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             {service.deliverables?.map((item, index) => (
                                 <li key={index} className="flex items-start gap-2">
