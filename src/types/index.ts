@@ -4,6 +4,7 @@ import { Timestamp } from "firebase/firestore";
 
 export interface ContactMessage {
   id: string;
+  proposalId: string;
   name: string;
   email: string;
   service: string;

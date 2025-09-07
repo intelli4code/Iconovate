@@ -179,6 +179,7 @@ export function ProjectIntakeList() {
                          <Badge variant="outline" className={statusStyles[message.status || 'New']}>{message.status || 'New'}</Badge>
                     </div>
                     <CardDescription>{message.email}</CardDescription>
+                    <p className="text-xs text-muted-foreground pt-1">ID: {message.proposalId}</p>
                   </CardHeader>
                   <CardContent>
                       <p className="font-semibold text-sm">{message.service}</p>
@@ -200,6 +201,7 @@ export function ProjectIntakeList() {
                 <DialogDescription>From {selectedMessage?.name} ({selectedMessage?.email})</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 max-h-[70vh] overflow-y-auto p-4">
+                <div className="font-semibold">Proposal ID: <span className="font-mono text-xs bg-muted p-1 rounded">{selectedMessage?.proposalId}</span></div>
                 <div className="font-semibold">Service: <span className="font-normal text-primary">{selectedMessage?.service}</span></div>
                 <div>
                     <Label className="font-semibold">Description</Label>

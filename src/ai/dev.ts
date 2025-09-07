@@ -1,4 +1,5 @@
 
+
 'use server';
 import { config } from 'dotenv';
 config();
@@ -27,5 +28,6 @@ import '@/ai/flows/save-contact-message.ts';
 import '@/ai/flows/archetype-analyzer.ts';
 import '@/ai/flows/visual-synthesis.ts';
 import '@/ai/flows/proposal-generator.ts';
+import '@/app/actions/send-proposal-received-email.ts';
 
 
