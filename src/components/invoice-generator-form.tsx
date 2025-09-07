@@ -95,7 +95,7 @@ export function InvoiceGeneratorForm({ editingInvoice = null, onClose }: Invoice
         projectName: editingInvoice.projectName,
         issueDate: editingInvoice.issueDate,
         dueDate: editingInvoice.dueDate,
-        lineItems: editingInvoice.lineItems.map(item => ({...item, price: item.price / 100})), // Assuming price is in cents
+        lineItems: editingInvoice.lineItems.map(item => ({...item, price: item.price})),
         taxRate: editingInvoice.taxRate,
         notes: editingInvoice.notes,
         paymentLink: editingInvoice.paymentLink,

@@ -53,13 +53,13 @@ export function InvoiceList() {
   React.useEffect(() => {
     setLoading(true)
     const invoicesRef = collection(db, "invoices")
-    // Corrected Query: Removed the faulty `where` clause to fetch ALL invoices.
     const q = query(invoicesRef, orderBy("createdAt", "desc"))
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const invoicesData = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
+        createdAt: doc.data().createdAt || new Date(), // Fallback for missing timestamps
       })).filter(invoice => invoice.id) as Invoice[]; // Ensure invoice has an ID
       setInvoices(invoicesData)
       setLoading(false)
@@ -124,26 +124,36 @@ export function InvoiceList() {
 
   const handleSendEmail = async (invoice: Invoice) => {
     setIsSending(invoice.id);
-    // If the invoice is a draft, update its status to 'Sent' first.
-    if (invoice.status === 'Draft') {
-      await updateDoc(doc(db, "invoices", invoice.id), { status: 'Sent' });
+    try {
+        if (invoice.status === 'Draft') {
+            const invoiceRef = doc(db, "invoices", invoice.id);
+            await updateDoc(invoiceRef, { status: 'Sent' });
+        }
+        
+        const result = await sendInvoiceByEmail(invoice);
+        
+        if (result.success) {
+            toast({
+                title: "Email Sent!",
+                description: result.message,
+            });
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Send Failed",
+                description: result.error,
+            });
+        }
+    } catch (error: any) {
+        console.error('Email send error:', error);
+        toast({
+            variant: "destructive",
+            title: "Send Failed",
+            description: "An unexpected error occurred while sending the invoice.",
+        });
+    } finally {
+        setIsSending(null);
     }
-    
-    const result = await sendInvoiceByEmail(invoice);
-    
-    if (result.success) {
-      toast({
-        title: "Email Sent!",
-        description: result.message,
-      });
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Send Failed",
-        description: result.error,
-      });
-    }
-    setIsSending(null);
   };
   
   const handleEditOpen = (invoice: Invoice) => {
