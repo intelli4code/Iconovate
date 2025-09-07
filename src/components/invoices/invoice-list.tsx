@@ -53,7 +53,7 @@ export function InvoiceList() {
   React.useEffect(() => {
     setLoading(true)
     const invoicesRef = collection(db, "invoices")
-    const q = query(invoicesRef, orderBy("createdAt", "desc"))
+    const q = query(invoicesRef, orderBy("createdAt", "desc"));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const invoicesData = querySnapshot.docs.map(doc => ({
