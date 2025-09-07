@@ -70,6 +70,11 @@ export function PaymentList() {
     batch.update(paymentRef, { status: newStatus, reviewedAt: new Date().toISOString() });
 
     if (newStatus === 'Approved') {
+        if (!payment.invoiceId || !payment.projectId) {
+            toast({ variant: "destructive", title: "Missing Data", description: "Payment record is missing necessary invoice or project ID."});
+            setUpdatingId(null);
+            return;
+        }
         const invoiceRef = doc(db, "invoices", payment.invoiceId);
         batch.update(invoiceRef, { status: 'Paid' });
 
