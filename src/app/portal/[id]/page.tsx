@@ -266,6 +266,7 @@ export default function ClientPortalPage() {
   const [briefLinks, setBriefLinks] = useState("");
   const [newProjectBrief, setNewProjectBrief] = useState("");
   const [revisionDetails, setRevisionDetails] = useState("");
+  const [cancellationReason, setCancellationReason] = useState("");
   const { toast } = useToast();
   
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
@@ -410,10 +411,16 @@ export default function ClientPortalPage() {
   };
 
   const handleRequestCancellation = async () => {
-    if (!project) return;
+    if (!project || !cancellationReason.trim()) {
+       toast({ variant: "destructive", title: "Reason Required", description: "Please provide a reason for cancellation." });
+       return;
+    }
     if (project.status === 'Completed' || project.status === 'Canceled') return;
     const projectRef = doc(db, "projects", project.id);
-    await updateDoc(projectRef, { status: 'Cancellation Requested' });
+    await updateDoc(projectRef, { 
+        status: 'Cancellation Requested',
+        cancellationReason: cancellationReason,
+    });
     toast({
         title: "Cancellation Requested",
         description: "Your cancellation request has been sent to the designer for review.",
@@ -920,15 +927,25 @@ export default function ClientPortalPage() {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogTitle>Are you sure you want to cancel?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This will send a cancellation request to your designer. They will have to approve it before the project is officially canceled.
+                            Please provide a reason for cancelling. This will send a cancellation request to your designer for review.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
+                         <div className="py-2">
+                            <Label htmlFor="cancellation-reason">Reason for Cancellation</Label>
+                            <Textarea 
+                                id="cancellation-reason"
+                                placeholder="e.g., Change in project scope, budget constraints, etc."
+                                value={cancellationReason}
+                                onChange={(e) => setCancellationReason(e.target.value)}
+                            />
+                          </div>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Go Back</AlertDialogCancel>
                           <AlertDialogAction 
                             onClick={handleRequestCancellation} 
+                            disabled={!cancellationReason.trim()}
                             className={buttonVariants({ variant: "destructive" })}
                           >
                             Yes, Request Cancellation

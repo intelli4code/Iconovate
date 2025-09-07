@@ -182,6 +182,7 @@ export interface Project {
   briefLinks?: string;
   revisionRequestDetails?: string;
   revisionRequestTimestamp?: string;
+  cancellationReason?: string;
 }
 
 export interface PortfolioItem {

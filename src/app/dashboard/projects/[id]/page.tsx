@@ -26,6 +26,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { sendCancellationEmail } from "@/app/actions/send-cancellation-email"
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>()
@@ -314,16 +315,23 @@ export default function ProjectDetailPage() {
     if (!project) return;
     const projectRef = doc(db, "projects", project.id);
     await updateDoc(projectRef, { status: 'Canceled' });
+    
+    // Send email after confirming cancellation
+    await sendCancellationEmail(project);
+
     toast({
       title: "Project Canceled",
-      description: `The project "${project.name}" has been canceled.`,
+      description: `The project "${project.name}" has been canceled and the client has been notified.`,
     });
   };
 
   const handleDenyCancellationRequest = async () => {
     if (!project) return;
     const projectRef = doc(db, "projects", project.id);
-    await updateDoc(projectRef, { status: 'In Progress' });
+    await updateDoc(projectRef, { 
+      status: 'In Progress',
+      cancellationReason: '', // Clear the reason
+    });
     toast({
       title: "Cancellation Request Denied",
       description: `The project "${project.name}" has been moved back to "In Progress". The client has been notified.`,
@@ -521,9 +529,9 @@ export default function ProjectDetailPage() {
         <Alert variant="destructive" className="mb-4">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Cancellation Requested</AlertTitle>
-          <AlertDescription className="flex flex-col sm:flex-row justify-between sm:items-center">
-            The client has requested to cancel this project.
-            <div className="flex gap-2 mt-2 sm:mt-0">
+          <AlertDescription>
+            <p className="mb-2"><strong>Reason:</strong> "{project.cancellationReason || 'No reason provided.'}"</p>
+            <div className="flex gap-2 mt-2">
               <Button onClick={handleConfirmCancellation} variant="destructive" size="sm">Confirm Cancellation</Button>
               <Button onClick={handleDenyCancellationRequest} variant="outline" size="sm">Deny Request</Button>
             </div>
