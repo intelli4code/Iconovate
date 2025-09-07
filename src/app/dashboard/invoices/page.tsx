@@ -35,6 +35,7 @@ export default function InvoicesPage() {
     return () => unsubscribe();
   }, []);
 
+  const draftInvoices = invoices.filter(inv => inv.status === 'Draft');
   const sentInvoices = invoices.filter(inv => ['Sent', 'Paid', 'Overdue'].includes(inv.status));
   const archivedInvoices = invoices.filter(inv => inv.status === 'Deleted');
 
@@ -57,6 +58,11 @@ export default function InvoicesPage() {
         </div>
       ) : (
         <>
+          <InvoiceList
+            title="Draft Invoices"
+            description="Invoices that have not yet been sent to the client."
+            invoices={draftInvoices}
+          />
           <InvoiceList
             title="Sent Invoices"
             description="Invoices that have been sent to clients for payment."
