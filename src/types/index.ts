@@ -1,4 +1,5 @@
 
+
 import { Timestamp } from "firebase/firestore";
 
 export interface ContactMessage {
@@ -275,6 +276,8 @@ export interface HomePageContent {
     heroSubtitle: string;
     featureTitle: string;
     featureSubtitle: string;
+    featurePoint1Title: string;
+    featurePoint1Text: string;
 }
 
 export interface PageContent {

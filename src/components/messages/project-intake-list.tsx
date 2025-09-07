@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { ContactMessage, Project, ProjectStatus, ProjectType, TeamMember, ProjectPaymentStatus, Task } from "@/types";
 import { v4 as uuidv4 } from 'uuid';
+import { sendProjectCreationEmail } from "@/app/actions/send-project-creation-email";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
@@ -130,9 +131,11 @@ export function ProjectIntakeList() {
     };
     
     try {
-        await addDoc(collection(db, 'projects'), newProjectData);
+        const newDocRef = await addDoc(collection(db, 'projects'), newProjectData);
+        await sendProjectCreationEmail({ ...newProjectData, id: newDocRef.id });
         await handleStatusUpdate(selectedMessage.id, 'Converted');
-        toast({ title: "Project Created!", description: `${data.name} is now live.` });
+
+        toast({ title: "Project Created!", description: `${data.name} is now live and the client has been notified.` });
         setIsProjectModalOpen(false);
     } catch (error) {
         toast({ variant: "destructive", title: "Project Creation Failed" });

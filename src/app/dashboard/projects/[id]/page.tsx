@@ -448,6 +448,8 @@ export default function ProjectDetailPage() {
     return <Loading />;
   }
 
+  const isCanceled = project.status === 'Canceled';
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -462,7 +464,7 @@ export default function ProjectDetailPage() {
             </Button>
             <Dialog open={isDeliverDialogOpen} onOpenChange={setIsDeliverDialogOpen}>
               <DialogTrigger asChild>
-                <Button>Deliver Asset</Button>
+                <Button disabled={isCanceled}>Deliver Asset</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -494,7 +496,7 @@ export default function ProjectDetailPage() {
             </Dialog>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                  <Button variant="destructive">Cancel Project</Button>
+                  <Button variant="destructive" disabled={isCanceled}>Cancel Project</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -511,7 +513,7 @@ export default function ProjectDetailPage() {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-            <Button onClick={handleCompleteProject} variant="secondary">Mark as Complete</Button>
+            <Button onClick={handleCompleteProject} variant="secondary" disabled={isCanceled}>Mark as Complete</Button>
           </div>
         }
       />

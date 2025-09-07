@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,6 +11,7 @@ import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { format, formatDistanceToNow, addDays } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
+import { sendProjectCreationEmail } from "@/app/actions/send-project-creation-email";
 
 import type { ProjectRequest, Project, ProjectStatus, ProjectPaymentStatus, TeamMember, Task, ProjectType } from "@/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -125,20 +127,8 @@ export function ReturningOrdersList() {
         };
 
         const newProjectRef = await addDoc(collection(db, 'projects'), newProjectData);
-        
-        const notification = {
-            id: uuidv4(),
-            text: `Your new project request has been approved! Your new Order ID is ${newProjectRef.id}. You can use this to log in to your new project portal.`,
-            timestamp: new Date().toISOString()
-        }
-        
-        const projectsRef = collection(db, "projects");
-        const q = query(projectsRef, where("clientEmail", "==", selectedRequest.clientEmail), orderBy("createdAt", "desc"), limit(1));
-        const projectsSnap = await getDocs(q);
-        if(!projectsSnap.empty) {
-            const lastProjectRef = projectsSnap.docs[0].ref;
-            await updateDoc(lastProjectRef, { notifications: arrayUnion(notification) });
-        }
+
+        await sendProjectCreationEmail({ ...newProjectData, id: newProjectRef.id });
         
         await deleteDoc(doc(db, "projectRequests", selectedRequest.id));
         
