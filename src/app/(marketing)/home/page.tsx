@@ -683,3 +683,5 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
     </>
   );
 }
+
+    
