@@ -21,7 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, FileText, Plus, Trash2, Download, Save, Edit } from 'lucide-react';
+import { Loader2, FileText, Plus, Trash2, Download, Save, Edit, Send } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
@@ -186,7 +186,7 @@ export function InvoiceGeneratorForm({ editingInvoice = null, onClose }: Invoice
     }
   };
 
-  const handleSaveInvoice = async (status: InvoiceStatus) => {
+  const handleSaveAndSend = async () => {
       if (!result || !getValues('projectId')) {
           toast({ variant: 'destructive', title: 'Error', description: 'Missing project or invoice data.'});
           return;
@@ -196,15 +196,15 @@ export function InvoiceGeneratorForm({ editingInvoice = null, onClose }: Invoice
           const invoiceData: Omit<Invoice, 'id' | 'createdAt'> = {
               ...result,
               projectId: getValues('projectId'),
-              status,
+              status: 'Sent',
           };
           
           if(editingInvoice) {
             await updateDoc(doc(db, "invoices", editingInvoice.id), invoiceData);
-            toast({ title: `Invoice Updated!`, description: `The invoice has been successfully updated.` });
+            toast({ title: `Invoice Updated!`, description: `The invoice has been successfully updated and sent.` });
           } else {
             await addDoc(collection(db, "invoices"), { ...invoiceData, createdAt: serverTimestamp() });
-            toast({ title: `Invoice Saved!`, description: `The invoice has been saved as a ${status}.`});
+            toast({ title: `Invoice Sent!`, description: `The invoice is now visible to the client.`});
           }
           
           setResult(null);
@@ -443,9 +443,9 @@ export function InvoiceGeneratorForm({ editingInvoice = null, onClose }: Invoice
                     <Button onClick={handleDownloadPdf} variant="outline" disabled={isSubmitting}>
                         <Download className="mr-2 h-4 w-4" /> Download PDF
                     </Button>
-                    <Button onClick={() => handleSaveInvoice('Draft')} variant="secondary" disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        {editingInvoice ? 'Update Invoice' : 'Save as Draft'}
+                    <Button onClick={handleSaveAndSend} variant="secondary" disabled={isSubmitting}>
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                        {editingInvoice ? 'Update & Resend' : 'Save & Send'}
                     </Button>
                 </div>
             </div>

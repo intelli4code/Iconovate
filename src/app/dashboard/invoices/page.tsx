@@ -23,7 +23,7 @@ export default function InvoicesPage() {
       const invoicesData = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        createdAt: doc.data().createdAt || new Date(),
+        createdAt: doc.data().createdAt?.toDate() || new Date(),
       })) as Invoice[];
       setInvoices(invoicesData);
       setLoading(false);
@@ -35,9 +35,8 @@ export default function InvoicesPage() {
     return () => unsubscribe();
   }, []);
 
-  const draftInvoices = invoices.filter(inv => inv.status === 'Draft');
   const sentInvoices = invoices.filter(inv => ['Sent', 'Paid', 'Overdue'].includes(inv.status));
-  const deletedInvoices = invoices.filter(inv => inv.status === 'Deleted');
+  const archivedInvoices = invoices.filter(inv => inv.status === 'Deleted');
 
   return (
     <div className="space-y-8">
@@ -59,11 +58,6 @@ export default function InvoicesPage() {
       ) : (
         <>
           <InvoiceList
-            title="Draft Invoices"
-            description="Invoices that are not yet sent to clients."
-            invoices={draftInvoices}
-          />
-          <InvoiceList
             title="Sent Invoices"
             description="Invoices that have been sent to clients for payment."
             invoices={sentInvoices}
@@ -71,7 +65,7 @@ export default function InvoicesPage() {
           <InvoiceList
             title="Archived Invoices"
             description="Deleted or archived invoices."
-            invoices={deletedInvoices}
+            invoices={archivedInvoices}
           />
         </>
       )}

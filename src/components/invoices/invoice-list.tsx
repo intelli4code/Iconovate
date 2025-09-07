@@ -70,26 +70,6 @@ export function InvoiceList({ title, description, invoices }: InvoiceListProps) 
     }
   }
 
-  const handleSendToClient = async (invoice: Invoice) => {
-    const invoiceRef = doc(db, "invoices", invoice.id);
-    const projectRef = doc(db, "projects", invoice.projectId);
-
-    const notification: Notification = {
-      id: uuidv4(),
-      text: `A new invoice (${invoice.invoiceNumber}) has been issued for your project.`,
-      timestamp: new Date().toISOString(),
-    };
-
-    try {
-      await updateDoc(invoiceRef, { status: 'Sent' });
-      await updateDoc(projectRef, { notifications: arrayUnion(notification) });
-      toast({ title: "Invoice Sent!", description: "The invoice is now visible to the client." });
-    } catch (error) {
-      console.error("Error sending invoice to client:", error);
-      toast({ variant: "destructive", title: "Failed to Send" });
-    }
-  };
-
   const handleSoftDeleteInvoice = async (invoiceId: string) => {
      handleUpdateStatus(invoiceId, 'Deleted');
   }
@@ -102,34 +82,29 @@ export function InvoiceList({ title, description, invoices }: InvoiceListProps) 
         title: "Invoice Deleted",
         description: "The invoice has been permanently removed.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting invoice:", error);
-      toast({ variant: "destructive", title: "Deletion Failed"});
+      toast({ variant: "destructive", title: "Deletion Failed", description: error.message || "An unknown error occurred."});
     }
   };
 
   const handleSendEmail = async (invoice: Invoice) => {
     setIsSending(invoice.id);
     try {
-        if (invoice.status === 'Draft') {
-            const invoiceRef = doc(db, "invoices", invoice.id);
-            await updateDoc(invoiceRef, { status: 'Sent' });
-        }
+      const result = await sendInvoiceByEmail(invoice);
         
-        const result = await sendInvoiceByEmail(invoice);
-        
-        if (result.success) {
-            toast({
-                title: "Email Sent!",
-                description: result.message,
-            });
-        } else {
-            toast({
-                variant: "destructive",
-                title: "Send Failed",
-                description: result.error,
-            });
-        }
+      if (result.success) {
+          toast({
+              title: "Email Sent!",
+              description: result.message,
+          });
+      } else {
+          toast({
+              variant: "destructive",
+              title: "Send Failed",
+              description: result.error,
+          });
+      }
     } catch (error: any) {
         console.error('Email send error:', error);
         toast({
@@ -180,7 +155,7 @@ export function InvoiceList({ title, description, invoices }: InvoiceListProps) 
                 </TableCell>
               </TableRow>
             ) : (
-              invoices.map((invoice) => (
+              invoices.filter(inv => inv.id).map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell className="font-mono text-xs">
                     {invoice.invoiceNumber}
@@ -206,11 +181,6 @@ export function InvoiceList({ title, description, invoices }: InvoiceListProps) 
                         <DropdownMenuItem onSelect={() => handleEditOpen(invoice)}>
                            <Edit className="mr-2 h-4 w-4"/> Edit Invoice
                         </DropdownMenuItem>
-                         {invoice.status === 'Draft' && (
-                           <DropdownMenuItem onSelect={() => handleSendToClient(invoice)}>
-                             <Send className="mr-2 h-4 w-4" /> Send to Client
-                           </DropdownMenuItem>
-                         )}
                         <DropdownMenuItem onSelect={() => handleSendEmail(invoice)} disabled={isSending === invoice.id}>
                             <Mail className="mr-2 h-4 w-4"/> Send as Email
                         </DropdownMenuItem>
