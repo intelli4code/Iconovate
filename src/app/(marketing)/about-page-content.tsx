@@ -200,12 +200,10 @@ export default function AboutPageContent() {
                     className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-12"
                 >
                     {stats.map((stat) => (
-                         <Fragment key={stat.id}>
-                            <motion.div variants={staggerItem}>
-                                <h3 className="text-5xl md:text-6xl font-bold text-primary">{stat.value}</h3>
-                                <p className="mt-2 text-muted-foreground">{stat.label}</p>
-                            </motion.div>
-                        </Fragment>
+                        <motion.div key={stat.id} variants={staggerItem}>
+                            <h3 className="text-5xl md:text-6xl font-bold text-primary">{stat.value}</h3>
+                            <p className="mt-2 text-muted-foreground">{stat.label}</p>
+                        </motion.div>
                     ))}
                 </motion.div>
                  {stats.length === 0 && <p className="text-muted-foreground mt-8">Key statistics will be displayed here.</p>}
