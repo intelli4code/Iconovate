@@ -25,7 +25,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Loader2, PlusCircle, CheckCircle, Clock, Send, Mail, Edit } from "lucide-react"
+import { MoreHorizontal, Loader2, PlusCircle, CheckCircle, Clock, Send, Mail, Edit, Trash2 } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog"
 import { InvoiceGeneratorForm } from "../invoice-generator-form"
 import { Dialog, DialogContent } from "../ui/dialog"
@@ -35,46 +35,25 @@ const statusStyles: { [key in InvoiceStatus]: string } = {
   'Sent': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border-blue-300',
   'Paid': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-300',
   'Overdue': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 border-red-300',
+  'Deleted': 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300 border-gray-300',
 };
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 }
 
-export function InvoiceList() {
-  const [invoices, setInvoices] = React.useState<Invoice[]>([])
-  const [loading, setLoading] = React.useState(true)
+interface InvoiceListProps {
+  title: string;
+  description: string;
+  invoices: Invoice[];
+}
+
+export function InvoiceList({ title, description, invoices }: InvoiceListProps) {
   const [isSending, setIsSending] = React.useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const [editingInvoice, setEditingInvoice] = React.useState<Invoice | null>(null);
 
   const { toast } = useToast()
-
-  React.useEffect(() => {
-    setLoading(true)
-    const invoicesRef = collection(db, "invoices")
-    const q = query(invoicesRef, orderBy("createdAt", "desc"));
-
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const invoicesData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt || new Date(), // Fallback for missing timestamps
-      })).filter(invoice => invoice.id) as Invoice[]; // Ensure invoice has an ID
-      setInvoices(invoicesData)
-      setLoading(false)
-    }, (error) => {
-      console.error("Error fetching invoices: ", error)
-      setLoading(false)
-      toast({
-        variant: "destructive",
-        title: "Failed to load invoices",
-        description: "Could not fetch invoice data from the database.",
-      })
-    })
-
-    return () => unsubscribe()
-  }, [toast])
   
   const handleUpdateStatus = async (invoiceId: string, status: InvoiceStatus) => {
     const invoiceRef = doc(db, "invoices", invoiceId);
@@ -111,15 +90,8 @@ export function InvoiceList() {
     }
   };
 
-  const handleDeleteInvoice = async (invoiceId: string) => {
-     const invoiceRef = doc(db, "invoices", invoiceId);
-     try {
-        await deleteDoc(invoiceRef);
-        toast({ title: "Invoice Deleted" });
-     } catch (error) {
-        console.error("Error deleting invoice:", error);
-        toast({ variant: "destructive", title: "Deletion Failed"});
-     }
+  const handleSoftDeleteInvoice = async (invoiceId: string) => {
+     handleUpdateStatus(invoiceId, 'Deleted');
   }
 
   const handleSendEmail = async (invoice: Invoice) => {
@@ -167,14 +139,9 @@ export function InvoiceList() {
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
-                <CardTitle>All Invoices</CardTitle>
-                <CardDescription>A list of all your generated invoices.</CardDescription>
+                <CardTitle>{title}</CardTitle>
+                <CardDescription>{description}</CardDescription>
             </div>
-            <Button asChild>
-                <LoadingLink href="/dashboard/invoice-generator">
-                    <PlusCircle className="mr-2"/> Create Invoice
-                </LoadingLink>
-            </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -192,19 +159,10 @@ export function InvoiceList() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">
-                  <div className="flex justify-center items-center p-4">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading invoices...
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : invoices.length === 0 ? (
+            {invoices.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center h-24">
-                  No invoices found.
+                  No invoices in this category.
                 </TableCell>
               </TableRow>
             ) : (
@@ -255,18 +213,21 @@ export function InvoiceList() {
                          <DropdownMenuSeparator />
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">Delete</DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                </DropdownMenuItem>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This will permanently delete this invoice. This action cannot be undone.
+                                    This will mark the invoice as "Deleted" and move it to the archive. This action can be undone by changing the status.
                                 </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteInvoice(invoice.id)} className="bg-destructive hover:bg-destructive/90">Delete Invoice</AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleSoftDeleteInvoice(invoice.id)} className="bg-destructive hover:bg-destructive/90">Yes, Delete</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
