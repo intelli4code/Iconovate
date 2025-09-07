@@ -84,9 +84,9 @@ export function PaymentList() {
             description: `The payment has been marked as ${newStatus}.`,
             action: <CheckCircle className="text-green-500"/>
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error updating payment status:", error);
-        toast({ variant: "destructive", title: "Update Failed"});
+        toast({ variant: "destructive", title: "Update Failed", description: error.message || "An unknown error occurred."});
     } finally {
         setUpdatingId(null);
     }
