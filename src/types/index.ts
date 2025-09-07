@@ -54,8 +54,12 @@ export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
 export type TeamMemberRole = "Admin" | "Designer" | "Viewer";
 
 export interface SiteIdentity {
+    siteName?: string;
+    siteDescription?: string;
+    siteKeywords?: string;
     logoUrl?: string;
     logoPath?: string;
+    logoHeight?: number;
     faviconUrl?: string;
     faviconPath?: string;
 }

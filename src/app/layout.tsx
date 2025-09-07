@@ -11,19 +11,25 @@ import CustomCursor from '@/components/custom-cursor';
 import React, { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
+import type { SiteIdentity } from '@/types';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [faviconUrl, setFaviconUrl] = useState("/favicon.ico");
+  const [identity, setIdentity] = useState<SiteIdentity>({
+    siteName: 'BrandBoost AI',
+    siteDescription: 'AI-Powered Brand Design Automation Platform',
+    siteKeywords: 'AI, branding, design, logo, automation',
+    faviconUrl: '/favicon.ico',
+  });
 
   useEffect(() => {
     const contentDocRef = doc(db, "siteContent", "main");
     const unsubscribe = onSnapshot(contentDocRef, (docSnap) => {
-        if (docSnap.exists() && docSnap.data().identity?.faviconUrl) {
-            setFaviconUrl(docSnap.data().identity.faviconUrl);
+        if (docSnap.exists() && docSnap.data().identity) {
+            setIdentity(docSnap.data().identity);
         }
     });
     return () => unsubscribe();
@@ -32,9 +38,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>BrandBoost AI</title>
-        <meta name="description" content="AI-Powered Brand Design Automation Platform" />
-        <link rel="icon" href={faviconUrl} sizes="any" />
+        <title>{identity.siteName}</title>
+        <meta name="description" content={identity.siteDescription} />
+        <meta name="keywords" content={identity.siteKeywords} />
+        <link rel="icon" href={identity.faviconUrl} sizes="any" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />

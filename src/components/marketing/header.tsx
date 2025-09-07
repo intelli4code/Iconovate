@@ -77,9 +77,17 @@ export function MarketingHeader() {
         <div className="flex items-center space-x-6">
           <LoadingLink href="/" className="flex items-center space-x-2">
             {identity?.logoUrl ? (
-                <Image src={identity.logoUrl} alt="Site Logo" width={120} height={40} className="object-contain h-8" />
+                <Image 
+                    src={identity.logoUrl} 
+                    alt={identity.siteName || "Site Logo"} 
+                    width={150} // Set a base width, height will auto-adjust
+                    height={identity.logoHeight || 40}
+                    style={{ height: `${identity.logoHeight || 40}px`, width: 'auto' }}
+                    className="object-contain" 
+                    priority
+                />
             ) : (
-                <div className="h-6 w-24 bg-muted rounded-md animate-pulse" />
+                <div className="h-8 w-24 bg-muted rounded-md animate-pulse" />
             )}
           </LoadingLink>
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
@@ -119,9 +127,16 @@ export function MarketingHeader() {
             <SheetContent side="left" className="pr-0">
               <LoadingLink href="/" className="flex items-center space-x-2">
                  {identity?.logoUrl ? (
-                    <Image src={identity.logoUrl} alt="Site Logo" width={120} height={40} className="object-contain h-8" />
+                    <Image 
+                        src={identity.logoUrl} 
+                        alt={identity.siteName || "Site Logo"} 
+                        width={150} 
+                        height={identity.logoHeight || 40}
+                        style={{ height: `${identity.logoHeight || 40}px`, width: 'auto' }}
+                        className="object-contain"
+                    />
                 ) : (
-                    <div className="h-6 w-24 bg-muted rounded-md animate-pulse" />
+                    <div className="h-8 w-24 bg-muted rounded-md animate-pulse" />
                 )}
               </LoadingLink>
               <div className="my-4 h-px w-full bg-border" />
