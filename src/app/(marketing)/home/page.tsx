@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Star, ArrowRight, ShieldCheck, Check, Zap, Compass, Wand2, Code, Rocket, HelpCircle } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FooterContent as FooterContentType, FeaturePoint, Testimonial } from "@/types";
+import type { PortfolioItem, PricingTier, SiteImage, SiteStat, PageContent, FeaturePoint, Testimonial } from "@/types";
 import { PortfolioItemCard } from "@/components/marketing/portfolio-item-card";
 import { motion } from "framer-motion";
 import * as LucideIcons from 'lucide-react';
@@ -21,7 +21,6 @@ interface HomePageContentProps {
   stats: SiteStat[];
   images: { [key: string]: SiteImage };
   pageContent: PageContent | null;
-  footerData: FooterContentType | null;
   featurePoints: FeaturePoint[];
   testimonials: Testimonial[];
 }
@@ -203,7 +202,7 @@ const faqData = [
 ]
 
 
-export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints, testimonials }: HomePageContentProps) {
+export default function HomePageContent({ portfolioItems, pricingTiers, stats, images, pageContent, featurePoints, testimonials }: HomePageContentProps) {
   const sortedTiers = pricingTiers.sort((a, b) => a.order - b.order);
 
   const heroImage = images?.homeHero?.imageUrl || "https://placehold.co/800x600.png";
@@ -683,5 +682,3 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
     </>
   );
 }
-
-    

@@ -53,6 +53,13 @@ export type ProjectType = 'Branding' | 'Web Design' | 'UI/UX' | 'Marketing' | 'O
 export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
 export type TeamMemberRole = "Admin" | "Designer" | "Viewer";
 
+export interface SiteIdentity {
+    logoUrl?: string;
+    logoPath?: string;
+    faviconUrl?: string;
+    faviconPath?: string;
+}
+
 export interface TeamMember {
   id: string; // The doc ID from firestore
   authUid?: string; // Firebase Auth UID
@@ -284,4 +291,5 @@ export interface SiteContent {
     stats: SiteStat[];
     theme: string;
     featurePoints: FeaturePoint[];
+    identity: SiteIdentity;
 }

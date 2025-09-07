@@ -34,7 +34,6 @@ async function getHomepageData() {
     let stats: SiteStat[] = [];
     let images: { [key: string]: SiteImage } = {};
     let pageContent: PageContent | null = null;
-    let footerData: FooterContentType | null = null;
     let featurePoints: FeaturePoint[] = [];
 
     if (contentDoc.exists()) {
@@ -43,34 +42,29 @@ async function getHomepageData() {
         images = contentData.images || {};
         pageContent = contentData.pageContent || null;
         featurePoints = contentData.featurePoints || [];
-        if(contentData.footer) {
-          footerData = contentData.footer as FooterContentType;
-          footerData.columns.sort((a,b) => a.order - b.order);
-        }
     }
     
     stats.sort((a,b) => a.order - b.order);
     featurePoints.sort((a, b) => a.order - b.order);
 
-    return { portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints, testimonials };
+    return { portfolioItems, pricingTiers, stats, images, pageContent, featurePoints, testimonials };
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
-    return { portfolioItems: [], pricingTiers: [], stats: [], images: {}, pageContent: null, footerData: null, featurePoints: [], testimonials: [] };
+    return { portfolioItems: [], pricingTiers: [], stats: [], images: {}, pageContent: null, featurePoints: [], testimonials: [] };
   }
 }
 
 export default async function RootPage() {
-  const { portfolioItems, pricingTiers, stats, images, pageContent, footerData, featurePoints, testimonials } = await getHomepageData();
+  const { portfolioItems, pricingTiers, stats, images, pageContent, featurePoints, testimonials } = await getHomepageData();
 
   return (
-    <MarketingLayout footer={<FooterContent footerData={footerData} />}>
+    <MarketingLayout>
       <HomePageContent 
         portfolioItems={portfolioItems} 
         pricingTiers={pricingTiers} 
         stats={stats} 
         images={images} 
         pageContent={pageContent}
-        footerData={footerData}
         featurePoints={featurePoints}
         testimonials={testimonials}
       />

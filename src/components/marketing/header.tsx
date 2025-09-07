@@ -4,15 +4,30 @@
 import { useState, useEffect } from "react";
 import { LoadingLink } from "@/components/ui/loading-link";
 import { Button } from "@/components/ui/button";
-import { Rocket, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
+import { db } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
+import type { SiteIdentity } from "@/types";
+import Image from "next/image";
 
 export function MarketingHeader() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [identity, setIdentity] = useState<SiteIdentity | null>(null);
+
+  useEffect(() => {
+    const contentDocRef = doc(db, "siteContent", "main");
+    const unsubscribe = onSnapshot(contentDocRef, (docSnap) => {
+        if (docSnap.exists() && docSnap.data().identity) {
+            setIdentity(docSnap.data().identity);
+        }
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,8 +76,11 @@ export function MarketingHeader() {
         {/* Left: Logo + Nav */}
         <div className="flex items-center space-x-6">
           <LoadingLink href="/" className="flex items-center space-x-2">
-            <Rocket className="h-6 w-6 text-primary" />
-            <span className="hidden font-bold sm:inline-block">BrandBoost AI</span>
+            {identity?.logoUrl ? (
+                <Image src={identity.logoUrl} alt="Site Logo" width={120} height={40} className="object-contain h-8" />
+            ) : (
+                <div className="h-6 w-24 bg-muted rounded-md animate-pulse" />
+            )}
           </LoadingLink>
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
             <NavItems />
@@ -100,8 +118,11 @@ export function MarketingHeader() {
             </SheetTrigger>
             <SheetContent side="left" className="pr-0">
               <LoadingLink href="/" className="flex items-center space-x-2">
-                <Rocket className="h-6 w-6 text-primary" />
-                <span className="font-bold">BrandBoost AI</span>
+                 {identity?.logoUrl ? (
+                    <Image src={identity.logoUrl} alt="Site Logo" width={120} height={40} className="object-contain h-8" />
+                ) : (
+                    <div className="h-6 w-24 bg-muted rounded-md animate-pulse" />
+                )}
               </LoadingLink>
               <div className="my-4 h-px w-full bg-border" />
               <div className="flex flex-col space-y-4">

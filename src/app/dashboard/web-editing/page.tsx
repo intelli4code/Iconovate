@@ -2,11 +2,12 @@
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingLink } from "@/components/ui/loading-link";
-import { Brush, Image as ImageIcon, MessageSquareText, FileText, PencilRuler, Tags, Users, Link as LinkIcon, CaseUpper, Palette, Waves, ListChecks, BarChartHorizontal } from "lucide-react";
+import { Brush, Image as ImageIcon, MessageSquareText, FileText, PencilRuler, Tags, Users, Link as LinkIcon, CaseUpper, Palette, Waves, ListChecks, BarChartHorizontal, AppWindow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function WebEditingHubPage() {
   const editingSections = [
+    { title: "Manage Site Identity", description: "Update your website's logo and favicon.", href: "/dashboard/web-editing/site-identity", icon: <AppWindow /> },
     { title: "Manage Site Text", description: "Edit headlines and text on your website.", href: "/dashboard/web-editing/site-text", icon: <CaseUpper /> },
     { title: "Manage Theme", description: "Change the color palette of your website.", href: "/dashboard/web-editing/theme", icon: <Palette /> },
     { title: "Manage Portfolio", description: "Add, edit, or delete portfolio projects.", href: "/dashboard/web-editing/portfolio", icon: <Brush /> },
