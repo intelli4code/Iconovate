@@ -94,6 +94,20 @@ export function InvoiceList({ title, description, invoices }: InvoiceListProps) 
      handleUpdateStatus(invoiceId, 'Deleted');
   }
 
+  const handlePermanentDeleteInvoice = async (invoiceId: string) => {
+    const invoiceRef = doc(db, "invoices", invoiceId);
+    try {
+      await deleteDoc(invoiceRef);
+      toast({
+        title: "Invoice Deleted",
+        description: "The invoice has been permanently removed.",
+      });
+    } catch (error) {
+      console.error("Error deleting invoice:", error);
+      toast({ variant: "destructive", title: "Deletion Failed"});
+    }
+  };
+
   const handleSendEmail = async (invoice: Invoice) => {
     setIsSending(invoice.id);
     try {
@@ -215,19 +229,22 @@ export function InvoiceList({ title, description, invoices }: InvoiceListProps) 
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
                                     <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete
+                                    {invoice.status === 'Deleted' ? 'Delete Permanently' : 'Delete'}
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This will mark the invoice as "Deleted" and move it to the archive. This action can be undone by changing the status.
+                                    {invoice.status === 'Deleted' ? 
+                                    'This will permanently delete the invoice. This action cannot be undone.' :
+                                    'This will mark the invoice as "Deleted" and move it to the archive. It can be permanently deleted from there.'
+                                    }
                                 </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleSoftDeleteInvoice(invoice.id)} className="bg-destructive hover:bg-destructive/90">Yes, Delete</AlertDialogAction>
+                                <AlertDialogAction onClick={() => invoice.status === 'Deleted' ? handlePermanentDeleteInvoice(invoice.id) : handleSoftDeleteInvoice(invoice.id)} className="bg-destructive hover:bg-destructive/90">Yes, Delete</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
