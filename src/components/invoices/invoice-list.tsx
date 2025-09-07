@@ -59,7 +59,7 @@ export function InvoiceList() {
       const invoicesData = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-      })) as Invoice[]
+      })).filter(invoice => invoice.id) as Invoice[]; // Ensure invoice has an ID
       setInvoices(invoicesData)
       setLoading(false)
     }, (error) => {
