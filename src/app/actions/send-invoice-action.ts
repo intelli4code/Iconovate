@@ -1,8 +1,9 @@
+
 'use server';
 
 import { Resend } from 'resend';
 import { z } from 'zod';
-import type { Invoice, Project } from '@/types';
+import type { Invoice, Project, SiteIdentity } from '@/types';
 import { getDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -15,6 +16,7 @@ const formatCurrency = (amount: number) => {
 const emailSchema = z.object({
   clientEmail: z.string().email(),
   invoice: z.any(),
+  siteIdentity: z.any().optional(),
 });
 
 export async function sendInvoiceByEmail(invoice: Invoice): Promise<{ success: boolean, message?: string, error?: string }> {
@@ -24,7 +26,12 @@ export async function sendInvoiceByEmail(invoice: Invoice): Promise<{ success: b
 
   try {
     const projectRef = doc(db, 'projects', invoice.projectId);
-    const projectDoc = await getDoc(projectRef);
+    const contentDocRef = doc(db, "siteContent", "main");
+    
+    const [projectDoc, contentDoc] = await Promise.all([
+      getDoc(projectRef),
+      getDoc(contentDocRef),
+    ]);
 
     if (!projectDoc.exists() || !projectDoc.data().clientEmail) {
       console.error(`Could not find project or client email for invoice ${invoice.id}`);
@@ -32,13 +39,14 @@ export async function sendInvoiceByEmail(invoice: Invoice): Promise<{ success: b
     }
     
     const project = projectDoc.data() as Project;
-    const clientEmail = project.clientEmail;
+    const siteIdentity = contentDoc.exists() ? contentDoc.data().identity as SiteIdentity : null;
 
+    const clientEmail = project.clientEmail;
     if (!clientEmail) {
         return { success: false, error: 'Client email is not available.' };
     }
 
-    const validation = emailSchema.safeParse({ clientEmail, invoice });
+    const validation = emailSchema.safeParse({ clientEmail, invoice, siteIdentity });
 
     if (!validation.success) {
       console.error('Invalid invoice data for email:', validation.error);
@@ -47,11 +55,12 @@ export async function sendInvoiceByEmail(invoice: Invoice): Promise<{ success: b
 
     const { data } = validation;
     const portalLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/portal/${project.id}`;
+    const companyName = data.siteIdentity?.siteName || 'BrandBoost AI';
 
     const emailResponse = await resend.emails.send({
-      from: 'BrandBoost AI <onboarding@resend.dev>',
+      from: `${companyName} <onboarding@resend.dev>`,
       to: [data.clientEmail],
-      subject: `Invoice #${data.invoice.invoiceNumber} from BrandBoost AI`,
+      subject: `Invoice #${data.invoice.invoiceNumber} from ${companyName}`,
       html: `
         <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; color: #333;">
           <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">

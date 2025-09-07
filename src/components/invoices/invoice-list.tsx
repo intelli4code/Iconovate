@@ -53,6 +53,7 @@ export function InvoiceList() {
   React.useEffect(() => {
     setLoading(true)
     const invoicesRef = collection(db, "invoices")
+    // Corrected Query: Removed the faulty `where` clause to fetch ALL invoices.
     const q = query(invoicesRef, orderBy("createdAt", "desc"))
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
