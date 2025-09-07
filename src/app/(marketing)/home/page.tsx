@@ -634,7 +634,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
             >
               {sortedTiers.map((tier) => (
                 <motion.div
-                  key={tier.name}
+                  key={tier.id}
                   variants={fadeIn}
                   whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 >
