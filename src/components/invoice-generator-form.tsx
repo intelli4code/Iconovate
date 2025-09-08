@@ -185,9 +185,9 @@ export function InvoiceGeneratorForm({ editingInvoice = null, onClose }: Invoice
       setLoading(false);
     }
   };
-
-  const handleSaveAndSend = async () => {
-      if (!result || !getValues('projectId')) {
+  
+  const handleSaveInvoice = async (status: InvoiceStatus) => {
+    if (!result || !getValues('projectId')) {
           toast({ variant: 'destructive', title: 'Error', description: 'Missing project or invoice data.'});
           return;
       }
@@ -196,15 +196,15 @@ export function InvoiceGeneratorForm({ editingInvoice = null, onClose }: Invoice
           const invoiceData: Omit<Invoice, 'id' | 'createdAt'> = {
               ...result,
               projectId: getValues('projectId'),
-              status: 'Sent',
+              status: status,
           };
           
           if(editingInvoice) {
             await updateDoc(doc(db, "invoices", editingInvoice.id), invoiceData);
-            toast({ title: `Invoice Updated!`, description: `The invoice has been successfully updated and sent.` });
+            toast({ title: `Invoice Updated!`, description: `The invoice has been successfully updated.` });
           } else {
             await addDoc(collection(db, "invoices"), { ...invoiceData, createdAt: serverTimestamp() });
-            toast({ title: `Invoice Sent!`, description: `The invoice is now visible to the client.`});
+            toast({ title: `Invoice Saved as Draft!`, description: `The invoice is saved and can be sent later.`});
           }
           
           setResult(null);
@@ -218,7 +218,7 @@ export function InvoiceGeneratorForm({ editingInvoice = null, onClose }: Invoice
       } finally {
           setIsSubmitting(false);
       }
-  };
+  }
 
   const handleDownloadPdf = async () => {
     if (!invoicePreviewRef.current || !result) {
@@ -443,10 +443,16 @@ export function InvoiceGeneratorForm({ editingInvoice = null, onClose }: Invoice
                     <Button onClick={handleDownloadPdf} variant="outline" disabled={isSubmitting}>
                         <Download className="mr-2 h-4 w-4" /> Download PDF
                     </Button>
-                    <Button onClick={handleSaveAndSend} variant="secondary" disabled={isSubmitting}>
+                    <Button onClick={() => handleSaveInvoice('Sent')} variant="secondary" disabled={isSubmitting}>
                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                        {editingInvoice ? 'Update & Resend' : 'Save & Send'}
+                        {editingInvoice ? 'Update & Resend' : 'Send to Client'}
                     </Button>
+                     {!editingInvoice && (
+                        <Button onClick={() => handleSaveInvoice('Draft')} variant="outline" disabled={isSubmitting}>
+                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Save as Draft
+                        </Button>
+                    )}
                 </div>
             </div>
           ) : !loading && (
