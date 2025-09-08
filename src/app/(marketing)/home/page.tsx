@@ -278,7 +278,7 @@ export default function HomePageContent({ portfolioItems, pricingTiers, stats, i
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center justify-center max-w-4xl mx-auto">
             {stats.map((stat) => (
-              <motion.div key={stat.id} variants={fadeIn}>
+              <motion.div key={stat.id || stat.label} variants={fadeIn}>
                 <Card className="bg-white/5 border-white/10 p-6 rounded-2xl backdrop-blur-sm">
                   <h3 className="text-4xl md:text-5xl font-bold">{stat.value}</h3>
                   <p className="mt-2 text-muted-foreground">{stat.label}</p>
