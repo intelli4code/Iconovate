@@ -204,7 +204,7 @@ export function InvoiceGeneratorForm({ editingInvoice = null, onClose }: Invoice
             toast({ title: `Invoice Updated!`, description: `The invoice has been successfully updated.` });
           } else {
             await addDoc(collection(db, "invoices"), { ...invoiceData, createdAt: serverTimestamp() });
-            toast({ title: `Invoice Saved as Draft!`, description: `The invoice is saved and can be sent later.`});
+            toast({ title: `Invoice Saved as ${status}!`, description: `The invoice is saved and can be managed from the invoices page.`});
           }
           
           setResult(null);

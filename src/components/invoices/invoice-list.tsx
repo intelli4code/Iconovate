@@ -90,6 +90,12 @@ export function InvoiceList({ title, description, invoices }: InvoiceListProps) 
   const handleSendEmail = async (invoice: Invoice) => {
     setIsSending(invoice.id);
     try {
+      // If it's a draft, mark it as 'Sent' first.
+      if (invoice.status === 'Draft') {
+        const invoiceRef = doc(db, "invoices", invoice.id);
+        await updateDoc(invoiceRef, { status: 'Sent' });
+      }
+
       const result = await sendInvoiceByEmail(invoice);
         
       if (result.success) {
@@ -181,7 +187,7 @@ export function InvoiceList({ title, description, invoices }: InvoiceListProps) 
                            <Edit className="mr-2 h-4 w-4"/> Edit Invoice
                         </DropdownMenuItem>
                         <DropdownMenuItem onSelect={() => handleSendEmail(invoice)} disabled={isSending === invoice.id}>
-                            <Mail className="mr-2 h-4 w-4"/> Send as Email
+                            <Mail className="mr-2 h-4 w-4"/> {invoice.status === 'Draft' ? 'Send to Client' : 'Resend Email'}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onSelect={() => handleUpdateStatus(invoice.id, 'Paid')} disabled={invoice.status === 'Paid'}>
