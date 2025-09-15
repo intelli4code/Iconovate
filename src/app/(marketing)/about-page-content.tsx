@@ -200,7 +200,7 @@ export default function AboutPageContent() {
                     className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-12"
                 >
                     {stats.map((stat) => (
-                        <motion.div key={stat.id} variants={staggerItem}>
+                        <motion.div key={stat.id || stat.label} variants={staggerItem}>
                             <h3 className="text-5xl md:text-6xl font-bold text-primary">{stat.value}</h3>
                             <p className="mt-2 text-muted-foreground">{stat.label}</p>
                         </motion.div>

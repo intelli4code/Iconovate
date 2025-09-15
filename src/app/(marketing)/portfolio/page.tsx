@@ -3,6 +3,9 @@ import PortfolioPageContent from "../portfolio-page-content";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, getDocs, where } from "firebase/firestore";
 import type { PortfolioItem } from "@/types";
+import { Suspense } from "react";
+import Loading from "@/app/dashboard/loading";
+
 
 async function getPortfolioItems() {
     try {
@@ -35,5 +38,9 @@ async function getPortfolioItems() {
 
 export default async function PortfolioPage() {
     const { allItems, featuredItems } = await getPortfolioItems();
-    return <PortfolioPageContent allItems={allItems} featuredItems={featuredItems} />;
+    return (
+        <Suspense fallback={<Loading />}>
+            <PortfolioPageContent allItems={allItems} featuredItems={featuredItems} />
+        </Suspense>
+    );
 }

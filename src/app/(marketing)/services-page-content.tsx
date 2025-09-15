@@ -9,6 +9,7 @@ import type { Service, SiteImage } from "@/types";
 import * as LucideIcons from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Check } from "lucide-react";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
