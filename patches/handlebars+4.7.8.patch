@@ -1,0 +1,24 @@
+diff --git a/node_modules/handlebars/lib/index.js b/node_modules/handlebars/lib/index.js
+index 92576b9..a046830 100644
+--- a/node_modules/handlebars/lib/index.js
++++ b/node_modules/handlebars/lib/index.js
+@@ -1,5 +1,4 @@
+ import Handlebars from './handlebars.runtime';
+ 
+ // Compiler imports
+-import { registerDefaultDecorators } from './handlebars/decorators';
+ import { __spread } from 'util/spread';
+ import {
+   Compiler,
+@@ -29,11 +28,6 @@
+ 
+ Handlebars.create = function () {
+   const hb = new HandlebarsEnvironment();
+-
+-  __spread(
+-    ['helpers', 'partials', 'decorators'],
+-    (prop) => (hb[prop] = __spread(Handlebars[prop], hb[prop]))
+-  );
+   
+   return hb;
+ };
