@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -7,10 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
 
-import { ai } from '@/ai/genkit';
-import { analyzeArchetype, type ArchetypeAnalysisOutput } from '@/ai/flows/archetype-analyzer';
-import { synthesizeVisuals, type VisualSynthesisOutput } from '@/ai/flows/visual-synthesis';
-import { generateProposal, type ProposalGeneratorOutput } from '@/ai/flows/proposal-generator';
+import { runStrategyWorkshop } from '@/app/actions/run-strategy-workshop';
+import type { ArchetypeAnalysisOutput, VisualSynthesisOutput, ProposalGeneratorOutput, WorkshopImage } from '@/app/actions/run-strategy-workshop';
+
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,8 +45,7 @@ export function StrategyWorkshop() {
   const [archetypeResult, setArchetypeResult] = useState<ArchetypeAnalysisOutput | null>(null);
   
   // State for step 2: Visual Selection
-  const [imagePrompts, setImagePrompts] = useState<string[]>([]);
-  const [imageOptions, setImageOptions] = useState<{url: string, prompt: string}[]>([]);
+  const [imageOptions, setImageOptions] = useState<WorkshopImage[]>([]);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   
   // State for step 3: Visual Synthesis & Proposal
@@ -67,43 +64,20 @@ export function StrategyWorkshop() {
   const onArchetypeSubmit: SubmitHandler<ArchetypeFormValues> = async (data) => {
     setLoading(true);
     setArchetypeResult(null);
-    try {
-      const response = await analyzeArchetype(data);
-      setArchetypeResult(response);
-      setCurrentStep('visuals');
-      generateImageOptions(response.primaryArchetype);
-    } catch (error) {
-      toast({ variant: "destructive", title: "Analysis Failed" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateImageOptions = async (archetype: string) => {
-    setLoading(true);
     setImageOptions([]);
     try {
-        const prompts = [
-            `An abstract image representing the feeling of the ${archetype} archetype.`,
-            `A lifestyle photo that embodies the values of a ${archetype} brand.`,
-            `A texture or pattern suitable for a ${archetype} brand.`,
-            `An architectural style that aligns with a ${archetype} brand.`,
-            `A product shot reflecting the quality of a ${archetype} brand.`,
-            `A nature scene that captures the essence of the ${archetype} archetype.`
-        ];
-        setImagePrompts(prompts);
-
-        const imagePromises = prompts.map(prompt =>
-            ai.generate({ model: 'googleai/gemini-2.0-flash-preview-image-generation', prompt, config: { responseModalities: ['IMAGE'] } })
-        );
-        const imageResults = await Promise.all(imagePromises);
-        const generatedImages = imageResults.map((result, index) => ({ url: result.media!.url, prompt: prompts[index] }));
-        setImageOptions(generatedImages);
-
-    } catch (error) {
-        toast({ variant: "destructive", title: "Image Generation Failed" });
+      const response = await runStrategyWorkshop({ step: 'archetype', archetypeInput: data });
+      if (response.archetypeResult && response.imageOptions) {
+        setArchetypeResult(response.archetypeResult);
+        setImageOptions(response.imageOptions);
+        setCurrentStep('visuals');
+      } else {
+        throw new Error(response.error || "Failed to get archetype analysis and image options.");
+      }
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Analysis Failed", description: error.message });
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
   
@@ -124,22 +98,23 @@ export function StrategyWorkshop() {
 
     try {
         const selectedImageData = imageOptions.filter(opt => selectedImages.includes(opt.url));
-        const visualResponse = await synthesizeVisuals({ images: selectedImageData });
-        setVisualResult(visualResponse);
-        
-        if (archetypeResult) {
-            const proposalResponse = await generateProposal({
-                clientName: "Valued Client", // This can be made dynamic later
-                archetypeAnalysis: archetypeResult.analysis,
-                visualDirection: visualResponse.visualDirection,
-            });
-            setProposalResult(proposalResponse);
-        }
-        
-        setCurrentStep('proposal');
+        const response = await runStrategyWorkshop({ 
+            step: 'proposal',
+            visualInput: { images: selectedImageData },
+            archetypeAnalysis: archetypeResult?.analysis,
+            clientName: "Valued Client",
+        });
 
-    } catch (error) {
-         toast({ variant: "destructive", title: "Synthesis Failed" });
+        if (response.visualResult && response.proposalResult) {
+            setVisualResult(response.visualResult);
+            setProposalResult(response.proposalResult);
+            setCurrentStep('proposal');
+        } else {
+            throw new Error(response.error || "Failed to generate proposal.");
+        }
+
+    } catch (error: any) {
+         toast({ variant: "destructive", title: "Synthesis Failed", description: error.message });
     } finally {
         setLoading(false);
     }
