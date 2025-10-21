@@ -32,9 +32,18 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals.push('handlebars');
+    // This is the correct way to handle server-side only packages in Next.js
+    if (!isServer) {
+      // Don't bundle these modules for the client-side
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
     }
+
+    config.externals.push('handlebars');
     return config;
   }
 };
