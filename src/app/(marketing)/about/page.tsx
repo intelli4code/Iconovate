@@ -1,3 +1,4 @@
+
 import AboutPageContent from "../about-page-content";
 import { Suspense } from "react";
 import Loading from "@/app/dashboard/loading";
