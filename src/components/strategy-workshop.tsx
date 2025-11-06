@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useState } from 'react';
-import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
@@ -11,12 +12,11 @@ import type { ArchetypeAnalysisOutput, VisualSynthesisOutput, ProposalGeneratorO
 
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Loader2, Sparkles, Wand2, Lightbulb, UserCheck, Eye, FileSignature, Check } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, UserCheck, Eye, FileSignature, Check } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
 import { Progress } from './ui/progress';
@@ -229,3 +229,5 @@ export function StrategyWorkshop() {
     </Card>
   );
 }
+
+    
