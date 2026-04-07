@@ -1,4 +1,4 @@
-# **App Name**: BrandBoost AI
+# **App Name**: Iconovate
 
 ## Core Features:
 
